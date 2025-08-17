@@ -10,6 +10,9 @@ description: A flutter boilerplate project created using MobX and Provider.
 
 version: 1.0.0
 
+homepage: https://github.com/hyyz3293/QyChatApp.git
+repository: https://github.com/hyyz3293/QyChatApp.git
+
 environment:
   sdk: '>=3.0.6 <4.0.0'
 
@@ -113,6 +116,7 @@ dependencies:
   open_file: ^3.5.10
   # P
   path_provider: ^2.0.14
+  path: ^1.8.0
   permission_handler: ^11.3.0
   package_info_plus: ^8.0.0
   photo_manager: ^3.2.3
@@ -134,7 +138,8 @@ dependencies:
   #sign_in_with_apple: ^5.0.0
   share_plus: ^7.1.0
   scrollable_positioned_list: ^0.3.8
-  socket_io_client: 1.0.2
+  socket_io_client: ">=1.0.2 <3.0.0"
+
   # T
   timeago: ^3.7.0
 
@@ -155,8 +160,10 @@ dependencies:
   # Z
 
 dev_dependencies:
-#  flutter_test:
-#    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
 
   # The following adds the launcher icon support to your application.
   # run below mentioned commands to generate launcher icons
