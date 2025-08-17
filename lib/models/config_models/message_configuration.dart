@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import 'package:boilerplate/models/models.dart';
+import 'package:qychatapp/models/models.dart';
 import 'package:flutter/material.dart';
 
 import '../../values/typedefs.dart';

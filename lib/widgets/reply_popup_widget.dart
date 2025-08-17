@@ -21,7 +21,7 @@
  */
 import 'package:flutter/material.dart';
 
-import 'package:boilerplate/utils/package_strings.dart';
+import 'package:qychatapp/utils/package_strings.dart';
 
 import '../values/typedefs.dart';
 

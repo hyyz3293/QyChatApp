@@ -1,7 +1,7 @@
 // import 'dart:async';
 // import 'dart:io';
-// import 'package:boilerplate/presentation/ui/dash/dash_composer.dart';
-// import 'package:boilerplate/presentation/utils/websocket/dash_socket_manager.dart';
+// import 'package:qychatapp/presentation/ui/dash/dash_composer.dart';
+// import 'package:qychatapp/presentation/utils/websocket/dash_socket_manager.dart';
 // import 'package:dash_chat_2/dash_chat_2.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';

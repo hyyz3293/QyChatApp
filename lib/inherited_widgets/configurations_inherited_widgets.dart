@@ -1,4 +1,4 @@
-import 'package:boilerplate/models/models.dart';
+import 'package:qychatapp/models/models.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 

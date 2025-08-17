@@ -1,4 +1,4 @@
-import 'package:boilerplate/values/enumeration.dart';
+import 'package:qychatapp/values/enumeration.dart';
 import 'package:flutter/material.dart';
 
 /// Configuration for the "Scroll to Bottom" button.

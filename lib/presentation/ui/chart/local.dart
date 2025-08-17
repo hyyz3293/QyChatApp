@@ -1,6 +1,6 @@
 // import 'dart:math';
 //
-// import 'package:boilerplate/presentation/ui/chart/composer_action_bar.dart';
+// import 'package:qychatapp/presentation/ui/chart/composer_action_bar.dart';
 // import 'package:dio/dio.dart';
 // import 'package:file_picker/file_picker.dart';
 // import 'package:flutter/cupertino.dart';
@@ -16,7 +16,7 @@
 // import 'package:image_picker/image_picker.dart';
 // import 'package:pull_down_button/pull_down_button.dart';
 // import 'package:uuid/uuid.dart';
-// import 'package:boilerplate/presentation/ui/chart/create_message.dart';
+// import 'package:qychatapp/presentation/ui/chart/create_message.dart';
 //
 //
 // class Local extends StatefulWidget {

@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:boilerplate/presentation/constants/strings.dart';
-import 'package:boilerplate/presentation/utils/routes/routes.dart';
+import 'package:qychatapp/presentation/constants/strings.dart';
+import 'package:qychatapp/presentation/utils/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 

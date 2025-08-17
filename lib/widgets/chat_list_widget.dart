@@ -21,19 +21,19 @@
  */
 import 'dart:async';
 import 'dart:io' if (kIsWeb) 'dart:html';
-import 'package:boilerplate/controller/chat_controller.dart';
-import 'package:boilerplate/extensions/extensions.dart';
-import 'package:boilerplate/models/config_models/feature_active_config.dart';
-import 'package:boilerplate/models/config_models/message_list_configuration.dart';
-import 'package:boilerplate/models/config_models/suggestion_list_config.dart';
-import 'package:boilerplate/models/data_models/message.dart';
-import 'package:boilerplate/models/data_models/reply_message.dart';
-import 'package:boilerplate/values/enumeration.dart';
-import 'package:boilerplate/values/typedefs.dart';
-import 'package:boilerplate/widgets/suggestions/suggestion_list.dart';
-import 'package:boilerplate/widgets/type_indicator_widget.dart';
-import 'package:boilerplate/extensions/extensions.dart';
-import 'package:boilerplate/widgets/chat_groupedlist_widget.dart';
+import 'package:qychatapp/controller/chat_controller.dart';
+import 'package:qychatapp/extensions/extensions.dart';
+import 'package:qychatapp/models/config_models/feature_active_config.dart';
+import 'package:qychatapp/models/config_models/message_list_configuration.dart';
+import 'package:qychatapp/models/config_models/suggestion_list_config.dart';
+import 'package:qychatapp/models/data_models/message.dart';
+import 'package:qychatapp/models/data_models/reply_message.dart';
+import 'package:qychatapp/values/enumeration.dart';
+import 'package:qychatapp/values/typedefs.dart';
+import 'package:qychatapp/widgets/suggestions/suggestion_list.dart';
+import 'package:qychatapp/widgets/type_indicator_widget.dart';
+import 'package:qychatapp/extensions/extensions.dart';
+import 'package:qychatapp/widgets/chat_groupedlist_widget.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 

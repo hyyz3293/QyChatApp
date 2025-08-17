@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:convert' as convert;
-import 'package:boilerplate/presentation/utils/global_utils.dart';
+import 'package:qychatapp/presentation/utils/global_utils.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io' show File, Platform;
 
 import 'package:audio_waveforms/audio_waveforms.dart';
-import 'package:boilerplate/utils/constants/constants.dart';
+import 'package:qychatapp/utils/constants/constants.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

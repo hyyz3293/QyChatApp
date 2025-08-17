@@ -1,4 +1,4 @@
-import 'package:boilerplate/values/typedefs.dart';
+import 'package:qychatapp/values/typedefs.dart';
 import 'package:flutter/material.dart';
 
 class ChatViewStateConfiguration {

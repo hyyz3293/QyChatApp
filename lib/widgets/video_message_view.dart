@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:boilerplate/widgets/reaction_widget.dart';
-import 'package:boilerplate/widgets/share_icon.dart';
+import 'package:qychatapp/widgets/reaction_widget.dart';
+import 'package:qychatapp/widgets/share_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/services.dart';

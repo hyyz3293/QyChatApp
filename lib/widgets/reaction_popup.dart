@@ -19,8 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import 'package:boilerplate/extensions/extensions.dart';
-import 'package:boilerplate/widgets/glassmorphism_reaction_popup.dart';
+import 'package:qychatapp/extensions/extensions.dart';
+import 'package:qychatapp/widgets/glassmorphism_reaction_popup.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/chat_controller.dart';

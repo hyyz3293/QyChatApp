@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:boilerplate/extensions/extensions.dart';
-import 'package:boilerplate/models/models.dart';
+import 'package:qychatapp/extensions/extensions.dart';
+import 'package:qychatapp/models/models.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../utils/constants/constants.dart';

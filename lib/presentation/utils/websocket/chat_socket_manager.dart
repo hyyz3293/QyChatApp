@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:boilerplate/models/data_models/chat_user.dart';
-import 'package:boilerplate/presentation/ui/chart/message_event.dart';
-import 'package:boilerplate/presentation/ui/dash/data.dart';
-import 'package:boilerplate/presentation/utils/global_utils.dart';
+import 'package:qychatapp/models/data_models/chat_user.dart';
+import 'package:qychatapp/presentation/ui/chart/message_event.dart';
+import 'package:qychatapp/presentation/ui/dash/data.dart';
+import 'package:qychatapp/presentation/utils/global_utils.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;

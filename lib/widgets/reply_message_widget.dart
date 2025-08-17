@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 import 'package:audio_waveforms/audio_waveforms.dart';
-import 'package:boilerplate/extensions/extensions.dart';
+import 'package:qychatapp/extensions/extensions.dart';
 import 'package:flutter/material.dart';
 
 import '../models/data_models/message.dart';

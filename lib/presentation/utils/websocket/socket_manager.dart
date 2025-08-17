@@ -1,6 +1,6 @@
 // import 'dart:async';
 // import 'dart:convert';
-// import 'package:boilerplate/presentation/utils/global_utils.dart';
+// import 'package:qychatapp/presentation/utils/global_utils.dart';
 // import 'package:date_format/date_format.dart';
 // import 'package:flutter_chat_core/flutter_chat_core.dart';
 // import 'package:shared_preferences/shared_preferences.dart';

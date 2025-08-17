@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 import 'package:flutter/material.dart';
-import 'package:boilerplate/models/config_models/image_message_configuration.dart';
+import 'package:qychatapp/models/config_models/image_message_configuration.dart';
 
 class ShareIcon extends StatelessWidget {
   const ShareIcon({

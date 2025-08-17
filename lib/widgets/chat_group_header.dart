@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 import 'package:flutter/material.dart';
-import 'package:boilerplate/models/models.dart';
-import 'package:boilerplate/extensions/extensions.dart';
+import 'package:qychatapp/models/models.dart';
+import 'package:qychatapp/extensions/extensions.dart';
 
 import '../utils/constants/constants.dart';
 

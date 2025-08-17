@@ -1,4 +1,4 @@
-import 'package:boilerplate/extensions/extensions.dart';
+import 'package:qychatapp/extensions/extensions.dart';
 import 'package:flutter/material.dart';
 
 class ScrollToBottomButton extends StatefulWidget {

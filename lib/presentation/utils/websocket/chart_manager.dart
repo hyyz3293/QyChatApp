@@ -1,8 +1,8 @@
 // import 'dart:async';
 // import 'dart:convert';
 // import 'dart:math';
-// import 'package:boilerplate/presentation/ui/model/im_user_online.dart';
-// import 'package:boilerplate/presentation/utils/dio/dio_client.dart';
+// import 'package:qychatapp/presentation/ui/model/im_user_online.dart';
+// import 'package:qychatapp/presentation/utils/dio/dio_client.dart';
 // import 'package:flutter_chat_core/flutter_chat_core.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:web_socket_channel/io.dart';

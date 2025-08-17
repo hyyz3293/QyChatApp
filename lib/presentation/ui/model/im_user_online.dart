@@ -1,4 +1,4 @@
-import 'package:boilerplate/presentation/ui/model/attachment_bean.dart';
+import 'package:qychatapp/presentation/ui/model/attachment_bean.dart';
 
 import 'image_bean.dart';
 

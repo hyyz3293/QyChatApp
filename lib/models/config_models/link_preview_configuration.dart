@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import 'package:boilerplate/values/typedefs.dart';
+import 'package:qychatapp/values/typedefs.dart';
 import 'package:flutter/material.dart';
 
 class LinkPreviewConfiguration {

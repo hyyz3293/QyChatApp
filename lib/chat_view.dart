@@ -1,3 +1,3 @@
-library boilerplate;
+library qychatapp;
 
-export 'package:boilerplate/presentation/ui/chart/chart_out_view.dart';
+export 'package:qychatapp/presentation/ui/chart/chart_out_view.dart';

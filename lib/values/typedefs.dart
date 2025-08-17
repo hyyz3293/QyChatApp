@@ -19,8 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import 'package:boilerplate/models/data_models/reply_message.dart';
-import 'package:boilerplate/values/enumeration.dart';
+import 'package:qychatapp/models/data_models/reply_message.dart';
+import 'package:qychatapp/values/enumeration.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 

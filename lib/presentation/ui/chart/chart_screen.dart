@@ -1,6 +1,6 @@
 // import 'dart:async';
-// import 'package:boilerplate/presentation/ui/chart/text_message_widget.dart';
-// import 'package:boilerplate/presentation/ui/chart/video_message_widget.dart';
+// import 'package:qychatapp/presentation/ui/chart/text_message_widget.dart';
+// import 'package:qychatapp/presentation/ui/chart/video_message_widget.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_chat_core/flutter_chat_core.dart';
 // import 'package:flutter_chat_ui/flutter_chat_ui.dart';

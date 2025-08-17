@@ -19,11 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import 'package:boilerplate/inherited_widgets/configurations_inherited_widgets.dart';
-import 'package:boilerplate/models/config_models/message_list_configuration.dart';
-import 'package:boilerplate/widgets/chat_view_inherited_widget.dart';
-import 'package:boilerplate/widgets/profile_image_widget.dart';
-import 'package:boilerplate/widgets/suggestions/suggestions_config_inherited_widget.dart';
+import 'package:qychatapp/inherited_widgets/configurations_inherited_widgets.dart';
+import 'package:qychatapp/models/config_models/message_list_configuration.dart';
+import 'package:qychatapp/widgets/chat_view_inherited_widget.dart';
+import 'package:qychatapp/widgets/profile_image_widget.dart';
+import 'package:qychatapp/widgets/suggestions/suggestions_config_inherited_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/config_models/reply_suggestions_config.dart';

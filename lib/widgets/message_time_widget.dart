@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import 'package:boilerplate/extensions/extensions.dart';
+import 'package:qychatapp/extensions/extensions.dart';
 import 'package:flutter/material.dart';
 
 class MessageTimeWidget extends StatelessWidget {

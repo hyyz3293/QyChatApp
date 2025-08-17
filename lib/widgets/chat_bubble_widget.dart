@@ -19,9 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import 'package:boilerplate/extensions/extensions.dart';
-import 'package:boilerplate/utils/constants/constants.dart';
-import 'package:boilerplate/widgets/chat_view_inherited_widget.dart';
+import 'package:qychatapp/extensions/extensions.dart';
+import 'package:qychatapp/utils/constants/constants.dart';
+import 'package:qychatapp/widgets/chat_view_inherited_widget.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/chat_controller.dart';

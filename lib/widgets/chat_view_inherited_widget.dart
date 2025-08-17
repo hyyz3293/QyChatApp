@@ -1,4 +1,4 @@
-import 'package:boilerplate/widgets/reaction_popup.dart';
+import 'package:qychatapp/widgets/reaction_popup.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/chat_controller.dart';

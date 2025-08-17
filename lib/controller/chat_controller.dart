@@ -21,7 +21,7 @@
  */
 import 'dart:async';
 
-import 'package:boilerplate/widgets/suggestions/suggestion_list.dart';
+import 'package:qychatapp/widgets/suggestions/suggestion_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

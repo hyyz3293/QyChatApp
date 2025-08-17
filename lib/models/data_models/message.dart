@@ -19,10 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import 'package:boilerplate/extensions/extensions.dart';
-import 'package:boilerplate/models/data_models/reaction.dart';
-import 'package:boilerplate/models/data_models/reply_message.dart';
-import 'package:boilerplate/values/enumeration.dart';
+import 'package:qychatapp/extensions/extensions.dart';
+import 'package:qychatapp/models/data_models/reaction.dart';
+import 'package:qychatapp/models/data_models/reply_message.dart';
+import 'package:qychatapp/values/enumeration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 

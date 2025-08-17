@@ -1,4 +1,4 @@
-import 'package:boilerplate/presentation/ui/chart/chart_out_view.dart' show ChartExternalScreen;
+//import 'package:qychatapp/presentation/ui/chart/chart_out_view.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -18,7 +18,7 @@ class Example extends StatelessWidget {
         colorScheme:
             ColorScheme.fromSwatch(accentColor: const Color(0xffEE5366)),
       ),
-      home: ChartExternalScreen(channelCode: "",),
+      //home: ChartExternalScreen(channelCode: "",),
     );
   }
 }

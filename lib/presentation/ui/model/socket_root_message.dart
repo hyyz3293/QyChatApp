@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:boilerplate/presentation/ui/model/socket_im_message.dart';
+import 'package:qychatapp/presentation/ui/model/socket_im_message.dart';
 
 
 class SocketRootMessage {

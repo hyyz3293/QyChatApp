@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:boilerplate/presentation/my_app.dart';
-import 'package:boilerplate/presentation/utils/service_locator.dart';
+import 'package:qychatapp/presentation/my_app.dart';
+import 'package:qychatapp/presentation/utils/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oktoast/oktoast.dart';

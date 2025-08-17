@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
-import 'package:boilerplate/extensions/extensions.dart';
-import 'package:boilerplate/models/models.dart';
-import 'package:boilerplate/utils/constants/constants.dart';
-import 'package:boilerplate/widgets/suggestions/suggestion_item.dart';
+import 'package:qychatapp/extensions/extensions.dart';
+import 'package:qychatapp/models/models.dart';
+import 'package:qychatapp/utils/constants/constants.dart';
+import 'package:qychatapp/widgets/suggestions/suggestion_item.dart';
 import 'package:flutter/material.dart';
 
 class SuggestionList extends StatefulWidget {

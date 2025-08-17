@@ -1,4 +1,4 @@
-import 'package:boilerplate/models/data_models/suggestion_item_data.dart';
+import 'package:qychatapp/models/data_models/suggestion_item_data.dart';
 import 'package:flutter/material.dart';
 
 import 'suggestion_item_config.dart';

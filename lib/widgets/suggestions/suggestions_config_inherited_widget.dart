@@ -1,4 +1,4 @@
-import 'package:boilerplate/models/config_models/reply_suggestions_config.dart';
+import 'package:qychatapp/models/config_models/reply_suggestions_config.dart';
 import 'package:flutter/material.dart';
 
 /// This widget for alternative of excessive amount of passing arguments

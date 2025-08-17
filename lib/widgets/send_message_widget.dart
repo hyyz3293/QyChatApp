@@ -21,11 +21,11 @@
  */
 import 'dart:io' if (kIsWeb) 'dart:html';
 
-import 'package:boilerplate/extensions/extensions.dart';
-import 'package:boilerplate/utils/package_strings.dart';
-import 'package:boilerplate/widgets/chatui_textfield.dart';
-import 'package:boilerplate/widgets/reply_message_view.dart';
-import 'package:boilerplate/widgets/scroll_to_bottom_button.dart';
+import 'package:qychatapp/extensions/extensions.dart';
+import 'package:qychatapp/utils/package_strings.dart';
+import 'package:qychatapp/widgets/chatui_textfield.dart';
+import 'package:qychatapp/widgets/reply_message_view.dart';
+import 'package:qychatapp/widgets/scroll_to_bottom_button.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 

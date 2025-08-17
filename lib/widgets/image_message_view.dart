@@ -22,8 +22,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:boilerplate/extensions/extensions.dart';
-import 'package:boilerplate/models/models.dart';
+import 'package:qychatapp/extensions/extensions.dart';
+import 'package:qychatapp/models/models.dart';
 import 'package:flutter/material.dart';
 
 import 'reaction_widget.dart';

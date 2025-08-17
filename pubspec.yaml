@@ -1,5 +1,5 @@
-name: boilerplate
-description: A flutter boilerplate project created using MobX and Provider.
+name: qychatapp
+description: A flutter qychatapp project created using MobX and Provider.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -10,8 +10,8 @@ description: A flutter boilerplate project created using MobX and Provider.
 
 version: 1.0.0
 
-homepage: https://github.com/hyyz3293/QyChatApp.git
-repository: https://github.com/hyyz3293/QyChatApp.git
+#homepage: https://github.com/hyyz3293/QyChatApp.git
+#repository: https://github.com/hyyz3293/QyChatApp.git
 
 environment:
   sdk: '>=3.0.6 <4.0.0'

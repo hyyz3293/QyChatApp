@@ -2,7 +2,7 @@
 // import 'dart:convert';
 // import 'dart:io';
 // import 'package:audioplayers/audioplayers.dart';
-// import 'package:boilerplate/presentation/utils/global_utils.dart';
+// import 'package:qychatapp/presentation/utils/global_utils.dart';
 // import 'package:dash_chat_2/dash_chat_2.dart';
 // import 'package:share_plus/share_plus.dart';
 // import 'package:shared_preferences/shared_preferences.dart';

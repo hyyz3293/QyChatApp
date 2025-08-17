@@ -1,10 +1,10 @@
 import 'dart:async';
 
 
-import 'package:boilerplate/presentation/ui/model/channel_account_model.dart';
-import 'package:boilerplate/presentation/ui/model/channel_config_model.dart';
-import 'package:boilerplate/presentation/utils/dio/dio_client.dart';
-import 'package:boilerplate/presentation/utils/routes/routes.dart';
+import 'package:qychatapp/presentation/ui/model/channel_account_model.dart';
+import 'package:qychatapp/presentation/ui/model/channel_config_model.dart';
+import 'package:qychatapp/presentation/utils/dio/dio_client.dart';
+import 'package:qychatapp/presentation/utils/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:oktoast/oktoast.dart';
