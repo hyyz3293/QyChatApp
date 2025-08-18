@@ -46,7 +46,6 @@ class _ChartHomeScreenState extends State<ChartHomeScreen> with WidgetsBindingOb
     WidgetsBinding.instance.addObserver(this);
     super.initState();
     _controllers[0].text = "0fa684c5166b4f65bba9231f071a756d";
-
   }
 
   Widget _buildRoot() {
@@ -110,35 +109,6 @@ class _ChartHomeScreenState extends State<ChartHomeScreen> with WidgetsBindingOb
     sharedPreferences.setString("channel_code", channelCode);
 
     GoRouter.of(context).push(Routes.ChartTestRoot, extra: channelCode);
-
-    // if (CSocketIOManager().isConnected) {
-    //   print("------>>>> 已连接");
-    //   GoRouter.of(context).push(Routes.ChartTestRoot);
-    // } else {
-    //   print("------>>>> 未连接");
-    //
-    //   loadData();
-    // }
-    //loadData();
-    //GoRouter.of(context).push(Routes.ChartTestRoot);
-
-    // String values = '';
-    // for (int i = 0; i < _controllers.length; i++) {
-    //   values += '输入框 ${i + 1}: ${_controllers[i].text}\n';
-    // }
-    // showDialog(
-    //   context: context,
-    //   builder: (context) => AlertDialog(
-    //     title: Text('输入内容'),
-    //     content: Text(values),
-    //     actions: [
-    //       TextButton(
-    //         onPressed: () => Navigator.pop(context),
-    //         child: Text('确定'),
-    //       )
-    //     ],
-    //   ),
-    // );
   }
 
 
@@ -178,49 +148,49 @@ class _ChartHomeScreenState extends State<ChartHomeScreen> with WidgetsBindingOb
   }
 
 
-  Future<void> loadData() async {
-    var json = await DioClient().getChannelConfig();
-    //var logger = Logger();
-    // 解析
-    final response = ApiResponse<ChannelConfigModel>.fromJson(
-      json,
-          (dataJson) => ChannelConfigModel.fromJson(dataJson),
-    );
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var cid = response.data.accessParams.cid;
-    sharedPreferences.setInt("cid", cid);
-    print("app-ChannelConfig- ${response}");
-    print("app-cid- ${cid}");
-
-    var userInfoJson = await DioClient().getUserinfoMessage();
-    var userMap = userInfoJson["data"];
-    var channelMap = userInfoJson["channel"];
-    var userAccount =  UserAccountModel.fromJson(userMap);
-    var channelAccount =  ChannelAccountModel.fromJson(channelMap);
-
-
-    sharedPreferences.setString("token", userAccount.token);
-    sharedPreferences.setInt("userId", userAccount.id);
-    sharedPreferences.setString("accid", userAccount.accid);
-    sharedPreferences.setString("cpmpanyAccid", userAccount.cpmpanyAccid);
-
-    sharedPreferences.setInt("channel_id", channelAccount.id);
-    sharedPreferences.setInt("channel_type", channelAccount.type);
-    sharedPreferences.setString("channel_name", channelAccount.name);
-
-    printN("app-token- ${userAccount.token}");
-    printN("app-userId- ${userAccount.userid}");
-
-    printN("app-UserinfoMessage- ${userInfoJson}");
-
-
-    // if (!CSocketIOManager().isConnected) {
-    //   CSocketIOManager().connect();
-    // }
-
-    //GoRouter.of(context).push(Routes.ChartTestRoot, extra: c);
-
-  }
+  // Future<void> loadData() async {
+  //   var json = await DioClient().getChannelConfig();
+  //   //var logger = Logger();
+  //   // 解析
+  //   final response = ApiResponse<ChannelConfigModel>.fromJson(
+  //     json,
+  //         (dataJson) => ChannelConfigModel.fromJson(dataJson),
+  //   );
+  //   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+  //   var cid = response.data.accessParams.cid;
+  //   sharedPreferences.setInt("cid", cid);
+  //   print("app-ChannelConfig- ${response}");
+  //   print("app-cid- ${cid}");
+  //
+  //   var userInfoJson = await DioClient().getUserinfoMessage();
+  //   var userMap = userInfoJson["data"];
+  //   var channelMap = userInfoJson["channel"];
+  //   var userAccount =  UserAccountModel.fromJson(userMap);
+  //   var channelAccount =  ChannelAccountModel.fromJson(channelMap);
+  //
+  //
+  //   sharedPreferences.setString("token", userAccount.token);
+  //   sharedPreferences.setInt("userId", userAccount.id);
+  //   sharedPreferences.setString("accid", userAccount.accid);
+  //   sharedPreferences.setString("cpmpanyAccid", userAccount.cpmpanyAccid);
+  //
+  //   sharedPreferences.setInt("channel_id", channelAccount.id);
+  //   sharedPreferences.setInt("channel_type", channelAccount.type);
+  //   sharedPreferences.setString("channel_name", channelAccount.name);
+  //
+  //   printN("app-token- ${userAccount.token}");
+  //   printN("app-userId- ${userAccount.userid}");
+  //
+  //   printN("app-UserinfoMessage- ${userInfoJson}");
+  //
+  //
+  //   // if (!CSocketIOManager().isConnected) {
+  //   //   CSocketIOManager().connect();
+  //   // }
+  //
+  //   //GoRouter.of(context).push(Routes.ChartTestRoot, extra: c);
+  //
+  // }
 
 
 

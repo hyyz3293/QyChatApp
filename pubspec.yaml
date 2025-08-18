@@ -10,8 +10,8 @@ description: A flutter qychatapp project created using MobX and Provider.
 
 version: 1.0.0
 
-#homepage: https://github.com/hyyz3293/QyChatApp.git
-#repository: https://github.com/hyyz3293/QyChatApp.git
+homepage: https://github.com/hyyz3293/QyChatApp.git
+repository: https://github.com/hyyz3293/QyChatApp.git
 
 environment:
   sdk: '>=3.0.6 <4.0.0'
@@ -138,7 +138,7 @@ dependencies:
   #sign_in_with_apple: ^5.0.0
   share_plus: ^7.1.0
   scrollable_positioned_list: ^0.3.8
-  socket_io_client: ">=1.0.2 <3.0.0"
+  socket_io_client: 1.0.2 #">=1.0.2 <3.0.0"
 
   # T
   timeago: ^3.7.0

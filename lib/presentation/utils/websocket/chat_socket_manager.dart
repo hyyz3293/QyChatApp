@@ -191,6 +191,7 @@ class CSocketIOManager {
     var cid = sharedPreferences.getInt("cid");
     var token = sharedPreferences.getString("token");
     var userid = sharedPreferences.getInt("userId");
+    var useridReal = sharedPreferences.getString("userIdReal");
     var accid = sharedPreferences.getString("accid");
 
     if (token == "")

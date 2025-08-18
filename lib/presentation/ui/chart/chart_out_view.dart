@@ -20,6 +20,8 @@ class ChartExternalScreen extends StatefulWidget {
 
 class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindingObserver {
 
+  bool isLoadIng = true;
+
   @override
   void initState() {
     super.initState();
@@ -55,6 +57,9 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
 
     sharedPreferences.setString("token", userAccount.token);
     sharedPreferences.setInt("userId", userAccount.id);
+
+    sharedPreferences.setString("userIdReal", userAccount.userid);
+
     sharedPreferences.setString("accid", userAccount.accid);
     sharedPreferences.setString("cpmpanyAccid", userAccount.cpmpanyAccid);
 
@@ -73,6 +78,9 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
     // }
 
     //GoRouter.of(context).push(Routes.ChartTestRoot, extra: c);
+    setState(() {
+      isLoadIng = false;
+    });
     CSocketIOManager();
   }
 
@@ -90,7 +98,7 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: ChatViewScreen(),
+      body: isLoadIng ? Container() : ChatViewScreen(),
     );
   }
 
