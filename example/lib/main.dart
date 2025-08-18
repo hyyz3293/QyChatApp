@@ -18,7 +18,7 @@ class Example extends StatelessWidget {
         colorScheme:
             ColorScheme.fromSwatch(accentColor: const Color(0xffEE5366)),
       ),
-      //home: ChartExternalScreen(channelCode: "",),
+      home: ChartExternalScreen(channelCode: "",),
     );
   }
 }

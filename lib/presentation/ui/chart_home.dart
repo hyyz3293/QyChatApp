@@ -1,20 +1,9 @@
 import 'dart:async';
-
-
-import 'package:qychatapp/presentation/ui/model/channel_account_model.dart';
-import 'package:qychatapp/presentation/ui/model/channel_config_model.dart';
-import 'package:qychatapp/presentation/utils/dio/dio_client.dart';
 import 'package:qychatapp/presentation/utils/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../utils/global_utils.dart';
-import '../utils/websocket/chat_socket_manager.dart';
-import '../utils/websocket/socket_manager.dart';
-import 'model/api_response.dart';
-import 'model/user_account_model.dart';
 
 
 class ChartHomeScreen extends StatefulWidget {
