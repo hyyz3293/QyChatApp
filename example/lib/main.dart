@@ -1,5 +1,6 @@
 //import 'package:qychatapp/presentation/ui/chart/chart_out_view.dart';
 import 'package:flutter/material.dart';
+import 'package:qychatapp/presentation/ui/chart/chart_out_view.dart';
 
 void main() {
   runApp(const Example());
