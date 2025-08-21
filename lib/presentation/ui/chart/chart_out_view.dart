@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert' as convert;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/dio/dio_client.dart';
@@ -9,6 +10,7 @@ import '../chatview/chat_view_screen.dart';
 import '../model/api_response.dart';
 import '../model/channel_account_model.dart';
 import '../model/channel_config_model.dart';
+import '../model/sence_config_model.dart';
 import '../model/user_account_model.dart';
 
 class ChartExternalScreen extends StatefulWidget {
@@ -72,12 +74,22 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
 
     printN("app-UserinfoMessage- ${userInfoJson}");
 
+    var sceneConfigJson = await DioClient().getSceneConfig();
+    final List<dynamic> sceneJson = sceneConfigJson['data'];
+    List<SenceConfigModel> sceneList = sceneJson
+        .map((item) => SenceConfigModel.fromJson(item))
+        .toList();
+    printN("app-sceneList- ${sceneList}");
 
-    // if (!CSocketIOManager().isConnected) {
-    //   CSocketIOManager().connect();
-    // }
+    sharedPreferences.setString("sence_config", convert.jsonEncode(sceneJson));
 
-    //GoRouter.of(context).push(Routes.ChartTestRoot, extra: c);
+    // String test = await sharedPreferences.getString("sence_config") ?? "";
+    // var testMap = convert.jsonDecode(test);
+    // final List<dynamic> sceneJson2 = testMap;
+    // List<SenceConfigModel> sceneList2 = sceneJson2
+    //     .map((item) => SenceConfigModel.fromJson(item))
+    //     .toList();
+    // printN("app-sceneList- ${sceneList2}");
     setState(() {
       isLoadIng = false;
     });
@@ -98,7 +110,14 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: isLoadIng ? Container() : ChatViewScreen(),
+      body: isLoadIng
+          ? const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+          strokeWidth: 3.0,
+        ),
+      )
+          : ChatViewScreen(),
     );
   }
 

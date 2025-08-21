@@ -1,10 +1,8 @@
 import 'package:qychatapp/presentation/ui/model/attachment_bean.dart';
-import 'package:qychatapp/presentation/ui/model/welcomeSpeech_bean.dart';
 
-import 'im_user_menu.dart';
 import 'image_bean.dart';
 
-class ImUserOnlineEvent {
+class ImUserSenseEvent {
   String? event;
   String? enumType;
   String? type;
@@ -31,13 +29,11 @@ class ImUserOnlineEvent {
   String? sendName;
   String? location;
   String? scene;
-  int? cid;
+  String? cid;
   int? channel;
-  WelcomeSpeechData? welcomeSpeech;
-  List<ChatMenuItem>? navigationList;
 
 
-  ImUserOnlineEvent({
+  ImUserSenseEvent({
     this.event,
     this.enumType,
     this.type,
@@ -66,14 +62,11 @@ class ImUserOnlineEvent {
     this.scene,
     this.cid,
     this.channel,
-    this.welcomeSpeech,
-    this.navigationList
-
   });
 
   // 从 JSON 创建对象 - 无强制转换
-  factory ImUserOnlineEvent.fromJson(Map<dynamic, dynamic> json) {
-    return ImUserOnlineEvent(
+  factory ImUserSenseEvent.fromJson(Map<dynamic, dynamic> json) {
+    return ImUserSenseEvent(
       event: json['event'],
       enumType: json['enumType'],
       type: json['type'],
@@ -100,9 +93,6 @@ class ImUserOnlineEvent {
       imgs: json['imgs'] != null ? (json['imgs'] as List)
           .map((e) => ImageData.fromJson(e as Map<String, dynamic>))
           .toList() : [],
-      navigationList: json['navigationList'] != null ? (json['navigationList'] as List)
-          .map((e) => ChatMenuItem.fromJson(e as Map<String, dynamic>))
-          .toList() : [],
       attachment: json['attachment'] != null ? (json['attachment'] as List)
           .map((e) => AttachmentData.fromJson(e as Map<String, dynamic>))
           .toList() : [],
@@ -111,11 +101,9 @@ class ImUserOnlineEvent {
 
       scene: json['scene'],
 
-      cid: int.tryParse("${json['cid']}"),
+      cid: "${json['cid']}",
 
       channel: json['channel'],
-
-      welcomeSpeech: json['welcomeSpeech'] != null ? WelcomeSpeechData.fromJson(json['welcomeSpeech']) : null,
     );
   }
 
@@ -145,10 +133,6 @@ class ImUserOnlineEvent {
     if (messId != null) data['messId'] = messId;
     if (imgs != null) data['imgs'].map((e) => e.toJson()).toList();
     if (attachment != null) data['attachment'].map((e) => e.toJson()).toList();
-
-    if (navigationList != null) data['navigationList'].map((e) => e.toJson()).toList();
-
-
     if (url != null) data['url'] = url;
 
     if (sendAvatar != null) data['sendAvatar'] = sendAvatar;
@@ -159,9 +143,6 @@ class ImUserOnlineEvent {
 
     if (cid != null) data['cid'] = cid;
     if (channel != null) data['channel'] = channel;
-
-
-    if (welcomeSpeech != null) data['welcomeSpeech'].map((e) => e.toJson());
 
     return data;
   }

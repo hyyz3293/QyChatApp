@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert' as convert;
 import 'dart:io' show File, Platform;
 
 import 'package:audio_waveforms/audio_waveforms.dart';
+import 'package:qychatapp/presentation/ui/model/sence_config_model.dart';
 import 'package:qychatapp/utils/constants/constants.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/foundation.dart';
@@ -9,8 +11,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/config_models/send_message_configuration.dart';
+import '../presentation/utils/global_utils.dart';
 import '../presentation/utils/service_locator.dart';
 import '../utils/debounce.dart';
 import '../utils/package_strings.dart';
@@ -99,6 +103,8 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
   int _recordingSeconds = 0;
   String? _currentRecordingPath; // 存储当前录音路径
 
+  List<SenceConfigModel> _senseList = [];
+
   @override
   void initState() {
     attachListeners();
@@ -110,6 +116,21 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
       controller = RecorderController();
     }
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String test = await sharedPreferences.getString("sence_config") ?? "";
+    var testMap = convert.jsonDecode(test);
+    final List<dynamic> sceneJson2 = testMap;
+    List<SenceConfigModel> sceneList2 = sceneJson2
+        .map((item) => SenceConfigModel.fromJson(item))
+        .toList();
+    printN("app-sceneList- ${sceneList2.length}");
+    setState(() {
+      _senseList = sceneList2;
+    });
   }
 
   @override
@@ -135,26 +156,15 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     return Column(
       children: [
         Container(
-          margin: EdgeInsets.only(left: 10, right: 10, bottom: 5),
-          child: Row(
-            children: [
-              InkWell(
-                onTap: () {
-                  print("people");
-                  widget.onTopSelected("people", "");
-                },
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  margin: textFieldConfig?.margin,
-                  decoration: BoxDecoration(
-                    borderRadius: textFieldConfig?.borderRadius ??
-                        BorderRadius.circular(textFieldBorderRadius),
-                    color: sendMessageConfig?.textFieldBackgroundColor ?? Colors.white,
-                  ),
-                  child: Text("人工客服", style: TextStyle(color: voiceRecordingConfig?.recorderIconColor,),),
-                ),
-              )
-            ],
+          height: 60,
+          width: double.infinity,
+          child: ListView.builder(
+            itemCount: _senseList.length,
+              scrollDirection: Axis.horizontal,
+            itemBuilder:
+              (BuildContext context, int index) {
+                return _buildInfoRow(_senseList[index]);
+              },
           ),
         ),
         Container(
@@ -277,8 +287,8 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                                         borderRadius: BorderRadius.circular(20),
                                         color: Colors.green,
                                       ),
-                                      padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-                                      child: Text("发送", style: TextStyle(color: Colors.white)),
+                                      padding: const EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+                                      child: const Text("发送", style: TextStyle(color: Colors.white)),
                                     ),
                                   )
                                 ],
@@ -350,6 +360,33 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
           ),
         )
       ],
+    );
+  }
+
+  // 构建信息行
+  Widget _buildInfoRow(SenceConfigModel sence) {
+    return Container(
+      margin: const EdgeInsets.only(left: 10, right: 10, bottom: 5),
+      child: Row(
+        children: [
+          InkWell(
+            onTap: () {
+              print("people");
+              //widget.onTopSelected("people", "");
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              margin: textFieldConfig?.margin,
+              decoration: BoxDecoration(
+                borderRadius: textFieldConfig?.borderRadius ??
+                    BorderRadius.circular(textFieldBorderRadius),
+                color: sendMessageConfig?.textFieldBackgroundColor ?? Colors.white,
+              ),
+              child: Text("${sence.name}", style: TextStyle(color: voiceRecordingConfig?.recorderIconColor,),),
+            ),
+          )
+        ],
+      ),
     );
   }
 

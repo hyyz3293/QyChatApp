@@ -24,61 +24,33 @@ dependencies:
   # A
   another_flushbar: ^1.12.29
   adaptive_navigation: ^0.0.3
-  #amplify_flutter: ^2.4.1
-  #amplify_auth_cognito: ^2.4.1
-  #amplify_authenticator: ^2.1.3
-  #adhan: ^2.0.0+1 # 穆斯林
   audio_session: ^0.1.21 # 音频
   android_intent_plus: ^4.0.3
   audioplayers: ^6.1.0
   audio_waveforms: ^1.0.5
   any_link_preview: ^3.0.2
-
-  #audioplayers: ^6.5.0
   # B
   flutter_blue_plus: ^1.31.15
   # C
   cupertino_icons: ^1.0.5
-  #connectivity_plus: ^5.0.2
   cached_network_image: ^3.4.0
   carousel_slider: ^5.0.0
   crop_your_image: ^1.1.0
   crypto: ^3.0.6
-  #chatview: 2.5.0
-  #collection: ^1.19.0
-
   # D
   dio: ^5.7.0
-  #device_info_plus: ^9.1.1  # 9.x版本兼容低版本ffi
   date_format: ^2.0.2 #日期管理类
-  dash_chat_2: ^0.0.21
   # E
   event_bus: ^2.0.0
   emoji_picker_flutter: ^3.0.0
-
-  #excel: ^4.0.2
   # F
   flutter_mobx: ^2.0.6+5
   flutter_slidable: ^3.0.1
   flutter_image_compress: ^2.3.0
-  #fl_chart: ^0.69.0
-  #firebase_messaging: ^15.1.0
-  #firebase_core: ^3.4.0
-  #flutter_local_notifications: ^19.0.0
-  #flutter_chat_core: ^2.8.0
-  #flutter_chat_ui: ^2.8.0
-  #flutter_chat_types: ^3.6.2
-  #flyer_chat_text_message: 2.5.1
-  #flyer_chat_image_message: ^2.2.1
-  #flyer_chat_text_stream_message: ^2.2.6
-  #flyer_chat_file_message: ^2.3.1
-  #flyer_chat_system_message: ^2.1.13
   flutter_lorem: ^2.0.0
   flutter_html: ^3.0.0-alpha.6  # 3.x版本可能已解决依赖冲突
   flutter_markdown: ^0.7.7+1
-  #file_picker: 8.3.3
   flutter_link_previewer: ^3.2.2
-
   # G
   get_it: ^8.0.0
   google_fonts: ^6.2.1
@@ -89,27 +61,19 @@ dependencies:
   google_maps_flutter: ^2.10.0
   # H
   http: ^1.1.1
-  #hijri: ^3.0.0 # 穆斯林
   # I
   intl: ^0.19.0
   image_picker: ^1.1.2
   image_cropper: ^9.0.0
-  # in_app_purchase: ^3.2.0
   in_app_update: ^4.2.3
   # J
   json_serializable: ^6.6.1
-  #just_audio: ^0.9.42 # 音频
-  #just_audio_background: ^0.0.1-beta.13 # 音频
   # K
   # L
-  #lottie: ^3.1.2
   localstorage: ^4.0.0+1
   logger: ^2.0.0
   # M
-  # material_dialogs: ^1.1.5
   mobx: ^2.1.4
-  #mobile_scanner: ^7.0.0-beta.3
-  # mobile_scanner: ^6.0.2
   # N
   # O
   oktoast: ^3.4.0
@@ -125,7 +89,6 @@ dependencies:
   pull_down_button: ^0.10.2
   provider: ^6.0.5 # 状态管理
   # Q
-  #qr_code_scanner: ^1.0.1
   qr_flutter: ^4.1.0
   # R
   reorderables: ^0.6.0
@@ -135,14 +98,11 @@ dependencies:
   sembast_web: ^2.1.3
   sembast: ^3.4.4
   sqflite: ^2.3.3
-  #sign_in_with_apple: ^5.0.0
   share_plus: ^7.1.0
   scrollable_positioned_list: ^0.3.8
   socket_io_client: 1.0.2 #">=1.0.2 <3.0.0"
-
   # T
   timeago: ^3.7.0
-
   # U
   url_launcher: ^6.3.0
   uuid: ^4.5.1
@@ -152,7 +112,6 @@ dependencies:
   video_player: ^2.9.5
   # W
   webview_flutter: ^4.13.0
-  #workmanager: ^0.5.2
   web_socket_channel: ^3.0.3
   # X
   xxtea: ^2.1.0
@@ -163,8 +122,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
-
-
   # The following adds the launcher icon support to your application.
   # run below mentioned commands to generate launcher icons
   # flutter packages get

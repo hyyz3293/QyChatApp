@@ -18,6 +18,7 @@ import '../../ui/model/api_response.dart';
 import '../../ui/model/each_api_response.dart';
 import '../../ui/model/file_model.dart';
 import '../../ui/model/im_user_online.dart';
+import '../../ui/model/im_user_sense.dart';
 import '../../ui/model/image_bean.dart';
 import '../../ui/model/message_send_model.dart';
 import '../../ui/model/socket_im_message.dart';
@@ -404,48 +405,49 @@ class CSocketIOManager {
       switch(enumType) {
         case "imUserOnline":
           playAudio();
-          //文本
-          msgId = msgBean.messId ?? "";
-          msg = "您好！有什么能帮助您的吗?";
-          // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
-          // msg = msg!.replaceAll(RegExp(r'</p>'), '');
-          var message = Message(
-              createdAt: dateTime,
-              //id: "${msgId}",
-              status: MessageStatus.delivered,
-              message: "${msg}",
-              sentBy: '${userId}'
-            //text: "${msg}",
-            //user: ChatUser(id: '${userId}'),
-            //authorId: '${userId}',
-          );
-          if (!isWelcome) {
-            isWelcome = true;
-            _sendMessage(message);
-          }
-
+          // //文本
+          // msgId = msgBean.messId ?? "";
+          // msg = "您好！有什么能帮助您的吗?";
+          // // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
+          // // msg = msg!.replaceAll(RegExp(r'</p>'), '');
+          // var message = Message(
+          //     createdAt: dateTime,
+          //     //id: "${msgId}",
+          //     status: MessageStatus.delivered,
+          //     message: "${msg}",
+          //     sentBy: '${userId}'
+          //   //text: "${msg}",
+          //   //user: ChatUser(id: '${userId}'),
+          //   //authorId: '${userId}',
+          // );
+          // if (!isWelcome) {
+          //   isWelcome = true;
+          //   _sendMessage(message);
+          // }
+          sendSenseConfigMsg();
           break;
         case "imOnlineed":
         //收到回复 自动进入转人工窗口
           //convertToHumanTranslation();
-          msgId = msgBean.messId ?? "";
-          msg = "您好！有什么能帮助您的吗?";
-          // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
-          // msg = msg!.replaceAll(RegExp(r'</p>'), '');
-          var message = Message(
-              createdAt: dateTime,
-              //id: "${msgId}",
-              status: MessageStatus.delivered,
-              message: "${msg}",
-              sentBy: '${userId}'
-            //text: "${msg}",
-            //user: ChatUser(id: '${userId}'),
-            //authorId: '${userId}',
-          );
-          if (!isWelcome) {
-            isWelcome = true;
-            _sendMessage(message);
-          }
+          // msgId = msgBean.messId ?? "";
+          // msg = "您好！有什么能帮助您的吗?";
+          // // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
+          // // msg = msg!.replaceAll(RegExp(r'</p>'), '');
+          // var message = Message(
+          //     createdAt: dateTime,
+          //     //id: "${msgId}",
+          //     status: MessageStatus.delivered,
+          //     message: "${msg}",
+          //     sentBy: '${userId}'
+          //   //text: "${msg}",
+          //   //user: ChatUser(id: '${userId}'),
+          //   //authorId: '${userId}',
+          // );
+          // if (!isWelcome) {
+          //   isWelcome = true;
+          //   _sendMessage(message);
+          // }
+          sendSenseConfigMsg();
           playAudio();
           break;
         case "imSeatReturnResult":
@@ -463,9 +465,54 @@ class CSocketIOManager {
           );
           _sendMessage(message);
           break;
+
+        case "navigation":
+          playAudio();
+          //文本
+          msgId = msgBean.messId ?? "";
+          var navigation = msgBean.navigationList;
+          if (navigation!.isNotEmpty && navigation!.length > 0) {
+            for (int i = 0; i< navigation!.length;i++) {
+              var message = Message(
+                  createdAt: dateTime,
+                  //id: "${msgId}",
+                  status: MessageStatus.delivered,
+                  message: "${navigation[i].menuTitle}",
+                  sentBy: '${userId}',
+
+                //text: "${msg}",
+                //user: ChatUser(id: '${userId}'),
+                //authorId: '${userId}',
+              );
+              _sendMessage(message);
+              printN("welcomeSpeec==== ${msgContent}");
+            }
+
+          }
+          // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
+          // msg = msg!.replaceAll(RegExp(r'</p>'), '');
+
+          break;
         case "welcomeSpeech":
+          playAudio();
+          //文本
+          msgId = msgBean.messId ?? "";
+          msg = "${msgBean.welcomeSpeech!.welcomeSpeech}";
+          // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
+          // msg = msg!.replaceAll(RegExp(r'</p>'), '');
+          var message = Message(
+              createdAt: dateTime,
+              //id: "${msgId}",
+              status: MessageStatus.delivered,
+              message: "${msg}",
+              sentBy: '${userId}'
+            //text: "${msg}",
+            //user: ChatUser(id: '${userId}'),
+            //authorId: '${userId}',
+          );
+          _sendMessage(message);
           printN("welcomeSpeec==== ${msgContent}");
-          //break;
+          break;
         case "graphicText":
         case "imClick":
         case "navigation":
@@ -829,6 +876,7 @@ class CSocketIOManager {
     var type = sharedPreferences.getInt("channel_type") ?? 0;
     var name = sharedPreferences.getString("channel_name") ?? "";
     var accid = sharedPreferences.getString("accid") ?? "";
+    var channelCode = sharedPreferences.getString("channel_code");
 
     var bean = ImUserOnlineEvent();
     bean.event = "IM-USER-ONLINE";
@@ -838,10 +886,10 @@ class CSocketIOManager {
     bean.enumType = "imUserOnline";
     bean.type = 'notice';
     bean.ip = '127.0.0.1';
-    bean.webUrl = "https://uat-ccc.qylink.com:9991/static/im/mobileChannel.html?channelCode=0fa684c5166b4f65bba9231f071a756d";
+    bean.webUrl = "https://uat-ccc.qylink.com:9991/static/im/mobileChannel.html?channelCode=${channelCode}";
     bean.browserTitle = "在线客服";
     bean.referrer = "";
-    bean.landing = "https://uat-ccc.qylink.com:9991/static/im/mobileChannel.html?channelCode=0fa684c5166b4f65bba9231f071a756d";
+    bean.landing = "https://uat-ccc.qylink.com:9991/static/im/mobileChannel.html?channelCode=${channelCode}";
     bean.browser = "chrome";
     bean.engine = "";
     bean.terminal = "Win10";
@@ -854,6 +902,61 @@ class CSocketIOManager {
 
 
     printN("上线；；==  ${msg}");
+
+    _socket!.emit('socket-im-communication', socketIMMessage.toJson());
+  }
+
+  // 发送场景信息
+  Future<void> sendSenseConfigMsg() async {
+    printN("场景 配置");
+
+    //["socket-im-communication",
+    // {"msgContent":"{\"event\":\"IM-SCENE-ACCESS\",
+    // \"scene\":\"\",\
+    // "location\":
+    // \"https://uat-ccc.qylink.com:9991/static/im/mobileChannel.html?channelCode=0fa684c5166b4f65bba9231f071a756d\"
+    // ,\"cid\":3006,\"channel\":1,\"content\":\"\",
+    // \"enumType\":\"accessMsg\",\"type\":\"notice\"}"
+    // ,"event":"socket-im-communication","toAccid":["3006_SYS"]}]
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var id = sharedPreferences.getInt("channel_id") ?? 0;
+    var type = sharedPreferences.getInt("channel_type") ?? 0;
+    var name = sharedPreferences.getString("channel_name") ?? "";
+    var accid = sharedPreferences.getString("accid") ?? "";
+    var cid = sharedPreferences.getInt("cid") ?? 0;
+
+    var channelCode = sharedPreferences.getString("channel_code");
+    var cpmpanyAccid = sharedPreferences.getString("cpmpanyAccid") ?? "";
+    var bean = ImUserOnlineEvent();
+    bean.event = "IM-SCENE-ACCESS";
+    bean.scene = "";
+    bean.location = "https://uat-ccc.qylink.com:9991/static/im/mobileChannel.html?channelCode=${channelCode}";
+    //bean.channelName = name;
+    //bean.channelId = id;
+    //bean.channelType = type;
+    bean.enumType = "accessMsg";
+    bean.type = 'notice';
+    bean.cid  = cid;
+    //bean.ip = '127.0.0.1';
+    bean.content = "";
+
+    //bean.webUrl = "https://uat-ccc.qylink.com:9991/static/im/mobileChannel.html?channelCode=${channelCode}";
+    //bean.browserTitle = "在线客服";
+    //bean.referrer = "";
+    //bean.landing = "https://uat-ccc.qylink.com:9991/static/im/mobileChannel.html?channelCode=${channelCode}";
+    //bean.browser = "chrome";
+    //bean.engine = "";
+    //bean.terminal = "Win10";
+    String msg = json.encode(bean);
+
+    SocketIMMessage socketIMMessage = SocketIMMessage(
+        toAccid: [cpmpanyAccid], event: 'socket-im-communication', msgContent: '${msg}');
+
+    printN("场景 配置；；=accid=  ${cpmpanyAccid}");
+
+
+    printN("场景 配置；；==  ${msg}");
 
     _socket!.emit('socket-im-communication', socketIMMessage.toJson());
   }

@@ -1,16 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
-import 'dart:convert' as convert;
 import 'package:qychatapp/presentation/utils/global_utils.dart';
-import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
-import 'package:oktoast/oktoast.dart';
 import 'package:path/path.dart' as path;
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../ui/model/message_send_model.dart';
 
@@ -55,18 +47,18 @@ class DioClient {
     // 添加一个拦截器来检查身份验证令牌
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        // 声明一个列表，包含所有需要令牌的受保护端点路径
-        const List<String> protectedEndpoints = [
-          '/add_resource_to_collection',
-          '/buy_resource',
-          '/del_resource',
-          '/get_my_collections',
-          '/get_my_library',
-        ];
+        // // 声明一个列表，包含所有需要令牌的受保护端点路径
+        // const List<String> protectedEndpoints = [
+        //   '/add_resource_to_collection',
+        //   '/buy_resource',
+        //   '/del_resource',
+        //   '/get_my_collections',
+        //   '/get_my_library',
+        // ];
 
-        // 检查是否是受保护的端点
-        bool isProtectedEndpoint = protectedEndpoints
-            .any((endpoint) => options.path.contains(endpoint));
+        // // 检查是否是受保护的端点
+        // bool isProtectedEndpoint = protectedEndpoints
+        //     .any((endpoint) => options.path.contains(endpoint));
 
         // if (isProtectedEndpoint) {
         //   String? token = await getIt<UserSharedHelper>().authToken;
@@ -377,14 +369,18 @@ class DioClient {
   // 4、获取场景配置
   Future<Map<String, dynamic>> getSceneConfig() async {
     try {
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      //var channelCode = sharedPreferences.getString("channel_code");
+      var cid = sharedPreferences.getInt("cid") ?? 0;
+
       Map<String, dynamic> dataMap = {};
-      dataMap["channelCode"] = "0fa684c5166b4f65bba9231f071a756d";
+      //dataMap["channelCode"] = channelCode;
       dataMap["sceneName"] = "";
+      dataMap["cid"] = cid;
       printN("Scene---start");
       printN("Scene---dataMap---.>>>>${dataMap}");
       Map<String, dynamic> response =
-      await get(
-          Endpoints.baseUrl + "/api/imBase/sceneconfig/querySceneKeys",
+      await get("${Endpoints.baseUrl}/api/imBase/sceneconfig/querySceneKeys",
           queryParameters: dataMap);
       printN("Scene---success----${response}");
       return response;
