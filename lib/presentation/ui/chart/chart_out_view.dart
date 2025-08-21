@@ -45,6 +45,40 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
           (dataJson) => ChannelConfigModel.fromJson(dataJson),
     );
     //SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    try {
+      // /**
+      //  * 移动端--是否允许使用相册{1:是,0:否}
+      //  */
+      // private int windowOptionAppwebPhoto;
+      // /**
+      //  * 移动端--是否允许使用拍照功能{1:是,0:否}
+      //  */
+      // private int windowOptionAppwebShoot;
+      // /**
+      //  * 移动端--是否允许使用留言功能{1:是,0:否}
+      //  */
+      // private int windowOptionAppwebMsg;
+      // /**
+      //  * 移动端--是否允许使用转人工功能{1:是,0:否}
+      //  */
+      // private int windowOptionAppwebAgent;
+
+      int windowOptionAppwebPhoto = response.data.accessParams.windowOptionAppwebPhoto;
+      int windowOptionAppwebShoot = response.data.accessParams.windowOptionAppwebShoot;
+      int windowOptionAppwebMsg = response.data.accessParams.windowOptionAppwebMsg;
+      int windowOptionAppwebAgent = response.data.accessParams.windowOptionAppwebAgent;
+
+      sharedPreferences.setInt("windowOptionAppwebPhoto", windowOptionAppwebPhoto);
+      sharedPreferences.setInt("windowOptionAppwebShoot", windowOptionAppwebShoot);
+      sharedPreferences.setInt("windowOptionAppwebMsg", windowOptionAppwebMsg);
+      sharedPreferences.setInt("windowOptionAppwebAgent", windowOptionAppwebAgent);
+
+    }catch(e) {
+
+    }
+
+
     var cid = response.data.accessParams.cid;
     sharedPreferences.setInt("cid", cid);
     print("app-ChannelConfig- ${response}");

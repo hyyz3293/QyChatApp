@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:convert' as convert;
 import 'dart:io';
+import 'package:qychatapp/presentation/utils/websocket/chat_socket_manager.dart';
 import 'package:qychatapp/widgets/reaction_widget.dart';
 import 'package:qychatapp/widgets/share_icon.dart';
 import 'package:dio/dio.dart';
@@ -53,29 +54,47 @@ class _NavigationState extends State<NavigationMessageView> {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment:
-      widget.isMessageBySender ? MainAxisAlignment.end : MainAxisAlignment.start,
+      mainAxisAlignment: widget.isMessageBySender ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         Container(
           margin: const EdgeInsets.only(left: 10, right: 10),
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.7, // 限制最大宽度
+          ),
           decoration: BoxDecoration(
-            borderRadius:BorderRadius.circular(27),
+            borderRadius: BorderRadius.circular(12), // 使用较小的圆角
             color: Color(0xff383152),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch, // 让子项填充宽度
             mainAxisSize: MainAxisSize.min,
-            children: _navigationList.map((item) {
-              return _buildInfoRow(item);
-            }).toList(),
+            children: _buildNavigationItems(),
           ),
         )
       ],
     );
   }
 
+  List<Widget> _buildNavigationItems() {
+    List<Widget> items = [];
 
+    for (int i = 0; i < _navigationList.length; i++) {
+      items.add(_buildInfoRow(_navigationList[i]));
+
+      // 添加分隔线（最后一个项目不添加）
+      if (i < _navigationList.length - 1) {
+        items.add(Divider(
+          height: 1,
+          thickness: 0.5,
+          color: Colors.grey.withOpacity(0.3),
+          indent: 16,
+          endIndent: 16,
+        ));
+      }
+    }
+
+    return items;
+  }
 // 构建信息行 - 支持多行文本
   Widget _buildInfoRow(ChatMenuItem scene) {
     return Material(
@@ -83,30 +102,35 @@ class _NavigationState extends State<NavigationMessageView> {
       child: InkWell(
         onTap: () {
           print("Selected: ${scene.menuTitle}");
+          CSocketIOManager().sendSenseConfig(scene);
         },
         borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           constraints: BoxConstraints(
             minHeight: 48, // 最小高度确保触摸区域足够
           ),
-          alignment: Alignment.centerLeft,
-          child:  Expanded(
-            child: Text(
-              "11111111111111111111111111111111111111111111${scene.menuTitle}",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  "${scene.menuTitle}",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                  softWrap: true, // 允许换行
+                  maxLines: 3, // 最大行数限制
+                  overflow: TextOverflow.ellipsis, // 超出部分显示省略号
+                ),
               ),
-              softWrap: true, // 允许换行
-              maxLines: 3, // 最大行数限制
-              overflow: TextOverflow.ellipsis, // 超出部分显示省略号
-            ),
+            ],
           ),
         ),
       ),
     );
   }
+
 
 
   @override

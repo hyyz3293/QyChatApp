@@ -14,9 +14,11 @@ import '../../../values/enumeration.dart';
 import '../../constants/assets.dart';
 import '../../ui/model/each_api_response.dart';
 import '../../ui/model/file_model.dart';
+import '../../ui/model/im_user_menu.dart';
 import '../../ui/model/im_user_online.dart';
 import '../../ui/model/image_bean.dart';
 import '../../ui/model/message_send_model.dart';
+import '../../ui/model/sence_config_model.dart';
 import '../../ui/model/socket_im_message.dart';
 import '../dio/dio_client.dart';
 import '../service_locator.dart';
@@ -454,6 +456,10 @@ class CSocketIOManager {
           _sendMessage(message);
           break;
 
+        case "complex":
+
+          break;
+
         case "navigation":
           playAudio();
           //文本
@@ -852,6 +858,111 @@ class CSocketIOManager {
   void _updateMessageStatusNew(Message msg) {
     _updateController.add(msg);
   }
+
+  //42["socket-im-communication",
+  // {"msgContent":"{
+  // \"event\":\"IM-CLICK\",
+  // \"type\":\"notice\"
+  // \"enumType\":\"imClick\",
+  // \"msgSendId\":962,
+  // \"msgSendType\":2,\
+  // \"source\":1,
+  // \"target\":\"1 \"
+  // \"id\":\"18 \",\
+  // "value\":\"多重，倒了后能不能搬得动？平时可以举起来健身吗?\"}","event":"socket-im-communication","toAccid":["3006_SYS"]}]
+  // 场景配置项
+  Future<void> sendSenseConfig(ChatMenuItem scene) async {
+    printN("场景配置项");
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var id = sharedPreferences.getInt("channel_id") ?? 0;
+    var type = sharedPreferences.getInt("channel_type") ?? 0;
+    var name = sharedPreferences.getString("channel_name") ?? "";
+    var accid = sharedPreferences.getString("accid") ?? "";
+    var channelCode = sharedPreferences.getString("channel_code");
+    var cid = sharedPreferences.getInt("cid") ?? 0;
+    var userId = sharedPreferences.getInt("userId") ?? 0;
+
+
+    var bean = ImUserOnlineEvent();
+    bean.event = "IM-CLICK";
+    bean.type = 'notice';
+    bean.enumType = 'imClick';
+    bean.msgSendId = cid;
+    bean.msgSendType = 2;
+    bean.source = 1;
+    bean.target = 1;
+    bean.id = "${scene.menuId}";
+    bean.value = scene.menuTitle;
+
+    String msg = json.encode(bean);
+
+    SocketIMMessage socketIMMessage = SocketIMMessage(
+        toAccid: [accid], event: 'socket-im-communication', msgContent: '${msg}');
+
+    printN("上线；；=accid=  ${accid}");
+
+
+    printN("上线；；==  ${msg}");
+
+    _socket!.emit('socket-im-communication', socketIMMessage.toJson());
+
+    var message = Message(
+      createdAt: DateTime.now(),
+      //id: msgId,
+      //status: MessageStatus.sending,
+      message: '${scene.menuTitle}', sentBy: '$userId',
+      //authorId: '${userId}',
+      //user:ChatUser(id: '${userId}', lastName: "${userId}", firstName: "${userId}"),
+    );
+
+    _sendMessage(message);
+  }
+
+  // 场景配置项
+  Future<void> sendChatConfig(SenceConfigModel scene) async {
+    printN("场景配置项");
+
+    if (scene.id == -1){
+      convertToHumanTranslation();
+      return;
+    }
+
+    //{"msgSendId":962,"msgSendType":2,
+    // "event":"IM-CLICK","type":"notice",
+    // "enumType":"imClick","source":2,"target":1,"id":3,"value":"////"}
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var id = sharedPreferences.getInt("channel_id") ?? 0;
+    var type = sharedPreferences.getInt("channel_type") ?? 0;
+    var name = sharedPreferences.getString("channel_name") ?? "";
+    var accid = sharedPreferences.getString("accid") ?? "";
+    var channelCode = sharedPreferences.getString("channel_code");
+    var cid = sharedPreferences.getInt("cid") ?? 0;
+    var bean = ImUserOnlineEvent();
+    bean.event = "IM-CLICK";
+    bean.type = 'notice';
+    bean.enumType = 'imClick';
+    bean.msgSendId = cid;
+    bean.msgSendType = 2;
+    bean.source = 2;
+    bean.target = 1;
+    bean.id = "${scene.id}";
+    bean.value = "";
+
+    String msg = json.encode(bean);
+
+    SocketIMMessage socketIMMessage = SocketIMMessage(
+        toAccid: [accid], event: 'socket-im-communication', msgContent: '${msg}');
+
+    printN("上线；；=accid=  ${accid}");
+
+
+    printN("上线；；==  ${msg}");
+
+    _socket!.emit('socket-im-communication', socketIMMessage.toJson());
+  }
+
 
   // 发送上线事件
   Future<void> sendOnlineMsg() async {

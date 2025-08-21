@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/config_models/send_message_configuration.dart';
 import '../presentation/utils/global_utils.dart';
 import '../presentation/utils/service_locator.dart';
+import '../presentation/utils/websocket/chat_socket_manager.dart';
 import '../utils/debounce.dart';
 import '../utils/package_strings.dart';
 import '../values/enumeration.dart';
@@ -122,11 +123,16 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
   Future<void> loadData() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String test = await sharedPreferences.getString("sence_config") ?? "";
+    int windowOptionAppwebAgent = sharedPreferences.getInt("windowOptionAppwebAgent") ?? 0;
     var testMap = convert.jsonDecode(test);
     final List<dynamic> sceneJson2 = testMap;
     List<SenceConfigModel> sceneList2 = sceneJson2
         .map((item) => SenceConfigModel.fromJson(item))
         .toList();
+    if (windowOptionAppwebAgent== 1) {
+      SenceConfigModel senceConfigModel = SenceConfigModel(id: -1, cid: 0, sceneid: 0, name: '转人工', type: 0, value: 0, createTime: DateTime.now(), updateTime: DateTime.now());
+      sceneList2.insert(0, senceConfigModel);
+    }
     printN("app-sceneList- ${sceneList2.length}");
     setState(() {
       _senseList = sceneList2;
@@ -373,6 +379,8 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
             onTap: () {
               print("people");
               //widget.onTopSelected("people", "");
+              CSocketIOManager().sendChatConfig(sence);
+
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

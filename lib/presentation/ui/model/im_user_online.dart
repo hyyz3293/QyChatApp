@@ -22,6 +22,14 @@ class ImUserOnlineEvent {
   String? msgId;
   String? msg;
   int? msgSendId;
+  int? msgSendType;
+
+  int? source;
+  int? target;
+
+  String? id;
+  String? value;
+
   String? content;
   String? messId;
   List<ImageData>? imgs;
@@ -54,6 +62,7 @@ class ImUserOnlineEvent {
     this.terminal,
     this.msg,
     this.msgSendId,
+    this.msgSendType,
     this.msgId,
     this.content,
     this.messId,
@@ -67,7 +76,14 @@ class ImUserOnlineEvent {
     this.cid,
     this.channel,
     this.welcomeSpeech,
-    this.navigationList
+    this.navigationList,
+
+    this.id,
+    this.source,
+    this.value,
+    this.target,
+
+
 
   });
 
@@ -90,7 +106,14 @@ class ImUserOnlineEvent {
       terminal: json['terminal'],
       msg: json['msg'],
       msgSendId: json['msgSendId'],
+      msgSendType: json['msgSendType'],
+
       msgId: json['msgId'],
+
+      source: json['source'],
+      id: json['id'],
+      value: json['value'],
+      target: json['target'],
 
       sendAvatar: json['sendAvatar'],
       sendName: json['sendName'],
@@ -140,6 +163,9 @@ class ImUserOnlineEvent {
     if (terminal != null) data['terminal'] = terminal;
     if (msg != null) data['msg'] = msg;
     if (msgSendId != null) data['msgSendId'] = msgSendId;
+
+    if (msgSendType != null) data['msgSendType'] = msgSendType;
+
     if (msgId != null) data['msgId'] = msgId;
     if (content != null) data['content'] = content;
     if (messId != null) data['messId'] = messId;
@@ -159,6 +185,12 @@ class ImUserOnlineEvent {
 
     if (cid != null) data['cid'] = cid;
     if (channel != null) data['channel'] = channel;
+
+    if (id != null) data['id'] = id;
+    if (source != null) data['source'] = source;
+    if (value != null) data['value'] = value;
+    if (target != null) data['target'] = target;
+
 
 
     if (welcomeSpeech != null) data['welcomeSpeech'].map((e) => e.toJson());
