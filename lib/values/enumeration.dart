@@ -33,6 +33,8 @@ enum MessageType {
   custom,
   navigation,
   file,
+  complex,
+
   video;
 
   static MessageType? tryParse(String? value) {
@@ -50,6 +52,8 @@ enum MessageType {
       return video;
     }else if (type == navigation.name) {
       return navigation;
+    }else if (type == complex.name) {
+      return complex;
     }
     return null;
   }

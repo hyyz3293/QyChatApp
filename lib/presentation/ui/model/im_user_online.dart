@@ -1,6 +1,7 @@
 import 'package:qychatapp/presentation/ui/model/attachment_bean.dart';
 import 'package:qychatapp/presentation/ui/model/welcomeSpeech_bean.dart';
 
+import 'complex_bean.dart';
 import 'im_user_menu.dart';
 import 'image_bean.dart';
 
@@ -44,6 +45,8 @@ class ImUserOnlineEvent {
   WelcomeSpeechData? welcomeSpeech;
   List<ChatMenuItem>? navigationList;
 
+  ComplexData? complex;
+
 
   ImUserOnlineEvent({
     this.event,
@@ -83,7 +86,7 @@ class ImUserOnlineEvent {
     this.value,
     this.target,
 
-
+    this.complex,
 
   });
 
@@ -139,13 +142,16 @@ class ImUserOnlineEvent {
       channel: json['channel'],
 
       welcomeSpeech: json['welcomeSpeech'] != null ? WelcomeSpeechData.fromJson(json['welcomeSpeech']) : null,
+
+      complex: json['complex'] != null ? ComplexData.fromJson(json['complex']) : null,
+
+
     );
   }
 
   // 将对象转为 JSON - 无默认值填充
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
-
     // 仅包含实际存在的值
     if (event != null) data['event'] = event;
     if (enumType != null) data['enumType'] = enumType;
@@ -163,37 +169,26 @@ class ImUserOnlineEvent {
     if (terminal != null) data['terminal'] = terminal;
     if (msg != null) data['msg'] = msg;
     if (msgSendId != null) data['msgSendId'] = msgSendId;
-
     if (msgSendType != null) data['msgSendType'] = msgSendType;
-
     if (msgId != null) data['msgId'] = msgId;
     if (content != null) data['content'] = content;
     if (messId != null) data['messId'] = messId;
     if (imgs != null) data['imgs'].map((e) => e.toJson()).toList();
     if (attachment != null) data['attachment'].map((e) => e.toJson()).toList();
-
     if (navigationList != null) data['navigationList'].map((e) => e.toJson()).toList();
-
-
     if (url != null) data['url'] = url;
-
     if (sendAvatar != null) data['sendAvatar'] = sendAvatar;
     if (sendName != null) data['sendName'] = sendName;
     if (location != null) data['location'] = location;
-
     if (scene != null) data['scene'] = scene;
-
     if (cid != null) data['cid'] = cid;
     if (channel != null) data['channel'] = channel;
-
     if (id != null) data['id'] = id;
     if (source != null) data['source'] = source;
     if (value != null) data['value'] = value;
     if (target != null) data['target'] = target;
-
-
-
     if (welcomeSpeech != null) data['welcomeSpeech'].map((e) => e.toJson());
+    if (complex != null) data['complex'].map((e) => e.toJson());
 
     return data;
   }

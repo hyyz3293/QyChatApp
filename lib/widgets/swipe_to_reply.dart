@@ -62,7 +62,7 @@ class _SwipeToReplyState extends State<SwipeToReply> {
 
   @override
   Widget build(BuildContext context) {
-    return !(chatViewIW?.featureActiveConfig.enableSwipeToReply ?? true)
+    return !(chatViewIW?.featureActiveConfig.enableSwipeToReply ?? false)
         ? widget.child
         : GestureDetector(
             onHorizontalDragStart: (details) =>

@@ -26,6 +26,7 @@ import 'package:qychatapp/values/enumeration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../presentation/ui/model/complex_bean.dart';
 import '../../presentation/ui/model/im_user_menu.dart';
 
 class Message {
@@ -61,6 +62,8 @@ class Message {
 
   List<ChatMenuItem>? navigationList;
 
+  ComplexData? complex;
+
   Message({
     this.id = '',
     required this.message,
@@ -71,6 +74,7 @@ class Message {
     this.messageType = MessageType.text,
     this.voiceMessageDuration,
     this.navigationList,
+    this.complex,
     MessageStatus status = MessageStatus.pending,
   })  : reaction = reaction ?? Reaction(reactions: [], reactedUserIds: []),
         key = GlobalKey(),
@@ -119,6 +123,8 @@ class Message {
         status: MessageStatus.tryParse(json['status']?.toString()) ??
             MessageStatus.pending,
 
+    complex: json['complex'] != null ? ComplexData.fromJson(json['complex']) :null,
+
     navigationList: json['navigationList'] != null ? (json['navigationList'] as List)
         .map((e) => ChatMenuItem.fromJson(e as Map<String, dynamic>))
         .toList() : [],
@@ -134,8 +140,7 @@ class Message {
         'message_type': messageType.name,
         'voice_message_duration': voiceMessageDuration?.inMicroseconds,
         'status': status.name,
-        'navigationList': navigationList?.map((item) => item.toJson()).toList(),
-
+        'navigationList': navigationList?.map((item) => item.toJson()).toList(), 'complex': complex?.toJson(),
   };
 
   Message copyWith({
@@ -150,7 +155,8 @@ class Message {
     Duration? voiceMessageDuration,
     MessageStatus? status,
     bool forceNullValue = false,
-    List<ChatMenuItem>? navigationList
+    List<ChatMenuItem>? navigationList,
+    ComplexData? complex,
   }) {
     return Message(
       id: id ?? this.id,
@@ -165,6 +171,9 @@ class Message {
       replyMessage: replyMessage ?? this.replyMessage,
       status: status ?? this.status,
       navigationList: navigationList ?? this.navigationList,
+      complex: complex ?? this.complex,
+
+
     );
   }
 }

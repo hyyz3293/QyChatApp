@@ -1,6 +1,6 @@
 class FeatureActiveConfig {
   const FeatureActiveConfig({
-    this.enableSwipeToReply = true,
+    this.enableSwipeToReply = false,
     this.enableReactionPopup = true,
     this.enableTextField = true,
     this.enableSwipeToSeeTime = true,

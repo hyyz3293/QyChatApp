@@ -141,6 +141,23 @@ class ReplyMessageView extends StatelessWidget {
             ),
         ],
       ),
+      MessageType.complex => Row(
+        children: [
+          Icon(
+            Icons.file_present,
+            color: sendMessageConfig?.micIconColor,
+          ),
+          const SizedBox(width: 4),
+          if (message.voiceMessageDuration != null)
+            Text(
+              message.voiceMessageDuration!.toHHMMSS(),
+              style: TextStyle(
+                fontSize: 12,
+                color: sendMessageConfig?.replyMessageColor ?? Colors.black,
+              ),
+            ),
+        ],
+      ),
     };
   }
 }

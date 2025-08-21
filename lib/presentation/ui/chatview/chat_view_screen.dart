@@ -51,9 +51,11 @@ class _ChatScreenState extends State<ChatViewScreen> {
   bool isDarkTheme = false;
   late final ChatController _chatController;
   bool _isSound = true;
-  String _currentUserId = "";
+  String _currentUserId = "user-id";
 
   StreamSubscription<Message>? _messageSubscription;
+  StreamSubscription<Message>? _messageSubscription2;
+
 
   final EventBus eventBus = EventBus();
 
@@ -87,7 +89,14 @@ class _ChatScreenState extends State<ChatViewScreen> {
     _messageSubscription = CSocketIOManager().messagesStream.listen((msg) {
       print("===>>>> Msg ");
       //msg.sentBy = "2";
-      var _msg = msg.copyWith(sentBy: "2");;
+      var _msg = msg.copyWith(sentBy: "2");
+      _chatController.addMessage(_msg);
+    });
+    // 订阅消息流
+    _messageSubscription2 = CSocketIOManager().messagesStream2.listen((msg) {
+      print("===>>>2222> Msg DATA ${msg.sentBy}");
+      //msg.sentBy = "2";
+      var _msg = msg.copyWith(sentBy: "${_currentUserId}");
       _chatController.addMessage(_msg);
     });
     _chatController = ChatController(
@@ -115,6 +124,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
     // ChatController should be disposed to avoid memory leaks
     _chatController.dispose();
     _messageSubscription?.cancel();
+    _messageSubscription2?.cancel();
     _otherSubscription?.cancel();
     CSocketIOManager().dispose();
     super.dispose();
@@ -392,6 +402,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
       ReplyMessage replyMessage,
       MessageType messageType,
       ) {
+    print("===>>>2222> Msg ${_chatController.currentUser.id}");
     final messageObj = Message(
       id: DateTime.now().toString(),
       createdAt: DateTime.now(),
@@ -444,7 +455,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
     var userId = sharedPreferences.getInt("userId") ?? 0;
     setState(() {
       _isSound = isOpenSound;
-      _currentUserId = '${userId}';
+      //_currentUserId = '${userId}';
     });
   }
 }

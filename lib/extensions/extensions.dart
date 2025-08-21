@@ -114,6 +114,9 @@ extension MessageTypes on MessageType {
 
   bool get isNavigation => this == MessageType.navigation;
 
+  bool get  isComplex => this == MessageType.complex;
+
+
 }
 
 /// Extension on ConnectionState for checking specific connection.

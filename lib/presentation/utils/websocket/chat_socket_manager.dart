@@ -71,6 +71,8 @@ class CSocketIOManager {
 
 
   late StreamController<Message> _messagesController;
+  late StreamController<Message> _messagesController2;
+
   late StreamController<Message> _updateController;
   late EventBus eventBus;
 
@@ -89,6 +91,9 @@ class CSocketIOManager {
 
   // 获取消息流
   Stream<Message> get messagesStream => _messagesController.stream;
+
+  Stream<Message> get messagesStream2 => _messagesController2.stream;
+
 
   // 获取消息流
   Stream<Message> get updateStream => _updateController.stream;
@@ -127,6 +132,8 @@ class CSocketIOManager {
 
     // 初始化消息和用户控制器
     _messagesController = StreamController<Message>.broadcast();
+    _messagesController2 = StreamController<Message>.broadcast();
+
     _updateController = StreamController<Message>.broadcast();
     //_usersController = StreamController<List<User>>.broadcast();
     _roomMessages = [];
@@ -156,6 +163,9 @@ class CSocketIOManager {
       _messagesController.close();
     }
 
+    if (!_messagesController2.isClosed) {
+      _messagesController2.close();
+    }
     // if (!_usersController.isClosed) {
     //   _usersController.close();
     // }
@@ -350,9 +360,13 @@ class CSocketIOManager {
     }
   }
 
-  void _handleData(Map<String, dynamic> msgContent) {
+  Future<void> _handleData(Map<String, dynamic> msgContent) async {
     //var msgContent = json['msgContent'];
     print("✅ 消息内容: ${msgContent['sendName']}");
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    var currentUserId = sharedPreferences.getInt("userId") ?? 0;
 
     printN("_handleSocketIm  msgContent= ${msgContent}");
     var msgBean = ImUserOnlineEvent.fromJson(msgContent);
@@ -457,7 +471,23 @@ class CSocketIOManager {
           break;
 
         case "complex":
-
+          playAudio();
+          //文本
+          msgId = msgBean.messId ?? "";
+          var complex = msgBean.complex;
+          var message = Message(
+              createdAt: dateTime,
+              //id: "${msgId}",
+              status: MessageStatus.delivered,
+              message: "${convert.jsonEncode(complex)}",
+              sentBy: '${userId}',
+              messageType: MessageType.complex,
+              complex: complex
+            //text: "${msg}",
+            //user: ChatUser(id: '${userId}'),
+            //authorId: '${userId}',
+          );
+          _sendMessage(message);
           break;
 
         case "navigation":
@@ -911,12 +941,14 @@ class CSocketIOManager {
       createdAt: DateTime.now(),
       //id: msgId,
       //status: MessageStatus.sending,
-      message: '${scene.menuTitle}', sentBy: '$userId',
+      message: '${scene.menuTitle}',
+      sentBy: "$currentUserId",
       //authorId: '${userId}',
       //user:ChatUser(id: '${userId}', lastName: "${userId}", firstName: "${userId}"),
     );
 
-    _sendMessage(message);
+    _messagesController2.add(message);
+
   }
 
   // 场景配置项

@@ -21,6 +21,7 @@
  */
 import 'package:qychatapp/widgets/chat_view_inherited_widget.dart';
 import 'package:qychatapp/widgets/navigation_message_view.dart';
+import 'package:qychatapp/widgets/text_complex_message_view.dart';
 import 'package:qychatapp/widgets/video_message_view.dart';
 import 'package:flutter/material.dart';
 
@@ -235,7 +236,18 @@ class _MessageViewState extends State<MessageView>
                     highlightColor: widget.highlightColor,
                     highlightMessage: widget.shouldHighlight,
                   );
-                } else if (widget.message.messageType.isVoice) {
+                } else if (widget.message.messageType.isComplex) {
+                  return TextComplexMessageView(
+                    inComingChatBubbleConfig: widget.inComingChatBubbleConfig,
+                    outgoingChatBubbleConfig: widget.outgoingChatBubbleConfig,
+                    isMessageBySender: widget.isMessageBySender,
+                    message: widget.message,
+                    chatBubbleMaxWidth: widget.chatBubbleMaxWidth,
+                    messageReactionConfig: messageConfig?.messageReactionConfig,
+                    highlightColor: widget.highlightColor,
+                    highlightMessage: widget.shouldHighlight,
+                  );
+                }else if (widget.message.messageType.isVoice) {
                   return VoiceMessageView(
                     screenWidth: MediaQuery.of(context).size.width,
                     message: widget.message,
