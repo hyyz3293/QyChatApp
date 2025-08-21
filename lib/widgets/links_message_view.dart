@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:convert' as convert;
 import 'dart:io';
+import 'package:oktoast/oktoast.dart';
+import 'package:qychatapp/presentation/ui/model/im_user_link.dart';
 import 'package:qychatapp/presentation/utils/websocket/chat_socket_manager.dart';
 import 'package:qychatapp/widgets/reaction_widget.dart';
 import 'package:qychatapp/widgets/share_icon.dart';
@@ -9,6 +11,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
 import '../models/config_models/image_message_configuration.dart';
@@ -16,8 +19,8 @@ import '../models/config_models/message_reaction_configuration.dart';
 import '../models/data_models/message.dart';
 import '../presentation/ui/model/im_user_menu.dart';
 
-class NavigationMessageView extends StatefulWidget {
-  const NavigationMessageView({
+class LinksMessageView extends StatefulWidget {
+  const LinksMessageView({
     Key? key,
     required this.message,
     required this.isMessageBySender,
@@ -33,18 +36,18 @@ class NavigationMessageView extends StatefulWidget {
   final double highlightScale;
 
   @override
-  State<NavigationMessageView> createState() => _NavigationState();
+  State<LinksMessageView> createState() => _NavigationState();
 }
 
-class _NavigationState extends State<NavigationMessageView> {
+class _NavigationState extends State<LinksMessageView> {
 
-  List<ChatMenuItem> _navigationList = [];
+  List<ChatLinkItem> _linksList = [];
 
   @override
   void initState() {
     super.initState();
-    if ( widget.message.navigationList != null &&  widget.message.navigationList!.isNotEmpty) {
-      _navigationList = widget.message.navigationList!;
+    if ( widget.message.links != null &&  widget.message.links!.isNotEmpty) {
+      _linksList = widget.message.links!;
     }
 
   }
@@ -78,11 +81,11 @@ class _NavigationState extends State<NavigationMessageView> {
   List<Widget> _buildNavigationItems() {
     List<Widget> items = [];
 
-    for (int i = 0; i < _navigationList.length; i++) {
-      items.add(_buildInfoRow(_navigationList[i]));
+    for (int i = 0; i < _linksList.length; i++) {
+      items.add(_buildInfoRow(_linksList[i]));
 
       // 添加分隔线（最后一个项目不添加）
-      if (i < _navigationList.length - 1) {
+      if (i < _linksList.length - 1) {
         items.add(Divider(
           height: 1,
           thickness: 0.5,
@@ -96,13 +99,14 @@ class _NavigationState extends State<NavigationMessageView> {
     return items;
   }
 // 构建信息行 - 支持多行文本
-  Widget _buildInfoRow(ChatMenuItem scene) {
+  Widget _buildInfoRow(ChatLinkItem scene) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          print("Selected: ${scene.menuTitle}");
-          CSocketIOManager().sendSenseConfig(scene);
+          ///print("Selected: ${scene.menuTitle}");
+          //CSocketIOManager().sendSenseConfig(scene);
+          _launchURL(context, scene.href);
         },
         borderRadius: BorderRadius.circular(8),
         child: Container(
@@ -114,7 +118,7 @@ class _NavigationState extends State<NavigationMessageView> {
             children: [
               Expanded(
                 child: Text(
-                  "${scene.menuTitle}",
+                  "${scene.text}",
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 16,
@@ -131,7 +135,21 @@ class _NavigationState extends State<NavigationMessageView> {
     );
   }
 
+  Future<void> _launchURL(BuildContext context, String url) async {
+    final Uri uri = Uri.parse(url);
 
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        showToast('无法打开链接');
+      }
+    } catch (e) {
+    }
+  }
 
   @override
   void dispose() {

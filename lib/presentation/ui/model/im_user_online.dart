@@ -2,6 +2,7 @@ import 'package:qychatapp/presentation/ui/model/attachment_bean.dart';
 import 'package:qychatapp/presentation/ui/model/welcomeSpeech_bean.dart';
 
 import 'complex_bean.dart';
+import 'im_user_link.dart';
 import 'im_user_menu.dart';
 import 'image_bean.dart';
 
@@ -40,10 +41,14 @@ class ImUserOnlineEvent {
   String? sendName;
   String? location;
   String? scene;
+  String? conversationCode;
+
+
   int? cid;
   int? channel;
   WelcomeSpeechData? welcomeSpeech;
   List<ChatMenuItem>? navigationList;
+  List<ChatLinkItem>? links;
 
   ComplexData? complex;
 
@@ -80,12 +85,12 @@ class ImUserOnlineEvent {
     this.channel,
     this.welcomeSpeech,
     this.navigationList,
-
+    this.links,
     this.id,
     this.source,
     this.value,
     this.target,
-
+    this.conversationCode,
     this.complex,
 
   });
@@ -99,6 +104,10 @@ class ImUserOnlineEvent {
       ip: json['ip'],
       webUrl: json['webUrl'],
       browserTitle: json['browserTitle'],
+
+
+      conversationCode: json['conversationCode'],
+
       channelType: json['channelType'],
       channelId: json['channelId'],
       referrer: json['referrer'],
@@ -129,6 +138,11 @@ class ImUserOnlineEvent {
       navigationList: json['navigationList'] != null ? (json['navigationList'] as List)
           .map((e) => ChatMenuItem.fromJson(e as Map<String, dynamic>))
           .toList() : [],
+
+      links: json['links'] != null ? (json['links'] as List)
+          .map((e) => ChatLinkItem.fromJson(e as Map<String, dynamic>))
+          .toList() : [],
+
       attachment: json['attachment'] != null ? (json['attachment'] as List)
           .map((e) => AttachmentData.fromJson(e as Map<String, dynamic>))
           .toList() : [],
@@ -176,6 +190,10 @@ class ImUserOnlineEvent {
     if (imgs != null) data['imgs'].map((e) => e.toJson()).toList();
     if (attachment != null) data['attachment'].map((e) => e.toJson()).toList();
     if (navigationList != null) data['navigationList'].map((e) => e.toJson()).toList();
+
+    if (links != null) data['links'].map((e) => e.toJson()).toList();
+
+
     if (url != null) data['url'] = url;
     if (sendAvatar != null) data['sendAvatar'] = sendAvatar;
     if (sendName != null) data['sendName'] = sendName;
@@ -189,6 +207,9 @@ class ImUserOnlineEvent {
     if (target != null) data['target'] = target;
     if (welcomeSpeech != null) data['welcomeSpeech'].map((e) => e.toJson());
     if (complex != null) data['complex'].map((e) => e.toJson());
+
+    if (conversationCode != null) data['conversationCode'] = conversationCode;
+
 
     return data;
   }

@@ -116,6 +116,9 @@ extension MessageTypes on MessageType {
 
   bool get  isComplex => this == MessageType.complex;
 
+  bool get isLinks => this == MessageType.links;
+
+
 
 }
 

@@ -35,6 +35,7 @@ import '../values/enumeration.dart';
 import '../values/typedefs.dart';
 import 'file_message_view.dart';
 import 'image_message_view.dart';
+import 'links_message_view.dart';
 import 'text_message_view.dart';
 import 'reaction_widget.dart';
 import 'voice_message_view.dart';
@@ -271,6 +272,17 @@ class _MessageViewState extends State<MessageView>
                   );
                 }else if (widget.message.messageType.isNavigation) {
                   return NavigationMessageView(
+                    //screenWidth: MediaQuery.of(context).size.width,
+                    message: widget.message,
+                    //config: messageConfig?.voiceMessageConfig,
+                    //onMaxDuration: widget.onMaxDuration,
+                    isMessageBySender: widget.isMessageBySender,
+                    //messageReactionConfig: messageConfig?.messageReactionConfig,
+                    //inComingChatBubbleConfig: widget.inComingChatBubbleConfig,
+                    //outgoingChatBubbleConfig: widget.outgoingChatBubbleConfig,
+                  );
+                }else if (widget.message.messageType.isLinks) {
+                  return LinksMessageView(
                     //screenWidth: MediaQuery.of(context).size.width,
                     message: widget.message,
                     //config: messageConfig?.voiceMessageConfig,

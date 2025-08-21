@@ -34,6 +34,7 @@ enum MessageType {
   navigation,
   file,
   complex,
+  links,
 
   video;
 
@@ -54,6 +55,8 @@ enum MessageType {
       return navigation;
     }else if (type == complex.name) {
       return complex;
+    }else if (type == links.name) {
+      return links;
     }
     return null;
   }

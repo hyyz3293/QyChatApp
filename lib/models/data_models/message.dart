@@ -22,6 +22,7 @@
 import 'package:qychatapp/extensions/extensions.dart';
 import 'package:qychatapp/models/data_models/reaction.dart';
 import 'package:qychatapp/models/data_models/reply_message.dart';
+import 'package:qychatapp/presentation/ui/model/im_user_link.dart';
 import 'package:qychatapp/values/enumeration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -62,6 +63,9 @@ class Message {
 
   List<ChatMenuItem>? navigationList;
 
+  List<ChatLinkItem>? links;
+
+
   ComplexData? complex;
 
   Message({
@@ -74,6 +78,8 @@ class Message {
     this.messageType = MessageType.text,
     this.voiceMessageDuration,
     this.navigationList,
+    this.links,
+
     this.complex,
     MessageStatus status = MessageStatus.pending,
   })  : reaction = reaction ?? Reaction(reactions: [], reactedUserIds: []),
@@ -128,6 +134,11 @@ class Message {
     navigationList: json['navigationList'] != null ? (json['navigationList'] as List)
         .map((e) => ChatMenuItem.fromJson(e as Map<String, dynamic>))
         .toList() : [],
+
+    links: json['links'] != null ? (json['links'] as List)
+        .map((e) => ChatLinkItem.fromJson(e as Map<String, dynamic>))
+        .toList() : [],
+
       );
 
   Map<String, dynamic> toJson() => {
@@ -140,7 +151,11 @@ class Message {
         'message_type': messageType.name,
         'voice_message_duration': voiceMessageDuration?.inMicroseconds,
         'status': status.name,
-        'navigationList': navigationList?.map((item) => item.toJson()).toList(), 'complex': complex?.toJson(),
+        'navigationList': navigationList?.map((item) => item.toJson()).toList(),
+    'links': links?.map((item) => item.toJson()).toList(),
+
+
+    'complex': complex?.toJson(),
   };
 
   Message copyWith({
@@ -156,6 +171,8 @@ class Message {
     MessageStatus? status,
     bool forceNullValue = false,
     List<ChatMenuItem>? navigationList,
+    List<ChatLinkItem>? links,
+
     ComplexData? complex,
   }) {
     return Message(
@@ -172,6 +189,7 @@ class Message {
       status: status ?? this.status,
       navigationList: navigationList ?? this.navigationList,
       complex: complex ?? this.complex,
+      links: links ?? this.links,
 
 
     );

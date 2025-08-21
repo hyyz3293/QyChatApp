@@ -377,9 +377,11 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
         children: [
           InkWell(
             onTap: () {
-              print("people");
+              print("people==== ${sence.toJson()}");
               //widget.onTopSelected("people", "");
+
               CSocketIOManager().sendChatConfig(sence);
+
 
             },
             child: Container(

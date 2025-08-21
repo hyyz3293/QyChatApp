@@ -535,6 +535,32 @@ class CSocketIOManager {
           _sendMessage(message);
           printN("welcomeSpeec==== ${msgContent}");
           break;
+
+        case "link":
+          playAudio();
+          //文本
+          msgId = msgBean.messId ?? "";
+          var links = msgBean.links;
+          if (links!.isNotEmpty && links!.length > 0) {
+            // for (int i = 0; i< navigation!.length;i++) {
+            //
+            //   printN("welcomeSpeec==== ${msgContent}");
+            // }
+            var message = Message(
+                createdAt: dateTime,
+                //id: "${msgId}",
+                status: MessageStatus.delivered,
+                message: "${convert.jsonEncode(links)}",
+                sentBy: '${userId}',
+                messageType: MessageType.links,
+                links: links
+              //text: "${msg}",
+              //user: ChatUser(id: '${userId}'),
+              //authorId: '${userId}',
+            );
+            _sendMessage(message);
+          }
+          break;
         case "graphicText":
         case "imClick":
         case "navigation":
@@ -560,6 +586,22 @@ class CSocketIOManager {
           _sendMessage(message);
           break;
         case "media":
+          playAudio();
+
+          var video = '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${msgBean.conversationCode}';
+          var message = Message(
+              createdAt: dateTime,
+              //id: "${msgId}",
+              status: MessageStatus.delivered,
+              message: '${video}',
+              sentBy: '${userId}',
+              messageType: MessageType.video
+            //text: "${msg}",
+            //user: ChatUser(id: '${userId}'),
+            //authorId: '${userId}',
+          );
+          _sendMessage(message);
+          break;
         case "video":
           playAudio();
         //文本
@@ -954,16 +996,10 @@ class CSocketIOManager {
   // 场景配置项
   Future<void> sendChatConfig(SenceConfigModel scene) async {
     printN("场景配置项");
-
     if (scene.id == -1){
       convertToHumanTranslation();
       return;
     }
-
-    //{"msgSendId":962,"msgSendType":2,
-    // "event":"IM-CLICK","type":"notice",
-    // "enumType":"imClick","source":2,"target":1,"id":3,"value":"////"}
-
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var id = sharedPreferences.getInt("channel_id") ?? 0;
     var type = sharedPreferences.getInt("channel_type") ?? 0;
@@ -977,22 +1013,22 @@ class CSocketIOManager {
     bean.enumType = 'imClick';
     bean.msgSendId = cid;
     bean.msgSendType = 2;
-    bean.source = 2;
+    bean.source = 1;
     bean.target = 1;
-    bean.id = "${scene.id}";
-    bean.value = "";
-
+    bean.id = "${scene.sceneid}";
+    bean.value = "${scene.name}";
     String msg = json.encode(bean);
-
-    SocketIMMessage socketIMMessage = SocketIMMessage(
-        toAccid: [accid], event: 'socket-im-communication', msgContent: '${msg}');
-
-    printN("上线；；=accid=  ${accid}");
-
-
-    printN("上线；；==  ${msg}");
-
+    SocketIMMessage socketIMMessage = SocketIMMessage(toAccid: [accid], event: 'socket-im-communication', msgContent: '${msg}');
+    printN("场景配置项  CHat；；=accid=  ${accid}");
+    printN("场景配置项 Chat ；；==  ${msg}");
     _socket!.emit('socket-im-communication', socketIMMessage.toJson());
+    var message = Message(
+      createdAt: DateTime.now(),
+      message: scene.name,
+      sentBy: "$currentUserId",
+    );
+
+    _messagesController2.add(message);
   }
 
 
