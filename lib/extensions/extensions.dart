@@ -111,6 +111,9 @@ extension MessageTypes on MessageType {
   bool get isCustom => this == MessageType.custom;
 
   bool get isVideo => this == MessageType.video;
+
+  bool get isNavigation => this == MessageType.navigation;
+
 }
 
 /// Extension on ConnectionState for checking specific connection.

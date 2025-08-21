@@ -26,6 +26,8 @@ import 'package:qychatapp/values/enumeration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../presentation/ui/model/im_user_menu.dart';
+
 class Message {
   /// Provides id
   final String id;
@@ -57,6 +59,8 @@ class Message {
   /// Provides max duration for recorded voice message.
   Duration? voiceMessageDuration;
 
+  List<ChatMenuItem>? navigationList;
+
   Message({
     this.id = '',
     required this.message,
@@ -66,6 +70,7 @@ class Message {
     Reaction? reaction,
     this.messageType = MessageType.text,
     this.voiceMessageDuration,
+    this.navigationList,
     MessageStatus status = MessageStatus.pending,
   })  : reaction = reaction ?? Reaction(reactions: [], reactedUserIds: []),
         key = GlobalKey(),
@@ -113,6 +118,10 @@ class Message {
         ),
         status: MessageStatus.tryParse(json['status']?.toString()) ??
             MessageStatus.pending,
+
+    navigationList: json['navigationList'] != null ? (json['navigationList'] as List)
+        .map((e) => ChatMenuItem.fromJson(e as Map<String, dynamic>))
+        .toList() : [],
       );
 
   Map<String, dynamic> toJson() => {
@@ -125,7 +134,9 @@ class Message {
         'message_type': messageType.name,
         'voice_message_duration': voiceMessageDuration?.inMicroseconds,
         'status': status.name,
-      };
+        'navigationList': navigationList?.map((item) => item.toJson()).toList(),
+
+  };
 
   Message copyWith({
     String? id,
@@ -139,6 +150,7 @@ class Message {
     Duration? voiceMessageDuration,
     MessageStatus? status,
     bool forceNullValue = false,
+    List<ChatMenuItem>? navigationList
   }) {
     return Message(
       id: id ?? this.id,
@@ -152,6 +164,7 @@ class Message {
       reaction: reaction ?? this.reaction,
       replyMessage: replyMessage ?? this.replyMessage,
       status: status ?? this.status,
+      navigationList: navigationList ?? this.navigationList,
     );
   }
 }

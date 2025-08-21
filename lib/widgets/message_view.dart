@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 import 'package:qychatapp/widgets/chat_view_inherited_widget.dart';
+import 'package:qychatapp/widgets/navigation_message_view.dart';
 import 'package:qychatapp/widgets/video_message_view.dart';
 import 'package:flutter/material.dart';
 
@@ -253,6 +254,17 @@ class _MessageViewState extends State<MessageView>
                     //onMaxDuration: widget.onMaxDuration,
                     isMessageBySender: widget.isMessageBySender,
                     messageReactionConfig: messageConfig?.messageReactionConfig,
+                    //inComingChatBubbleConfig: widget.inComingChatBubbleConfig,
+                    //outgoingChatBubbleConfig: widget.outgoingChatBubbleConfig,
+                  );
+                }else if (widget.message.messageType.isNavigation) {
+                  return NavigationMessageView(
+                    //screenWidth: MediaQuery.of(context).size.width,
+                    message: widget.message,
+                    //config: messageConfig?.voiceMessageConfig,
+                    //onMaxDuration: widget.onMaxDuration,
+                    isMessageBySender: widget.isMessageBySender,
+                    //messageReactionConfig: messageConfig?.messageReactionConfig,
                     //inComingChatBubbleConfig: widget.inComingChatBubbleConfig,
                     //outgoingChatBubbleConfig: widget.outgoingChatBubbleConfig,
                   );

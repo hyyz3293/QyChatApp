@@ -1,24 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:convert' as convert;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:qychatapp/models/data_models/chat_user.dart';
-import 'package:qychatapp/presentation/ui/chart/message_event.dart';
-import 'package:qychatapp/presentation/ui/dash/data.dart';
 import 'package:qychatapp/presentation/utils/global_utils.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:uuid/uuid.dart';
-
 import '../../../models/data_models/message.dart';
 import '../../../models/data_models/reply_message.dart';
 import '../../../values/enumeration.dart';
 import '../../constants/assets.dart';
-import '../../ui/model/api_response.dart';
 import '../../ui/model/each_api_response.dart';
 import '../../ui/model/file_model.dart';
 import '../../ui/model/im_user_online.dart';
-import '../../ui/model/im_user_sense.dart';
 import '../../ui/model/image_bean.dart';
 import '../../ui/model/message_send_model.dart';
 import '../../ui/model/socket_im_message.dart';
@@ -95,10 +91,6 @@ class CSocketIOManager {
   // 获取消息流
   Stream<Message> get updateStream => _updateController.stream;
 
-
-  // 获取用户流
-  //Stream<List<User>> get usersStream => _usersController.stream;
-
   Uuid _uuid = Uuid();
   bool _isPlaying = false;
 
@@ -123,9 +115,7 @@ class CSocketIOManager {
   bool socketConnect() {
     try {
       return  _socket!.connected;
-    }catch(e) {
-
-    }
+    }catch(e) {}
     return false;
   }
 
@@ -229,9 +219,7 @@ class CSocketIOManager {
           'userid': '${userid}',
           'EIO': '3',
           'transport': 'websocket'
-        })
-            .enableForceNew()
-            .build(),
+        }).enableForceNew().build(),
       );
 
       // 注册 Socket.IO 核心事件监听
@@ -472,26 +460,24 @@ class CSocketIOManager {
           msgId = msgBean.messId ?? "";
           var navigation = msgBean.navigationList;
           if (navigation!.isNotEmpty && navigation!.length > 0) {
-            for (int i = 0; i< navigation!.length;i++) {
-              var message = Message(
-                  createdAt: dateTime,
-                  //id: "${msgId}",
-                  status: MessageStatus.delivered,
-                  message: "${navigation[i].menuTitle}",
-                  sentBy: '${userId}',
-
-                //text: "${msg}",
-                //user: ChatUser(id: '${userId}'),
-                //authorId: '${userId}',
-              );
-              _sendMessage(message);
-              printN("welcomeSpeec==== ${msgContent}");
-            }
-
+            // for (int i = 0; i< navigation!.length;i++) {
+            //
+            //   printN("welcomeSpeec==== ${msgContent}");
+            // }
+            var message = Message(
+                createdAt: dateTime,
+                //id: "${msgId}",
+                status: MessageStatus.delivered,
+                message: "${convert.jsonEncode(navigation)}",
+                sentBy: '${userId}',
+                messageType: MessageType.navigation,
+                navigationList: navigation
+              //text: "${msg}",
+              //user: ChatUser(id: '${userId}'),
+              //authorId: '${userId}',
+            );
+            _sendMessage(message);
           }
-          // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
-          // msg = msg!.replaceAll(RegExp(r'</p>'), '');
-
           break;
         case "welcomeSpeech":
           playAudio();
@@ -729,7 +715,7 @@ class CSocketIOManager {
 
     // 6. 解析为 JSON 对象
     try {
-      return jsonDecode(msgContentStr);
+      return convert.jsonDecode(msgContentStr);
     } catch (e) {
       print('解析 JSON 失败: $e');
       return {};

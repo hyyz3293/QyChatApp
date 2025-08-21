@@ -31,9 +31,9 @@ enum MessageType {
   /// Only supported on android and ios
   voice,
   custom,
+  navigation,
   file,
   video;
-
 
   static MessageType? tryParse(String? value) {
     final type = value?.trim().toLowerCase();
@@ -48,6 +48,8 @@ enum MessageType {
       return custom;
     }else if (type == video.name) {
       return video;
+    }else if (type == navigation.name) {
+      return navigation;
     }
     return null;
   }
