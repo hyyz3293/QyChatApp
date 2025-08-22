@@ -6,6 +6,7 @@ import 'package:qychatapp/presentation/ui/chart/message_event.dart';
 import 'package:qychatapp/presentation/ui/chatview/theme.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:qychatapp/presentation/utils/dio/dio_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../controller/chat_controller.dart';
@@ -36,8 +37,10 @@ import '../../../models/data_models/reply_message.dart';
 import '../../../models/data_models/suggestion_item_data.dart';
 import '../../../values/enumeration.dart';
 import '../../../widgets/chat_view.dart';
+import '../../utils/global_utils.dart';
 import '../../utils/service_locator.dart';
 import '../../utils/websocket/chat_socket_manager.dart';
+import '../model/history_messsage_bean.dart';
 import 'chat_data.dart';
 
 class ChatViewScreen extends StatefulWidget {
@@ -68,6 +71,9 @@ class _ChatScreenState extends State<ChatViewScreen> {
     profilePhoto: "${Assets.appImages}headImg6.png",
     imageType: ImageType.asset,
   ),];
+
+  int page = 1;
+  var lastTime =0;
 
   @override
   void initState() {
@@ -117,6 +123,9 @@ class _ChatScreenState extends State<ChatViewScreen> {
     );
 
     loadSound();
+
+    lastTime = DateTime.now().toUtc().millisecondsSinceEpoch;
+
   }
 
   @override
@@ -155,7 +164,25 @@ class _ChatScreenState extends State<ChatViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       //resizeToAvoidBottomInset: true,
-      body: SafeArea(child: ChatView(
+      body: SafeArea(child:
+        RefreshIndicator( // <-- 使用 RefreshIndicator 包裹 ChatView
+        onRefresh: () async {
+          // 这里是你的刷新逻辑，通常是从服务器重新加载消息
+          print("开始刷新");
+          // 模拟一个网络请求延迟
+          loadData();
+          //await Future.delayed(Duration(seconds: 2));
+          // TODO: 替换为你的实际数据刷新逻辑，例如：
+          // await _yourDataRefreshFunction();
+          // 刷新完成后，RefreshIndicator 会自动隐藏
+          setState(() {
+            // 如果刷新逻辑涉及更新状态，可以在这里调用 setState
+          });
+    },
+    color: theme.outgoingChatBubbleColor, // 可选项：设置指示器颜色以匹配主题
+    backgroundColor: theme.backgroundColor, // 可选项：设置背景颜色以匹配主题
+    child:
+      ChatView(
         chatController: _chatController,
         onSendTap: _onSendTap,
         featureActiveConfig: const FeatureActiveConfig(
@@ -394,7 +421,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
               _onSendTap(item.text, const ReplyMessage(), MessageType.text),
         ),
       )),
-    );
+    ));
   }
 
   void _onSendTap(
@@ -458,4 +485,22 @@ class _ChatScreenState extends State<ChatViewScreen> {
       //_currentUserId = '${userId}';
     });
   }
+
+  Future<void> loadData() async {
+    lastTime = DateTime.now().toUtc().millisecondsSinceEpoch;
+
+    var map = await DioClient().getHistoryList(page,lastTime);
+    MessagePageResponse response = MessagePageResponse.fromJson(map);
+    if (response.page!.total! >= 30) {
+      page++;
+    }
+    if (response.page!.records!.isNotEmpty) {
+      for(int i = 0; i < response.page!.records!.length; i++) {
+        printN("history====${response.page!.records![i].toJson()}");
+      }
+    }
+
+
+  }
+
 }

@@ -393,12 +393,15 @@ class DioClient {
   }
 
   // 5、获取历史消息
-  Future<Map<String, dynamic>> getHistoryList(int page,) async {
+  Future<Map<String, dynamic>> getHistoryList(int page, int lastTime) async {
     try {
       Map<String, dynamic> dataMap = {};
       dataMap["page"] = page;
       dataMap["limit"] = 30;
-      dataMap["userid"] = 'a9184b47a17040c2aed2d72703a247b3';
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      var userId = sharedPreferences.getInt("userId") ?? 0;
+      dataMap["time"] = lastTime;
+      dataMap["userid"] = '${userId}';
       //lt/gt小于/大于指定时间戳
       dataMap["compare"] = "lt";
       printN("history---start");
