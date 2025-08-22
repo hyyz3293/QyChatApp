@@ -1,6 +1,5 @@
 import 'package:qychatapp/presentation/ui/model/attachment_bean.dart';
 import 'package:qychatapp/presentation/ui/model/welcomeSpeech_bean.dart';
-
 import 'complex_bean.dart';
 import 'im_user_link.dart';
 import 'im_user_menu.dart';
@@ -25,13 +24,10 @@ class ImUserOnlineEvent {
   String? msg;
   int? msgSendId;
   int? msgSendType;
-
   int? source;
   int? target;
-
   String? id;
   String? value;
-
   String? content;
   String? messId;
   List<ImageData>? imgs;
@@ -42,18 +38,16 @@ class ImUserOnlineEvent {
   String? location;
   String? scene;
   String? conversationCode;
-
-
   int? cid;
   int? channel;
   WelcomeSpeechData? welcomeSpeech;
   List<ChatMenuItem>? navigationList;
   List<ChatLinkItem>? links;
-
   ComplexData? complex;
-
+  String? title;
 
   ImUserOnlineEvent({
+    this.title,
     this.event,
     this.enumType,
     this.type,
@@ -92,22 +86,18 @@ class ImUserOnlineEvent {
     this.target,
     this.conversationCode,
     this.complex,
-
   });
 
-  // 从 JSON 创建对象 - 无强制转换
   factory ImUserOnlineEvent.fromJson(Map<dynamic, dynamic> json) {
     return ImUserOnlineEvent(
       event: json['event'],
+      title: json['title'],
       enumType: json['enumType'],
       type: json['type'],
       ip: json['ip'],
       webUrl: json['webUrl'],
       browserTitle: json['browserTitle'],
-
-
       conversationCode: json['conversationCode'],
-
       channelType: json['channelType'],
       channelId: json['channelId'],
       referrer: json['referrer'],
@@ -119,17 +109,13 @@ class ImUserOnlineEvent {
       msg: json['msg'],
       msgSendId: json['msgSendId'],
       msgSendType: json['msgSendType'],
-
       msgId: json['msgId'],
-
       source: json['source'],
       id: json['id'],
       value: json['value'],
       target: json['target'],
-
       sendAvatar: json['sendAvatar'],
       sendName: json['sendName'],
-
       content: json['content'],
       messId: json['messId'],
       imgs: json['imgs'] != null ? (json['imgs'] as List)
@@ -138,35 +124,25 @@ class ImUserOnlineEvent {
       navigationList: json['navigationList'] != null ? (json['navigationList'] as List)
           .map((e) => ChatMenuItem.fromJson(e as Map<String, dynamic>))
           .toList() : [],
-
       links: json['links'] != null ? (json['links'] as List)
           .map((e) => ChatLinkItem.fromJson(e as Map<String, dynamic>))
           .toList() : [],
-
       attachment: json['attachment'] != null ? (json['attachment'] as List)
           .map((e) => AttachmentData.fromJson(e as Map<String, dynamic>))
           .toList() : [],
       url: json['url'],
       location: json['location'],
-
       scene: json['scene'],
-
       cid: int.tryParse("${json['cid']}"),
-
       channel: json['channel'],
-
-      welcomeSpeech: json['welcomeSpeech'] != null ? WelcomeSpeechData.fromJson(json['welcomeSpeech']) : null,
-
+      welcomeSpeech: json['welcomeSpeech'] != null ?
+      WelcomeSpeechData.fromJson(json['welcomeSpeech']) : null,
       complex: json['complex'] != null ? ComplexData.fromJson(json['complex']) : null,
-
-
     );
   }
 
-  // 将对象转为 JSON - 无默认值填充
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
-    // 仅包含实际存在的值
     if (event != null) data['event'] = event;
     if (enumType != null) data['enumType'] = enumType;
     if (type != null) data['type'] = type;
@@ -190,10 +166,7 @@ class ImUserOnlineEvent {
     if (imgs != null) data['imgs'].map((e) => e.toJson()).toList();
     if (attachment != null) data['attachment'].map((e) => e.toJson()).toList();
     if (navigationList != null) data['navigationList'].map((e) => e.toJson()).toList();
-
     if (links != null) data['links'].map((e) => e.toJson()).toList();
-
-
     if (url != null) data['url'] = url;
     if (sendAvatar != null) data['sendAvatar'] = sendAvatar;
     if (sendName != null) data['sendName'] = sendName;
@@ -207,10 +180,8 @@ class ImUserOnlineEvent {
     if (target != null) data['target'] = target;
     if (welcomeSpeech != null) data['welcomeSpeech'].map((e) => e.toJson());
     if (complex != null) data['complex'].map((e) => e.toJson());
-
     if (conversationCode != null) data['conversationCode'] = conversationCode;
-
-
+    if (title != null) data['title'] = title;
     return data;
   }
 }

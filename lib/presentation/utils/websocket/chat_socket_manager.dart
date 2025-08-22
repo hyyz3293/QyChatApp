@@ -500,20 +500,22 @@ class CSocketIOManager {
             //
             //   printN("welcomeSpeec==== ${msgContent}");
             // }
-            var message = Message(
-                createdAt: dateTime,
-                //id: "${msgId}",
-                status: MessageStatus.delivered,
-                message: "${convert.jsonEncode(navigation)}",
-                sentBy: '${userId}',
-                messageType: MessageType.navigation,
-                navigationList: navigation
-              //text: "${msg}",
-              //user: ChatUser(id: '${userId}'),
-              //authorId: '${userId}',
-            );
-            _sendMessage(message);
+
           }
+          var message = Message(
+              createdAt: dateTime,
+              //id: "${msgId}",
+              status: MessageStatus.delivered,
+              message: "${msgBean.title}",
+              sentBy: '${userId}',
+              messageType: MessageType.navigation,
+              navigationList: navigation!.isNotEmpty ?navigation : []
+            //text: "${msg}",
+            //user: ChatUser(id: '${userId}'),
+            //authorId: '${userId}',
+          );
+          _sendMessage(message);
+
           break;
         case "welcomeSpeech":
           playAudio();
@@ -1013,10 +1015,16 @@ class CSocketIOManager {
     bean.enumType = 'imClick';
     bean.msgSendId = cid;
     bean.msgSendType = 2;
-    bean.source = 1;
-    bean.target = 1;
-    bean.id = "${scene.sceneid}";
-    bean.value = "${scene.name}";
+    if (bean.type == "1") {
+      bean.source = 2;
+      bean.target = 1;
+      bean.id = "${scene.value}";
+    } else {
+      bean.source = 2;
+      bean.target = 1;
+      bean.id = "${scene.value}";
+    }
+    bean.value = scene.name;
     String msg = json.encode(bean);
     SocketIMMessage socketIMMessage = SocketIMMessage(toAccid: [accid], event: 'socket-im-communication', msgContent: '${msg}');
     printN("场景配置项  CHat；；=accid=  ${accid}");

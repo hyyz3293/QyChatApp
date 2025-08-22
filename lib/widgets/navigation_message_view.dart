@@ -68,17 +68,32 @@ class _NavigationState extends State<NavigationMessageView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch, // 让子项填充宽度
             mainAxisSize: MainAxisSize.min,
-            children: _buildNavigationItems(),
+            children:_navigationList.isEmpty ?
+
+            _buildNavigationItems0() : _buildNavigationItems(),
           ),
         )
       ],
     );
   }
 
+  List<Widget> _buildNavigationItems0() {
+    List<Widget> items = [];
+
+    items.add(_buildInfoRow2("${widget.message.message}"));
+
+    return items;
+  }
+
+
   List<Widget> _buildNavigationItems() {
     List<Widget> items = [];
 
     for (int i = 0; i < _navigationList.length; i++) {
+      if (i == 0) {
+        items.add(_buildInfoRow2("${widget.message.message}"));
+      }
+
       items.add(_buildInfoRow(_navigationList[i]));
 
       // 添加分隔线（最后一个项目不添加）
@@ -95,7 +110,8 @@ class _NavigationState extends State<NavigationMessageView> {
 
     return items;
   }
-// 构建信息行 - 支持多行文本
+
+
   Widget _buildInfoRow(ChatMenuItem scene) {
     return Material(
       color: Colors.transparent,
@@ -118,6 +134,40 @@ class _NavigationState extends State<NavigationMessageView> {
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 16,
+                  ),
+                  softWrap: true, // 允许换行
+                  maxLines: 3, // 最大行数限制
+                  overflow: TextOverflow.ellipsis, // 超出部分显示省略号
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildInfoRow2(String scene) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          constraints: BoxConstraints(
+            minHeight: 48, // 最小高度确保触摸区域足够
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  "${scene}",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
                   ),
                   softWrap: true, // 允许换行
                   maxLines: 3, // 最大行数限制
