@@ -491,12 +491,61 @@ class _ChatScreenState extends State<ChatViewScreen> {
 
     var map = await DioClient().getHistoryList(page,lastTime);
     MessagePageResponse response = MessagePageResponse.fromJson(map);
+
+
+
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var evaluationFlag = sharedPreferences.getInt("sharedPreferences");
+    var serviceEvaluateTxt = sharedPreferences.getString("serviceEvaluateTxt");
+
     if (response.page!.total! >= 30) {
       page++;
     }
     if (response.page!.records!.isNotEmpty) {
       for(int i = 0; i < response.page!.records!.length; i++) {
         printN("history====${response.page!.records![i].toJson()}");
+        var dateTime = DateTime.now();
+        printN("_handleSocketIm  enumType= $enumType");
+        var msgBean = response.page!.records![i];
+
+        var messJson = response.page!.records![i].messJson;
+
+        String? enumType = messJson!.enumType;
+        String? type = messJson!.type;
+        int? userId = msgBean.msgSendId ?? 0;
+        String? sendName = msgBean.sendName;
+        String? sendAvatar = msgBean.sendAvatar;
+
+        if (enumType != "") {
+          // 调用提取的方法
+          await CSocketIOManager().handleEnumType(
+              enumType: enumType,
+              dateTime: dateTime,
+              sharedPreferences: sharedPreferences,
+              evaluationFlag: evaluationFlag,
+              serviceEvaluateTxt: serviceEvaluateTxt,
+
+              // -------------------------- 从 msgBean 提取的所有非必传字段 --------------------------
+              type: messJson.type,                  // 消息类型（如 "notice"）
+              msg: messJson.content,                    // 原始消息内容
+              msgId: msgBean.messId,                // 消息ID（msgBean 原有字段）
+              messId: msgBean.messId,              // 消息ID（msgBean 原有字段，与 msgId 区分）
+              msgSendId: msgBean.msgSendId,        // 消息发送者ID
+              serviceId: msgBean.serviceId,        // 服务ID（评价相关）
+              complex: messJson.complex,            // 复杂消息数据（ComplexData 类型）
+              navigationList: messJson.navigationList, // 导航菜单列表（ChatMenuItem 类型）
+              title: messJson.title,                // 导航/消息标题
+              welcomeSpeech: msgBean.welcomeSpeech, // 欢迎语数据（WelcomeSpeechData 类型）
+              links: messJson.links,                // 链接列表（ChatLinkItem 类型）
+              content: messJson.content,            // 文本/媒体内容
+              conversationCode: messJson.conversationCode, // 会话编码（媒体预览用）
+              url: messJson.url,                    // 媒体URL（视频/语音）
+              imgs: messJson.imgs,                  // 图片列表（ImageData 类型）
+              attachment: messJson.attachment,      // 附件列表（AttachmentData 类型）
+              digest: messJson.digest               // 复杂消息摘要
+          );
+        }
       }
     }
   }

@@ -12,15 +12,19 @@ import '../../../models/data_models/message.dart';
 import '../../../models/data_models/reply_message.dart';
 import '../../../values/enumeration.dart';
 import '../../constants/assets.dart';
+import '../../ui/model/attachment_bean.dart';
 import '../../ui/model/channel_config_model.dart';
+import '../../ui/model/complex_bean.dart';
 import '../../ui/model/each_api_response.dart';
 import '../../ui/model/file_model.dart';
+import '../../ui/model/im_user_link.dart';
 import '../../ui/model/im_user_menu.dart';
 import '../../ui/model/im_user_online.dart';
 import '../../ui/model/image_bean.dart';
 import '../../ui/model/message_send_model.dart';
 import '../../ui/model/sence_config_model.dart';
 import '../../ui/model/socket_im_message.dart';
+import '../../ui/model/welcomeSpeech_bean.dart';
 import '../dio/dio_client.dart';
 import '../service_locator.dart';
 
@@ -361,427 +365,578 @@ class CSocketIOManager {
     }
   }
 
-  Future<void> _handleData(Map<String, dynamic> msgContent) async {
-    print("✅ 消息内容: ${msgContent['sendName']}");
-    printN("_handleSocketIm  msgContent= ${msgContent}");
-    var msgBean = ImUserOnlineEvent.fromJson(msgContent);
-    String? enumType = msgBean.enumType;
+  Future<void> handleEnumType({
+    required String? enumType,
+    required DateTime dateTime,
+    required SharedPreferences sharedPreferences,
+    int? evaluationFlag,
+    String? serviceEvaluateTxt,
+    // 以下为从ImUserOnlineEvent拆分出的非必传字段
+    String? type,
+    String? msg,
+    String? msgId,
+    String? messId,
+    int? msgSendId,
+    int? serviceId,
+    ComplexData? complex, // 原msgBean.complex
+    List<ChatMenuItem>? navigationList, // 原msgBean.navigationList
+    String? title, // 原msgBean.title
+    WelcomeSpeechData? welcomeSpeech, // 原msgBean.welcomeSpeech
+    List<ChatLinkItem>? links, // 原msgBean.links
+    String? content, // 原msgBean.content
+    String? conversationCode, // 原msgBean.conversationCode
+    String? url, // 原msgBean.url
+    List<ImageData>? imgs, // 原msgBean.imgs
+    List<AttachmentData>? attachment, // 原msgBean.attachment
+    String? digest, // 原msgBean.digest
+  }) async {
+    // 从参数直接获取，无需再从msgBean获取
+    int? userId = msgSendId ?? 0;
+
+    switch(enumType) {
+      case "imQueueNotice":
+        playAudio();
+        // 使用拆分后的messId字段
+        msgId = messId ?? "";
+        var message = Message(
+          createdAt: dateTime,
+          status: MessageStatus.delivered,
+          message: "开始排队",
+          sentBy: '$userId',
+          messageType: MessageType.overChat,
+        );
+        _sendMessage(message);
+        break;
+
+      case "imInvitationEvaluate":
+      case "imCustomerOverChat":
+        if (evaluationFlag != 0) {
+          playAudio();
+          // 使用拆分后的serviceId字段
+          sharedPreferences.setInt("serviceId", serviceId ?? 0);
+
+          msgId = messId ?? "";
+          var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: "$serviceEvaluateTxt",
+            sentBy: '$userId',
+            messageType: MessageType.overChat,
+          );
+          _sendMessage(message);
+        }
+        break;
+
+      case "imUserOnline":
+        playAudio();
+        sendSenseConfigMsg();
+        break;
+
+      case "imOnlineed":
+        sendSenseConfigMsg();
+        playAudio();
+        break;
+
+      case "imSeatReturnResult":
+        playAudio();
+        var message = Message(
+          createdAt: dateTime,
+          status: MessageStatus.delivered,
+          message: '$msg',
+          sentBy: '$userId',
+        );
+        _sendMessage(message);
+        break;
+
+      case "complex":
+        playAudio();
+        msgId = messId ?? "";
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: "${jsonEncode(complex)}",
+            sentBy: '$userId',
+            messageType: MessageType.complex,
+            complex: complex,
+            digest: '$digest'
+        );
+        _sendMessage(message);
+        break;
+
+      case "navigation":
+        playAudio();
+        msgId = messId ?? "";
+        // 增加空安全判断，避免空指针
+        if (navigationList?.isNotEmpty ?? false) {
+          var message = Message(
+              createdAt: dateTime,
+              status: MessageStatus.delivered,
+              message: "$title",
+              sentBy: '$userId',
+              messageType: MessageType.navigation,
+              navigationList: navigationList
+          );
+          _sendMessage(message);
+        }
+        break;
+
+      case "welcomeSpeech":
+        playAudio();
+        msgId = messId ?? "";
+        // 处理welcomeSpeech可能为null的情况
+        msg = "${welcomeSpeech?.welcomeSpeech ?? ""}";
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: "$msg",
+            sentBy: '$userId'
+        );
+        _sendMessage(message);
+        break;
+
+      case "link":
+        playAudio();
+        msgId = messId ?? "";
+        if (links?.isNotEmpty ?? false) {
+          var message = Message(
+              createdAt: dateTime,
+              status: MessageStatus.delivered,
+              message: "${jsonEncode(links)}",
+              sentBy: '$userId',
+              messageType: MessageType.links,
+              links: links
+          );
+          _sendMessage(message);
+        }
+        break;
+
+      case "graphicText":
+      case "imClick":
+      case "knowGraphicText":
+      case "text":
+        playAudio();
+        msgId = messId ?? "";
+        msg = content; // 使用拆分后的content字段
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: "$msg",
+            sentBy: '$userId'
+        );
+        _sendMessage(message);
+        break;
+
+      case "media":
+        playAudio();
+        var video = '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${conversationCode ?? ""}';
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: '$video',
+            sentBy: '$userId',
+            messageType: MessageType.video
+        );
+        _sendMessage(message);
+        break;
+
+      case "video":
+        playAudio();
+        msgId = messId ?? "";
+        msg = url;
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: '${Endpoints.baseUrl}${url ?? ""}',
+            sentBy: '$userId',
+            messageType: MessageType.video
+        );
+        _sendMessage(message);
+        break;
+
+      case "voice":
+        playAudio();
+        msgId = messId ?? "";
+        msg = url;
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: '${Endpoints.baseUrl}${url ?? ""}',
+            sentBy: '$userId',
+            messageType: MessageType.voice
+        );
+        _sendMessage(message);
+        break;
+
+      case "image":
+      case "img":
+        playAudio();
+        msgId = messId ?? "";
+        msg = content;
+        // 空安全处理
+        if (imgs?.isNotEmpty ?? false) {
+          for(int i = 0; i < imgs!.length; i++) {
+            var message = Message(
+                createdAt: dateTime,
+                messageType: MessageType.image,
+                status: MessageStatus.delivered,
+                message: '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${imgs[i].code}',
+                sentBy: '$userId'
+            );
+            _sendMessage(message);
+          }
+        }
+        break;
+
+      case "attached":
+      case "attachment":
+        playAudio();
+        msgId = messId ?? "";
+        msg = content;
+        if (attachment?.isNotEmpty ?? false) {
+          for(int i = 0; i < attachment!.length; i++) {
+            var url = '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${attachment[i].code}';
+            bool isAudio = isAudioFile(attachment[i].fileName);
+            var message = Message(
+                createdAt: dateTime,
+                messageType: isAudio ? MessageType.voice : MessageType.file,
+                status: MessageStatus.delivered,
+                message: url,
+                sentBy: '$userId'
+            );
+            _sendMessage(message);
+          }
+        }
+        break;
+    }
+  }
+
+
+  // 提取的switch处理方法
+  Future<void> _handleEnumType2({
+    required String? enumType,
+    required ImUserOnlineEvent msgBean,
+    required DateTime dateTime,
+    required SharedPreferences sharedPreferences,
+    required int? evaluationFlag,
+    required String? serviceEvaluateTxt,
+  }) async {
     String? type = msgBean.type;
     String? msg = msgBean.msg;
     String msgId = msgBean.msgId ?? "";
     int? userId = msgBean.msgSendId ?? 0;
+
+    switch(enumType) {
+      case "imQueueNotice":
+        playAudio();
+        //文本
+        msgId = msgBean.messId ?? "";
+        var message = Message(
+          createdAt: dateTime,
+          status: MessageStatus.delivered,
+          message: "开始排队",
+          sentBy: '$userId',
+          messageType: MessageType.overChat,
+        );
+        _sendMessage(message);
+        break;
+
+      case "imInvitationEvaluate":
+      case "imCustomerOverChat":
+        if (evaluationFlag != 0) {
+          playAudio();
+          sharedPreferences.setInt("serviceId", msgBean.serviceId ?? 0);
+
+          //文本
+          msgId = msgBean.messId ?? "";
+          var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: "$serviceEvaluateTxt",
+            sentBy: '$userId',
+            messageType: MessageType.overChat,
+          );
+          _sendMessage(message);
+        }
+        break;
+
+      case "imUserOnline":
+        playAudio();
+        sendSenseConfigMsg();
+        break;
+
+      case "imOnlineed":
+        sendSenseConfigMsg();
+        playAudio();
+        break;
+
+      case "imSeatReturnResult":
+        playAudio();
+        //非在线时间
+        var message = Message(
+          createdAt: dateTime,
+          status: MessageStatus.delivered,
+          message: '$msg',
+          sentBy: '$userId',
+        );
+        _sendMessage(message);
+        break;
+
+      case "complex":
+        playAudio();
+        //文本
+        msgId = msgBean.messId ?? "";
+        var complex = msgBean.complex;
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: "${jsonEncode(complex)}",
+            sentBy: '$userId',
+            messageType: MessageType.complex,
+            complex: complex,
+            digest: '${msgBean.digest}'
+        );
+        _sendMessage(message);
+        break;
+
+      case "navigation":
+        playAudio();
+        //文本
+        msgId = msgBean.messId ?? "";
+        var navigation = msgBean.navigationList;
+        if (navigation!.isNotEmpty) {
+          var message = Message(
+              createdAt: dateTime,
+              status: MessageStatus.delivered,
+              message: "${msgBean.title}",
+              sentBy: '$userId',
+              messageType: MessageType.navigation,
+              navigationList: navigation
+          );
+          _sendMessage(message);
+        }
+        break;
+
+      case "welcomeSpeech":
+        playAudio();
+        //文本
+        msgId = msgBean.messId ?? "";
+        msg = "${msgBean.welcomeSpeech!.welcomeSpeech}";
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: "$msg",
+            sentBy: '$userId'
+        );
+        _sendMessage(message);
+        break;
+
+      case "link":
+        playAudio();
+        //文本
+        msgId = msgBean.messId ?? "";
+        var links = msgBean.links;
+        if (links!.isNotEmpty) {
+          var message = Message(
+              createdAt: dateTime,
+              status: MessageStatus.delivered,
+              message: "${jsonEncode(links)}",
+              sentBy: '$userId',
+              messageType: MessageType.links,
+              links: links
+          );
+          _sendMessage(message);
+        }
+        break;
+
+      case "graphicText":
+      case "imClick":
+      case "knowGraphicText":
+      case "text":
+        playAudio();
+        //文本
+        msgId = msgBean.messId ?? "";
+        msg = msgBean.content;
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: "$msg",
+            sentBy: '$userId'
+        );
+        _sendMessage(message);
+        break;
+
+      case "media":
+        playAudio();
+        var video = '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${msgBean.conversationCode}';
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: '$video',
+            sentBy: '$userId',
+            messageType: MessageType.video
+        );
+        _sendMessage(message);
+        break;
+
+      case "video":
+        playAudio();
+        //文本
+        msgId = msgBean.messId ?? "";
+        msg = msgBean.url;
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: '${Endpoints.baseUrl}$msg',
+            sentBy: '$userId',
+            messageType: MessageType.video
+        );
+        _sendMessage(message);
+        break;
+
+      case "voice":
+        playAudio();
+        //文本
+        msgId = msgBean.messId ?? "";
+        msg = msgBean.url;
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: '${Endpoints.baseUrl}$msg',
+            sentBy: '$userId',
+            messageType: MessageType.voice
+        );
+        _sendMessage(message);
+        break;
+
+      case "image":
+      case "img":
+        playAudio();
+        //图片
+        msgId = msgBean.messId ?? "";
+        msg = msgBean.content;
+        var imgs = msgBean.imgs;
+        if (imgs!.isNotEmpty) {
+          for(int i = 0; i < imgs.length; i++) {
+            var message = Message(
+                createdAt: dateTime,
+                messageType: MessageType.image,
+                status: MessageStatus.delivered,
+                message: '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${imgs[i].code}',
+                sentBy: '$userId'
+            );
+            _sendMessage(message);
+          }
+        }
+        break;
+
+      case "attached":
+      case "attachment":
+        playAudio();
+        msgId = msgBean.messId ?? "";
+        msg = msgBean.content;
+        var attachment = msgBean.attachment;
+        if (attachment!.isNotEmpty) {
+          for(int i = 0; i < attachment.length; i++) {
+            var url = '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${attachment[i].code}';
+            bool isAudio = isAudioFile(attachment[i].fileName);
+            var message = Message(
+                createdAt: dateTime,
+                messageType: isAudio ? MessageType.voice : MessageType.file,
+                status: MessageStatus.delivered,
+                message: url,
+                sentBy: '$userId'
+            );
+            _sendMessage(message);
+          }
+        }
+        break;
+    }
+  }
+
+// 修改后的 _handleData 方法
+  Future<void> _handleData(Map<String, dynamic> msgContent) async {
+    print("✅ 消息内容: ${msgContent['sendName']}");
+    printN("_handleSocketIm  msgContent= $msgContent");
+
+    var msgBean = ImUserOnlineEvent.fromJson(msgContent);
+    String? enumType = msgBean.enumType;
+    String? type = msgBean.type;
+    int? userId = msgBean.msgSendId ?? 0;
     String? sendName = msgBean.sendName;
     String? sendAvatar = msgBean.sendAvatar;
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var evaluationFlag = sharedPreferences.getInt("sharedPreferences");
+    var serviceEvaluateTxt = sharedPreferences.getString("serviceEvaluateTxt");
 
     if (!isFirstImg) {
       isFirstImg = true;
-      var chat =  ChatUser(
-        id: '${userId}',
-        name: '${sendName}',
+      var chat = ChatUser(
+        id: '$userId',
+        name: '$sendName',
         profilePhoto: "${Assets.appImages}headImg6.png",
         imageType: ImageType.asset,
       );
       getIt<EventBus>().fire(chat);
     }
 
-
     if (!isSendImg && sendName != "" && sendAvatar != "") {
       isSendImg = true;
-     var chat =  ChatUser(
-       id: '${userId}',
-       name: '${sendName}',
-       profilePhoto: "${Endpoints.baseUrl}${sendAvatar}",
-       imageType: ImageType.network,
-     );
+      var chat = ChatUser(
+        id: '$userId',
+        name: '$sendName',
+        profilePhoto: "${Endpoints.baseUrl}$sendAvatar",
+        imageType: ImageType.network,
+      );
       getIt<EventBus>().fire(chat);
     }
 
     var dateTime = DateTime.now();
-    printN("_handleSocketIm  enumType= ${enumType}");
+    printN("_handleSocketIm  enumType= $enumType");
+
     if (enumType != "") {
-      var evaluationFlag = sharedPreferences.getInt("sharedPreferences");
-      var serviceEvaluateTxt = sharedPreferences.getString("serviceEvaluateTxt");
-      // //文本
-      msgId = msgBean.messId ?? "";
-      var message = Message(
-        createdAt: dateTime,
-        status: MessageStatus.delivered,
-        message: "${serviceEvaluateTxt}",
-        sentBy: '$userId',
-        messageType: MessageType.overChat,
+      // 调用提取的方法
+      await handleEnumType(
+          enumType: enumType,
+          dateTime: dateTime,
+          sharedPreferences: sharedPreferences,
+          evaluationFlag: evaluationFlag,
+          serviceEvaluateTxt: serviceEvaluateTxt,
+
+          // -------------------------- 从 msgBean 提取的所有非必传字段 --------------------------
+          type: msgBean.type,                  // 消息类型（如 "notice"）
+          msg: msgBean.msg,                    // 原始消息内容
+          msgId: msgBean.msgId,                // 消息ID（msgBean 原有字段）
+          messId: msgBean.messId,              // 消息ID（msgBean 原有字段，与 msgId 区分）
+          msgSendId: msgBean.msgSendId,        // 消息发送者ID
+          serviceId: msgBean.serviceId,        // 服务ID（评价相关）
+          complex: msgBean.complex,            // 复杂消息数据（ComplexData 类型）
+          navigationList: msgBean.navigationList, // 导航菜单列表（ChatMenuItem 类型）
+          title: msgBean.title,                // 导航/消息标题
+          welcomeSpeech: msgBean.welcomeSpeech, // 欢迎语数据（WelcomeSpeechData 类型）
+          links: msgBean.links,                // 链接列表（ChatLinkItem 类型）
+          content: msgBean.content,            // 文本/媒体内容
+          conversationCode: msgBean.conversationCode, // 会话编码（媒体预览用）
+          url: msgBean.url,                    // 媒体URL（视频/语音）
+          imgs: msgBean.imgs,                  // 图片列表（ImageData 类型）
+          attachment: msgBean.attachment,      // 附件列表（AttachmentData 类型）
+          digest: msgBean.digest               // 复杂消息摘要
       );
-      _sendMessage(message);
-
-      switch(enumType) {
-
-        case "imQueueNotice":
-        playAudio();
-        //文本
-        msgId = msgBean.messId ?? "";
-        var message = Message(
-        createdAt: dateTime,
-        status: MessageStatus.delivered,
-        message: "开始排队",
-        sentBy: '$userId',
-        messageType: MessageType.overChat,
-        );
-        _sendMessage(message);
-        break;
-        case "imInvitationEvaluate":
-        case "imCustomerOverChat":
-
-          if (evaluationFlag != 0) {
-            playAudio();
-
-            sharedPreferences.setInt("serviceId", msgBean.serviceId ?? 0);
-
-            //文本
-            msgId = msgBean.messId ?? "";
-            var message = Message(
-              createdAt: dateTime,
-              status: MessageStatus.delivered,
-              message: "${serviceEvaluateTxt}",
-              sentBy: '$userId',
-              messageType: MessageType.overChat,
-            );
-            _sendMessage(message);
-          }
-
-          break;
-        case "imUserOnline":
-          playAudio();
-          // //文本
-          // msgId = msgBean.messId ?? "";
-          // msg = "您好！有什么能帮助您的吗?";
-          // // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
-          // // msg = msg!.replaceAll(RegExp(r'</p>'), '');
-          // var message = Message(
-          //     createdAt: dateTime,
-          //     //id: "${msgId}",
-          //     status: MessageStatus.delivered,
-          //     message: "${msg}",
-          //     sentBy: '${userId}'
-          //   //text: "${msg}",
-          //   //user: ChatUser(id: '${userId}'),
-          //   //authorId: '${userId}',
-          // );
-          // if (!isWelcome) {
-          //   isWelcome = true;
-          //   _sendMessage(message);
-          // }
-          sendSenseConfigMsg();
-          break;
-        case "imOnlineed":
-        //收到回复 自动进入转人工窗口
-          //convertToHumanTranslation();
-          // msgId = msgBean.messId ?? "";
-          // msg = "您好！有什么能帮助您的吗?";
-          // // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
-          // // msg = msg!.replaceAll(RegExp(r'</p>'), '');
-          // var message = Message(
-          //     createdAt: dateTime,
-          //     //id: "${msgId}",
-          //     status: MessageStatus.delivered,
-          //     message: "${msg}",
-          //     sentBy: '${userId}'
-          //   //text: "${msg}",
-          //   //user: ChatUser(id: '${userId}'),
-          //   //authorId: '${userId}',
-          // );
-          // if (!isWelcome) {
-          //   isWelcome = true;
-          //   _sendMessage(message);
-          // }
-          sendSenseConfigMsg();
-          playAudio();
-          break;
-        case "imSeatReturnResult":
-          playAudio();
-          //非在线时间
-          var message = Message(
-            createdAt: dateTime,
-            //id: "${msgId}",
-            status: MessageStatus.delivered,
-            message: '${msg}',
-            sentBy: '${userId}',
-            //text: "${msg}",
-            //authorId: '${userId}',
-            //user: ChatUser(id: '${userId}'),
-          );
-          _sendMessage(message);
-          break;
-
-        case "complex":
-          playAudio();
-          //文本
-          msgId = msgBean.messId ?? "";
-          var complex = msgBean.complex;
-          var message = Message(
-              createdAt: dateTime,
-              status: MessageStatus.delivered,
-              message: "${convert.jsonEncode(complex)}",
-              sentBy: '${userId}',
-              messageType: MessageType.complex,
-              complex: complex,
-              digest: '${msgBean.digest}'
-          );
-          _sendMessage(message);
-          break;
-
-        case "navigation":
-          playAudio();
-          //文本
-          msgId = msgBean.messId ?? "";
-          var navigation = msgBean.navigationList;
-          if (navigation!.isNotEmpty && navigation!.length > 0) {
-            // for (int i = 0; i< navigation!.length;i++) {
-            //
-            //   printN("welcomeSpeec==== ${msgContent}");
-            // }
-
-          }
-          var message = Message(
-              createdAt: dateTime,
-              //id: "${msgId}",
-              status: MessageStatus.delivered,
-              message: "${msgBean.title}",
-              sentBy: '${userId}',
-              messageType: MessageType.navigation,
-              navigationList: navigation!.isNotEmpty ?navigation : []
-            //text: "${msg}",
-            //user: ChatUser(id: '${userId}'),
-            //authorId: '${userId}',
-          );
-          _sendMessage(message);
-
-          break;
-        case "welcomeSpeech":
-          playAudio();
-          //文本
-          msgId = msgBean.messId ?? "";
-          msg = "${msgBean.welcomeSpeech!.welcomeSpeech}";
-          // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
-          // msg = msg!.replaceAll(RegExp(r'</p>'), '');
-          var message = Message(
-              createdAt: dateTime,
-              //id: "${msgId}",
-              status: MessageStatus.delivered,
-              message: "${msg}",
-              sentBy: '${userId}'
-            //text: "${msg}",
-            //user: ChatUser(id: '${userId}'),
-            //authorId: '${userId}',
-          );
-          _sendMessage(message);
-          printN("welcomeSpeec==== ${msgContent}");
-          break;
-
-        case "link":
-          playAudio();
-          //文本
-          msgId = msgBean.messId ?? "";
-          var links = msgBean.links;
-          if (links!.isNotEmpty && links!.length > 0) {
-            // for (int i = 0; i< navigation!.length;i++) {
-            //
-            //   printN("welcomeSpeec==== ${msgContent}");
-            // }
-            var message = Message(
-                createdAt: dateTime,
-                //id: "${msgId}",
-                status: MessageStatus.delivered,
-                message: "${convert.jsonEncode(links)}",
-                sentBy: '${userId}',
-                messageType: MessageType.links,
-                links: links
-              //text: "${msg}",
-              //user: ChatUser(id: '${userId}'),
-              //authorId: '${userId}',
-            );
-            _sendMessage(message);
-          }
-          break;
-        case "graphicText":
-        case "imClick":
-        case "navigation":
-        case "knowGraphicText":
-        case "navigation":
-        case "text":
-          playAudio();
-          //文本
-          msgId = msgBean.messId ?? "";
-          msg = msgBean.content;
-          // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
-          // msg = msg!.replaceAll(RegExp(r'</p>'), '');
-          var message = Message(
-            createdAt: dateTime,
-            //id: "${msgId}",
-            status: MessageStatus.delivered,
-            message: "${msg}",
-            sentBy: '${userId}'
-            //text: "${msg}",
-            //user: ChatUser(id: '${userId}'),
-            //authorId: '${userId}',
-          );
-          _sendMessage(message);
-          break;
-        case "media":
-          playAudio();
-
-          var video = '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${msgBean.conversationCode}';
-          var message = Message(
-              createdAt: dateTime,
-              //id: "${msgId}",
-              status: MessageStatus.delivered,
-              message: '${video}',
-              sentBy: '${userId}',
-              messageType: MessageType.video
-            //text: "${msg}",
-            //user: ChatUser(id: '${userId}'),
-            //authorId: '${userId}',
-          );
-          _sendMessage(message);
-          break;
-        case "video":
-          playAudio();
-        //文本
-          msgId = msgBean.messId ?? "";
-          msg = msgBean.url;
-          // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
-          // msg = msg!.replaceAll(RegExp(r'</p>'), '');
-          var message = Message(
-              createdAt: dateTime,
-              //id: "${msgId}",
-              status: MessageStatus.delivered,
-              message: '${Endpoints.baseUrl}${msg}',
-              sentBy: '${userId}',
-              messageType: MessageType.video
-            //text: "${msg}",
-            //user: ChatUser(id: '${userId}'),
-            //authorId: '${userId}',
-          );
-          _sendMessage(message);
-          break;
-        case "voice":
-          playAudio();
-          //文本
-          msgId = msgBean.messId ?? "";
-          msg = msgBean.url;
-          // msg = msg!.replaceAll(RegExp(r'<p[^>]*>'), '\n');
-          // msg = msg!.replaceAll(RegExp(r'</p>'), '');
-          var message = Message(
-              createdAt: dateTime,
-              //id: "${msgId}",
-              status: MessageStatus.delivered,
-              message: '${Endpoints.baseUrl}${msg}',
-              sentBy: '${userId}',
-              messageType: MessageType.voice
-            //text: "${msg}",
-            //user: ChatUser(id: '${userId}'),
-            //authorId: '${userId}',
-          );
-          _sendMessage(message);
-          break;
-        case "image":
-        case "img":
-          playAudio();
-        //图片
-          msgId = msgBean.messId ?? "";
-          msg = msgBean.content;
-          var imgs = msgBean.imgs;
-          if (imgs!.length > 0) {
-            //List<ChatMedia> medias = [];
-            for(int i = 0; i < imgs.length; i++) {
-              // medias.add(ChatMedia(
-              //   url: '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${imgs[i].code}',
-              //   type: MediaType.image,
-              //   fileName: '',
-              //   isUploading: false,
-              // ));
-              var message = Message(
-                //medias: medias,
-                  createdAt: dateTime,
-                  //id: "${msgId}",
-                  messageType: MessageType.image,
-                  status: MessageStatus.delivered,
-                  //authorId: '${userId}',
-                  //source: '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${imgs[i].code}'
-                  //user: ChatUser(id: '${userId}'),
-                  message: '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${imgs[i].code}',
-                  sentBy: '${userId}'
-              );
-              _sendMessage(message);
-            }
-
-            // var message = Message(
-            //   //medias: medias,
-            //   createdAt: dateTime,
-            //   //id: "${msgId}",
-            //     messageType: MessageType.image,
-            //   status: MessageStatus.delivered,
-            //   //authorId: '${userId}',
-            //   //source: '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${imgs[i].code}'
-            //   //user: ChatUser(id: '${userId}'),
-            //   message: '',
-            //   sentBy: '${userId}'
-            // );
-            // _sendMessage(message);
-          }
-          break;
-          //文件
-        case "attached":
-        case "attachment":
-          playAudio();
-          print(" attachment---->>>>");
-          msgId = msgBean.messId ?? "";
-          msg = msgBean.content;
-          var attachment = msgBean.attachment;
-          if (attachment!.length > 0) {
-            for(int i = 0; i < attachment.length; i++) {
-              var url = '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${attachment[i].code}';
-
-              print(" attachment---->>>> ur l ==== ${url}");
-
-              bool isAudio = isAudioFile(attachment[i].fileName);
-              var message = Message(
-                  createdAt: dateTime,
-                  messageType: isAudio ? MessageType.voice : MessageType.file,
-                  status: MessageStatus.delivered,
-                  message: url,
-                  sentBy: '${userId}'
-              );
-              _sendMessage(message);
-            }
-          }
-
-          break;
-      }
     } else if (type != "") {
-
-
-
       switch(type) {
         case "msg":
           playAudio();
           var message = Message(
             createdAt: dateTime,
-            //id: "${msgId}",
             status: MessageStatus.delivered,
-            // text: "${msg}",
-            // //authorId: '${userId}',
-            // user: ChatUser(id: '${userId}'),
-            message: "${msg}", sentBy: '${userId}',
+            message: "${msgBean.msg}",
+            sentBy: '$userId',
           );
-
           _sendMessage(message);
-
           break;
       }
     }
-    }
-
+  }
   bool isAudioFile(String fileName) {
     const audioExtensions = {
       'mp3', 'wav', 'aac', 'ogg', 'flac',

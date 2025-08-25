@@ -1,5 +1,13 @@
 import 'dart:convert';
 
+import 'package:qychatapp/presentation/ui/model/welcomeSpeech_bean.dart';
+
+import 'attachment_bean.dart';
+import 'complex_bean.dart';
+import 'im_user_link.dart';
+import 'im_user_menu.dart';
+import 'image_bean.dart';
+
 class MessagePageResponse {
   String? msg;
   int? code;
@@ -239,6 +247,51 @@ class MessJson {
   String? to;
   String? type;
 
+
+  String? event;
+  //String? enumType;
+  //String? type;
+  String? ip;
+  String? webUrl;
+  String? browserTitle;
+  int? channelType;
+  int? channelId;
+  String? referrer;
+  String? key;
+  String? landing;
+  String? channelName;
+  String? browser;
+  String? engine;
+  String? terminal;
+  String? msgId;
+  String? msg;
+  //int? msgSendId;
+  //int? msgSendType;
+  int? source;
+  int? target;
+  String? id;
+  String? value;
+  //String? content;
+  //String? messId;
+  List<ImageData>? imgs;
+  List<AttachmentData>? attachment;
+  String? url;
+  //String? sendAvatar;
+  //String? sendName;
+  String? location;
+  String? scene;
+  //String? conversationCode;
+  int? cid;
+  int? channel;
+  WelcomeSpeechData? welcomeSpeech;
+  List<ChatMenuItem>? navigationList;
+  List<ChatLinkItem>? links;
+  ComplexData? complex;
+  String? title;
+  String? digest;
+
+  int? serviceId;
+
   MessJson({
     this.content,
     this.conversationCode,
@@ -253,6 +306,48 @@ class MessJson {
     this.time,
     this.to,
     this.type,
+    this.key,
+    this.serviceId,
+    this.title,
+    this.event,
+    //this.enumType,
+    //this.type,
+    this.ip,
+    this.webUrl,
+    this.browserTitle,
+    this.channelType,
+    this.channelId,
+    this.referrer,
+    this.landing,
+    this.channelName,
+    this.browser,
+    this.engine,
+    this.terminal,
+    this.msg,
+    //this.msgSendId,
+    //this.msgSendType,
+    this.msgId,
+    //this.content,
+    this.digest,
+    //this.messId,
+    this.imgs,
+    this.attachment,
+    this.url,
+    //t/his.sendAvatar,
+    //this.sendName,
+    this.location,
+    this.scene,
+    this.cid,
+    this.channel,
+    this.welcomeSpeech,
+    this.navigationList,
+    this.links,
+    this.id,
+    this.source,
+    this.value,
+    this.target,
+    //this.conversationCode,
+    this.complex,
   });
 
   factory MessJson.fromJson(Map<String, dynamic> json) {
@@ -270,6 +365,59 @@ class MessJson {
       time: json['time'],
       to: json['to'],
       type: json['type'],
+
+      digest: json['digest'],
+
+      key: json['key'],
+      serviceId: json['serviceId'],
+      event: json['event'],
+      title: json['title'],
+      //enumType: json['enumType'],
+      //type: json['type'],
+      ip: json['ip'],
+      webUrl: json['webUrl'],
+      browserTitle: json['browserTitle'],
+      ///conversationCode: json['conversationCode'],
+      channelType: json['channelType'],
+      channelId: json['channelId'],
+      referrer: json['referrer'],
+      landing: json['landing'],
+      channelName: json['channelName'],
+      browser: json['browser'],
+      engine: json['engine'],
+      terminal: json['terminal'],
+      msg: json['msg'],
+      //msgSendId: json['msgSendId'],
+      //msgSendType: json['msgSendType'],
+      msgId: json['msgId'],
+      source: json['source'],
+      id: json['id'],
+      value: json['value'],
+      target: json['target'],
+      //sendAvatar: json['sendAvatar'],
+      //sendName: json['sendName'],
+      //content: json['content'],
+      //messId: json['messId'],
+      imgs: json['imgs'] != null ? (json['imgs'] as List)
+          .map((e) => ImageData.fromJson(e as Map<String, dynamic>))
+          .toList() : [],
+      navigationList: json['navigationList'] != null ? (json['navigationList'] as List)
+          .map((e) => ChatMenuItem.fromJson(e as Map<String, dynamic>))
+          .toList() : [],
+      links: json['links'] != null ? (json['links'] as List)
+          .map((e) => ChatLinkItem.fromJson(e as Map<String, dynamic>))
+          .toList() : [],
+      attachment: json['attachment'] != null ? (json['attachment'] as List)
+          .map((e) => AttachmentData.fromJson(e as Map<String, dynamic>))
+          .toList() : [],
+      url: json['url'],
+      location: json['location'],
+      scene: json['scene'],
+      cid: int.tryParse("${json['cid']}"),
+      channel: json['channel'],
+      welcomeSpeech: json['welcomeSpeech'] != null ?
+      WelcomeSpeechData.fromJson(json['welcomeSpeech']) : null,
+      complex: json['complex'] != null ? ComplexData.fromJson(json['complex']) : null,
     );
   }
 
@@ -288,6 +436,9 @@ class MessJson {
       'time': time,
       'to': to,
       'type': type,
+      
+
+
     };
   }
 }
