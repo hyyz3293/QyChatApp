@@ -499,8 +499,6 @@ class _ChatScreenState extends State<ChatViewScreen> {
         printN("history====${response.page!.records![i].toJson()}");
       }
     }
-
-
   }
 
 }

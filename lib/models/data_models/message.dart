@@ -65,7 +65,7 @@ class Message {
 
   List<ChatLinkItem>? links;
 
-
+  String? digest;
   ComplexData? complex;
 
   Message({
@@ -79,7 +79,7 @@ class Message {
     this.voiceMessageDuration,
     this.navigationList,
     this.links,
-
+    this.digest,
     this.complex,
     MessageStatus status = MessageStatus.pending,
   })  : reaction = reaction ?? Reaction(reactions: [], reactedUserIds: []),
@@ -110,6 +110,7 @@ class Message {
 
   factory Message.fromJson(Map<String, dynamic> json) => Message(
         id: json['id']?.toString() ?? '',
+    digest:  json['digest']?.toString() ?? '',
         message: json['message']?.toString() ?? '',
         createdAt:
             DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now(),
@@ -143,6 +144,7 @@ class Message {
 
   Map<String, dynamic> toJson() => {
         'id': id,
+    'digest': digest,
         'message': message,
         'createdAt': createdAt.toIso8601String(),
         'sentBy': sentBy,
@@ -160,6 +162,7 @@ class Message {
 
   Message copyWith({
     String? id,
+    String? digest,
     GlobalKey? key,
     String? message,
     DateTime? createdAt,
@@ -190,7 +193,7 @@ class Message {
       navigationList: navigationList ?? this.navigationList,
       complex: complex ?? this.complex,
       links: links ?? this.links,
-
+      digest: digest ?? this.digest,
 
     );
   }

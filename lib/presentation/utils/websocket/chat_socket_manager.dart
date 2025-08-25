@@ -12,6 +12,7 @@ import '../../../models/data_models/message.dart';
 import '../../../models/data_models/reply_message.dart';
 import '../../../values/enumeration.dart';
 import '../../constants/assets.dart';
+import '../../ui/model/channel_config_model.dart';
 import '../../ui/model/each_api_response.dart';
 import '../../ui/model/file_model.dart';
 import '../../ui/model/im_user_menu.dart';
@@ -402,7 +403,7 @@ class CSocketIOManager {
     if (enumType != "") {
       var evaluationFlag = sharedPreferences.getInt("sharedPreferences");
       var serviceEvaluateTxt = sharedPreferences.getString("serviceEvaluateTxt");
-      //文本
+      // //文本
       msgId = msgBean.messId ?? "";
       var message = Message(
         createdAt: dateTime,
@@ -428,10 +429,14 @@ class CSocketIOManager {
         );
         _sendMessage(message);
         break;
+        case "imInvitationEvaluate":
         case "imCustomerOverChat":
 
           if (evaluationFlag != 0) {
             playAudio();
+
+            sharedPreferences.setInt("serviceId", msgBean.serviceId ?? 0);
+
             //文本
             msgId = msgBean.messId ?? "";
             var message = Message(
@@ -515,15 +520,12 @@ class CSocketIOManager {
           var complex = msgBean.complex;
           var message = Message(
               createdAt: dateTime,
-              //id: "${msgId}",
               status: MessageStatus.delivered,
               message: "${convert.jsonEncode(complex)}",
               sentBy: '${userId}',
               messageType: MessageType.complex,
-              complex: complex
-            //text: "${msg}",
-            //user: ChatUser(id: '${userId}'),
-            //authorId: '${userId}',
+              complex: complex,
+              digest: '${msgBean.digest}'
           );
           _sendMessage(message);
           break;
@@ -1032,6 +1034,70 @@ class CSocketIOManager {
     _messagesController2.add(message);
 
   }
+
+
+  Future<void> sendPress(ImEvaluationDefine item) async {
+    printN("满意度////");
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var id = sharedPreferences.getInt("channel_id") ?? 0;
+    var type = sharedPreferences.getInt("channel_type") ?? 0;
+    var name = sharedPreferences.getString("channel_name") ?? "";
+    var accid = sharedPreferences.getString("accid") ?? "";
+    var channelCode = sharedPreferences.getString("channel_code");
+    var cid = sharedPreferences.getInt("cid") ?? 0;
+    var userId = sharedPreferences.getInt("userId") ?? 0;
+    var serviceId = sharedPreferences.getInt("serviceId") ?? 0;
+
+    // {"msgSendId":1085,
+    // "msgSendType":2,
+    // "event":"IM-EVALUATE",
+    // "key":"1",
+    // "value":"满意",
+    // "serviceId":"1734",
+    // "enumType":"evaluate",
+    // "type":"notice"}
+    // key对应pressKey
+    // value对应pressValue
+    // serviceId对应服务id
+
+    var bean = ImUserOnlineEvent();
+    bean.event = "IM-EVALUATE";
+    bean.type = 'notice';
+    bean.enumType = 'evaluate';
+    bean.msgSendId = cid;
+    bean.msgSendType = 2;
+    bean.key = item.pressKey;
+    bean.value = item.pressValue;
+    bean.serviceId = serviceId;
+
+
+    String msg = json.encode(bean);
+
+    SocketIMMessage socketIMMessage = SocketIMMessage(
+        toAccid: [accid], event: 'socket-im-communication', msgContent: '${msg}');
+
+    printN("上线；；=accid=  ${accid}");
+
+
+    printN("上线；；==  ${msg}");
+
+    _socket!.emit('socket-im-communication', socketIMMessage.toJson());
+
+    var message = Message(
+      createdAt: DateTime.now(),
+      //id: msgId,
+      //status: MessageStatus.sending,
+      message: '${item.pressValue}',
+      sentBy: "$currentUserId",
+      //authorId: '${userId}',
+      //user:ChatUser(id: '${userId}', lastName: "${userId}", firstName: "${userId}"),
+    );
+
+    _messagesController2.add(message);
+
+  }
+
 
   // 场景配置项
   Future<void> sendChatConfig(SenceConfigModel scene) async {

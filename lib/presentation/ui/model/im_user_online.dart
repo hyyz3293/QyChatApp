@@ -15,6 +15,7 @@ class ImUserOnlineEvent {
   int? channelType;
   int? channelId;
   String? referrer;
+  String? key;
   String? landing;
   String? channelName;
   String? browser;
@@ -45,8 +46,13 @@ class ImUserOnlineEvent {
   List<ChatLinkItem>? links;
   ComplexData? complex;
   String? title;
+  String? digest;
+
+  int? serviceId;
 
   ImUserOnlineEvent({
+    this.key,
+    this.serviceId,
     this.title,
     this.event,
     this.enumType,
@@ -67,6 +73,7 @@ class ImUserOnlineEvent {
     this.msgSendType,
     this.msgId,
     this.content,
+    this.digest,
     this.messId,
     this.imgs,
     this.attachment,
@@ -90,6 +97,10 @@ class ImUserOnlineEvent {
 
   factory ImUserOnlineEvent.fromJson(Map<dynamic, dynamic> json) {
     return ImUserOnlineEvent(
+      digest: json['digest'],
+
+      key: json['key'],
+      serviceId: json['serviceId'],
       event: json['event'],
       title: json['title'],
       enumType: json['enumType'],
@@ -143,6 +154,10 @@ class ImUserOnlineEvent {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
+    if (digest != null) data['digest'] = digest;
+
+    if (key != null) data['key'] = key;
+    if (serviceId != null) data['serviceId'] = serviceId;
     if (event != null) data['event'] = event;
     if (enumType != null) data['enumType'] = enumType;
     if (type != null) data['type'] = type;

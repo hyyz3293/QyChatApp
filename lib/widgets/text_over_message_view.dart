@@ -1,8 +1,13 @@
+import 'dart:convert' as convert;
+
 import 'package:flutter/material.dart';
 import 'package:qychatapp/extensions/extensions.dart';
 import 'package:qychatapp/models/models.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:qychatapp/presentation/ui/chart/press_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../presentation/ui/model/channel_config_model.dart';
 import '../utils/constants/constants.dart';
 import 'link_preview.dart';
 import 'reaction_widget.dart';
@@ -70,7 +75,10 @@ class TextOverMessageView extends StatelessWidget {
           )
               : GestureDetector(
             onTap: () {
-              _showDialog(context);
+              //_showDialog(context);
+
+              showDialogPress(context);
+
             },
             child: _buildTextContent(textTheme, textMessage, richText),
           ),
@@ -85,6 +93,39 @@ class TextOverMessageView extends StatelessWidget {
       ],
     );
   }
+
+  Future<void> showDialogPress(BuildContext context) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    String test = await sharedPreferences.getString("imEvaluationDefineList") ?? "";
+     var testMap = convert.jsonDecode(test);
+    final List<dynamic> sceneJson2 = testMap;
+    List<ImEvaluationDefine> satisfactionOptions = sceneJson2
+        .map((item) => ImEvaluationDefine.fromJson(item))
+        .toList();
+
+    // 显示对话框并等待用户选择
+    final selectedItem = await showDialog<ImEvaluationDefine>(
+      context: context,
+      builder: (BuildContext context) {
+        return EvaluationSelectorDialog(
+          options: satisfactionOptions,
+          title: "请选择满意度",
+        );
+      },
+    );
+
+    if (selectedItem != null) {
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('您选择了: ${selectedItem.pressValue} (ID: ${selectedItem.id})')),
+      // );
+      print('完整对象: $selectedItem');
+
+
+
+    }
+  }
+
 
   // 构建文本内容（支持富文本或普通文本）
   Widget _buildTextContent(TextTheme textTheme, String textMessage, InlineSpan? richText) {
@@ -213,87 +254,6 @@ class TextOverMessageView extends StatelessWidget {
   }
 
 
-  // 解析简单富文本标记
-  Widget _parseSimpleRichText(String text, TextStyle defaultStyle) {
-    final spans = <TextSpan>[];
-    final buffer = StringBuffer();
-    bool isBold = false;
-    bool isItalic = false;
-    bool isCode = false;
-
-    for (int i = 0; i < text.length; i++) {
-      final char = text[i];
-
-      // 处理粗体标记
-      if (char == '*' && i + 1 < text.length && text[i + 1] == '*') {
-        if (buffer.isNotEmpty) {
-          spans.add(TextSpan(
-            text: buffer.toString(),
-            style: _getCurrentStyle(defaultStyle, isBold, isItalic, isCode),
-          ));
-          buffer.clear();
-        }
-        isBold = !isBold;
-        i++; // 跳过下一个星号
-        continue;
-      }
-
-      // 处理斜体标记
-      if (char == '*') {
-        if (buffer.isNotEmpty) {
-          spans.add(TextSpan(
-            text: buffer.toString(),
-            style: _getCurrentStyle(defaultStyle, isBold, isItalic, isCode),
-          ));
-          buffer.clear();
-        }
-        isItalic = !isItalic;
-        continue;
-      }
-
-      // 处理代码标记
-      if (char == '`') {
-        if (buffer.isNotEmpty) {
-          spans.add(TextSpan(
-            text: buffer.toString(),
-            style: _getCurrentStyle(defaultStyle, isBold, isItalic, isCode),
-          ));
-          buffer.clear();
-        }
-        isCode = !isCode;
-        continue;
-      }
-
-      buffer.write(char);
-    }
-
-    // 添加剩余文本
-    if (buffer.isNotEmpty) {
-      spans.add(TextSpan(
-        text: buffer.toString(),
-        style: _getCurrentStyle(defaultStyle, isBold, isItalic, isCode),
-      ));
-    }
-
-    return RichText(
-      text: TextSpan(children: spans),
-    );
-  }
-
-  // 获取当前文本样式
-  TextStyle _getCurrentStyle(
-      TextStyle baseStyle,
-      bool isBold,
-      bool isItalic,
-      bool isCode,
-      ) {
-    return baseStyle.copyWith(
-      fontWeight: isBold ? FontWeight.bold : baseStyle.fontWeight,
-      fontStyle: isItalic ? FontStyle.italic : baseStyle.fontStyle,
-      backgroundColor: isCode ? Colors.grey[800] : null,
-      fontFamily: isCode ? 'monospace' : baseStyle.fontFamily,
-    );
-  }
 
   EdgeInsetsGeometry? get _padding => isMessageBySender
       ? outgoingChatBubbleConfig?.padding

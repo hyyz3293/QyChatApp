@@ -77,12 +77,6 @@ class _ChartHomeScreenState extends State<ChartHomeScreen> with WidgetsBindingOb
     );
   }
 
-  void _clearAllFields() {
-    for (var controller in _controllers) {
-      controller.clear();
-    }
-  }
-
   Future<void> _showValues() async {
     var channelCode = _controllers[0].text;
     if (channelCode.isEmpty) {

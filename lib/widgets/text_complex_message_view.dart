@@ -73,7 +73,14 @@ class TextComplexMessageView extends StatelessWidget {
                   linkPreviewConfig: _linkPreviewConfig,
                   url: textMessage,
                 )
-                    : _buildTextContent(textTheme, textMessage, richText),
+                    : GestureDetector(
+                  onTap: () {
+                    // if (message.digest != "") {
+                    //   if (message.digest != null) launchUrl(Uri.parse(message.digest));
+                    // }
+                  },
+                  child:_buildTextContent(textTheme, textMessage, richText),
+                ),
               ],
             )
         ),
@@ -94,19 +101,13 @@ class TextComplexMessageView extends StatelessWidget {
       color: Colors.grey,
       fontSize: 16,
     );
-
-    // if (richText != null) {
-    //   return RichText(
-    //     text: richText,
-    //     textAlign: TextAlign.start,
-    //   );
-    // }
-
     // 检测并处理简单富文本标记
     if (_containsSimpleRichText(textMessage)) {
       // 处理图片路径 - 添加前缀
       final processedHtml = _processImageUrls(message.complex!.content);
-
+      if (message.digest != "") {
+        _processImageUrls(message.digest!);
+      }
       return Html(
         data: processedHtml,
         style: {

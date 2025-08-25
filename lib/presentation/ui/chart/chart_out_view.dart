@@ -79,6 +79,7 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
 
       sharedPreferences.setInt("evaluationFlag", evaluationFlag);
       sharedPreferences.setString("serviceEvaluateTxt", serviceEvaluateTxt);
+      sharedPreferences.setString("imEvaluationDefineList", convert.jsonEncode(response.data.evaluateParams.imEvaluationDefineList));
 
 
 
