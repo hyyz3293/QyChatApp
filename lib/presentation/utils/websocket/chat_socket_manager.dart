@@ -361,13 +361,7 @@ class CSocketIOManager {
   }
 
   Future<void> _handleData(Map<String, dynamic> msgContent) async {
-    //var msgContent = json['msgContent'];
     print("✅ 消息内容: ${msgContent['sendName']}");
-
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-
-    var currentUserId = sharedPreferences.getInt("userId") ?? 0;
-
     printN("_handleSocketIm  msgContent= ${msgContent}");
     var msgBean = ImUserOnlineEvent.fromJson(msgContent);
     String? enumType = msgBean.enumType;
@@ -377,6 +371,8 @@ class CSocketIOManager {
     int? userId = msgBean.msgSendId ?? 0;
     String? sendName = msgBean.sendName;
     String? sendAvatar = msgBean.sendAvatar;
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
 
     if (!isFirstImg) {
       isFirstImg = true;
@@ -404,9 +400,51 @@ class CSocketIOManager {
     var dateTime = DateTime.now();
     printN("_handleSocketIm  enumType= ${enumType}");
     if (enumType != "") {
-
+      var evaluationFlag = sharedPreferences.getInt("sharedPreferences");
+      var serviceEvaluateTxt = sharedPreferences.getString("serviceEvaluateTxt");
+      //文本
+      msgId = msgBean.messId ?? "";
+      var message = Message(
+        createdAt: dateTime,
+        status: MessageStatus.delivered,
+        message: "${serviceEvaluateTxt}",
+        sentBy: '$userId',
+        messageType: MessageType.overChat,
+      );
+      _sendMessage(message);
 
       switch(enumType) {
+
+        case "imQueueNotice":
+        playAudio();
+        //文本
+        msgId = msgBean.messId ?? "";
+        var message = Message(
+        createdAt: dateTime,
+        status: MessageStatus.delivered,
+        message: "开始排队",
+        sentBy: '$userId',
+        messageType: MessageType.overChat,
+        );
+        _sendMessage(message);
+        break;
+        case "imCustomerOverChat":
+
+          if (evaluationFlag != 0) {
+            playAudio();
+            //文本
+            msgId = msgBean.messId ?? "";
+            var message = Message(
+              createdAt: dateTime,
+              status: MessageStatus.delivered,
+              message: "${serviceEvaluateTxt}",
+              sentBy: '$userId',
+              messageType: MessageType.overChat,
+            );
+            _sendMessage(message);
+          }
+
+          break;
         case "imUserOnline":
           playAudio();
           // //文本
@@ -1203,20 +1241,8 @@ class CSocketIOManager {
       //authorId: '${userId}',
       //user:ChatUser(id: '${userId}', lastName: "${userId}", firstName: "${userId}"),
     );
-
-    //_sendMessage(message);
     printN("sendData====${message}");
-
     var sendData = await DioClient().sendMessage(serviceMessageBean);
-    // Message updatedMessage = message.copyWith(status: MessageStatus.sent, authorId: message.authorId);
-    // if (sendData) {
-    //   printN("sendData=success= 更新 msg  ${msgId}" );
-    //   _updateMessageStatusNew(updatedMessage);
-    // } else {
-    //   printN("sendData=fail= 更新 msg  ${msgId}" );
-    //
-    //   _updateMessageStatusNew(updatedMessage);
-    // }
     printN("sendData====${sendData}");
   }
 
@@ -1377,15 +1403,6 @@ class CSocketIOManager {
 
     var sendMsg = await DioClient().sendMessage(serviceMessageBean);
     printN("sendMsg file ====${sendMsg}");
-    // Message updatedMessage = message.copyWith(status: MessageStatus.sent, authorId: message.authorId);
-    // if (sendData) {
-    //   printN("sendData=success= 更新 msg  ${msgId}" );
-    //   _updateMessageStatusNew(updatedMessage);
-    // } else {
-    //   printN("sendData=fail= 更新 msg  ${msgId}" );
-    //
-    //   _updateMessageStatusNew(updatedMessage);
-    // }
    }
 
 

@@ -463,55 +463,50 @@ class DioClient {
   }
 
   // 8、留言接口
-  Future<Map<String, dynamic>> leaveMessage() async {
+  Future<Map<String, dynamic>> leaveMessage(
+      String customerName,
+      String customerPhone,
+      String info,
+      String content,
+      ) async {
     try {
-    //     {
-    //       "customerName": "姓名",
-    //   "customerPhone": "手机号码",
-    //   "info": "问题简述",
-    //   "content": "问题描述",
-    //   "cid": 3030,//企业id
-    //   "userid": 61,//用户id
-    //   "channelType": 1,//渠道类型
-    //   "channelId": 9//渠道id
-    // }
-
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       var cid = sharedPreferences.getInt("cid") ?? 0;
-      Map<String, dynamic> dataMap = {};
-      dataMap["cid"] = cid;
-      dataMap["channelCode"] = "0fa684c5166b4f65bba9231f071a756d";
-      dataMap['userID'] = "a9184b47a17040c2aed2d72703a247b3";
-      printN("userinfo---start");
-      printN("userinfo---dataMap---.>>>>${dataMap}");
+      var userId = sharedPreferences.getInt("userId") ?? 0;
+    var channel_id = sharedPreferences.getInt("channel_id") ?? 0;
+    var channel_type = sharedPreferences.getInt("channel_type") ?? 0;
+
+
+
+    Map<String, dynamic> dataMap = {};
+      dataMap["customerName"] = "$customerName";
+      dataMap["customerPhone"] = "$customerPhone";
+      dataMap["info"] = "$info";
+      dataMap["content"] = "$content";
+      dataMap["cid"] = "$cid";
+      dataMap["userid"] = "$userId";
+      dataMap["channelType"] = "$channel_type";
+      dataMap["channelId"] = "${channel_id}";
+
+      printN("leaveMessage---start");
+      printN("leaveMessage---dataMap---.>>>>${dataMap}");
       Map<String, dynamic> response =
       await post(
           Endpoints.baseUrl + "/api/imBase/baseImLeaveMessage/leaveMessage",
-          queryParameters: dataMap);
-      printN("userinfo---success----${response}");
+          data: dataMap);
+      printN("leaveMessage---success----${response}");
       return response;
     } catch (e) {
       // 请求失败，抛出异常
-      printN("userinfo---error----${e.toString()}");
+      printN("leaveMessage---error----${e.toString()}");
     }
-    printN("userinfo---end");
+    printN("leaveMessage---end");
     return {};
   }
 
   // 9、查询基础配置信息
   Future<Map<String, dynamic>> queryCommonConfig() async {
     try {
-      //     {
-      //       "customerName": "姓名",
-      //   "customerPhone": "手机号码",
-      //   "info": "问题简述",
-      //   "content": "问题描述",
-      //   "cid": 3030,//企业id
-      //   "userid": 61,//用户id
-      //   "channelType": 1,//渠道类型
-      //   "channelId": 9//渠道id
-      // }
-
       SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       var cid = sharedPreferences.getInt("cid") ?? 0;
       Map<String, dynamic> dataMap = {};

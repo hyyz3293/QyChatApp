@@ -12,7 +12,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:qychatapp/presentation/utils/routes/routes.dart';
+import 'package:go_router/go_router.dart';
 import '../models/config_models/send_message_configuration.dart';
 import '../presentation/utils/global_utils.dart';
 import '../presentation/utils/service_locator.dart';
@@ -161,7 +162,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     final outlineBorder = _outLineBorder;
     return Column(
       children: [
-        Container(
+        SizedBox(
           height: 60,
           width: double.infinity,
           child: ListView.builder(
@@ -188,7 +189,6 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                 children: [
                   Row(
                     children: [
-
                       if ((sendMessageConfig?.allowRecordingVoice ?? false) &&
                           !kIsWeb && (Platform.isIOS || Platform.isAndroid) && !isRecordingValue)
                         IconButton(
@@ -315,9 +315,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                                         icon: Icon(Icons.add_circle_outline_rounded, color:
                                         voiceRecordingConfig?.recorderIconColor,),
                                       ),
-
                                   ],
-
                                   if (isRecordingValue &&
                                       cancelRecordConfiguration != null)
                                     IconButton(
@@ -353,10 +351,9 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                         ),
                     ],
                   ),
-
                   (_hasPhoto || _hasEmoji) && !isRecordingValue && !widget.focusNode.hasFocus ? Container(
                     color: Colors.transparent,
-                    height: 150,
+                    height: 200,
                     width: double.infinity,
                     child: _hasPhoto ? _buildMorePanel() : _hasEmoji ? _buildEmojiPanel() : Container(),
                   ) : Container()
@@ -369,7 +366,6 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     );
   }
 
-  // 构建信息行
   Widget _buildInfoRow(SenceConfigModel sence) {
     return Container(
       margin: const EdgeInsets.only(left: 10, right: 10, bottom: 5),
@@ -377,12 +373,8 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
         children: [
           InkWell(
             onTap: () {
-              print("people==== ${sence.toJson()}");
-              //widget.onTopSelected("people", "");
-
+              printN("people==== ${sence.toJson()}");
               CSocketIOManager().sendChatConfig(sence);
-
-
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -399,7 +391,6 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
       ),
     );
   }
-
 
   void _handleEmojiSend() {
     setState(() {
@@ -422,10 +413,8 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
   void _handleAdd() {
     setState(() {
       if (_hasPhoto) {
-        // 第二次点击同一个按钮 - 收起面板并打开键盘
         _hasPhoto = false;
-        // 延迟一点时间再打开键盘，确保面板完全收起
-        Future.delayed(Duration(milliseconds: 50), () {
+        Future.delayed(const Duration(milliseconds: 50), () {
           FocusScope.of(context).requestFocus(widget.focusNode);
         });
       } else {
@@ -438,7 +427,6 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
   }
 
   void _closeKeyboard() {
-    // 只关闭键盘，不改变面板状态
     FocusScope.of(context).unfocus();
   }
 
@@ -455,11 +443,9 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
       return;
     }
     final file = File(path);
-
     if (await file.exists()) {
       await file.delete();
     }
-
     isRecording.value = false;
   }
 
@@ -469,11 +455,8 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
         defaultTargetPlatform == TargetPlatform.android,
     "Voice messages are only supported with android and ios platform",
     );
-
     getIt<EventBus>().fire("audio");
-
     if (!isRecording.value) {
-      // 开始录音
       await controller?.record(
         sampleRate: voiceRecordingConfig?.sampleRate,
         bitRate: voiceRecordingConfig?.bitRate,
@@ -481,40 +464,31 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
         iosEncoder: voiceRecordingConfig?.iosEncoder,
         androidOutputFormat: voiceRecordingConfig?.androidOutputFormat,
       );
-
-      // 重置计时器
       _recordingSeconds = 0;
       _currentRecordingPath = null;
       isRecording.value = true;
-
-      // 启动计时器
       _recordingTimer = Timer.periodic(Duration(seconds: 1), (timer) {
         setState(() {
           _recordingSeconds = timer.tick;
         });
-
-        // 达到60秒自动停止
         if (_recordingSeconds >= 60) {
           _recordOrStop();
         }
       });
     } else {
-      // 停止录音
       _recordingTimer?.cancel();
       _recordingTimer = null;
 
       final path = await controller?.stop();
       isRecording.value = false;
       _currentRecordingPath = path; // 保存录音路径
-
-      // 处理录音结果
       if (_recordingSeconds < 3) {
         // 少于3秒，直接丢弃
         if (path != null) {
           _deleteRecordingFile(path);
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('录音时间太短（最少3秒）')),
+          const SnackBar(content: Text('录音时间太短（最少3秒）')),
         );
       } else {
         // 超过3秒，显示确认对话框
@@ -526,26 +500,25 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
   // 显示录音确认弹窗
   void _showRecordingConfirmation() {
     if (_currentRecordingPath == null) return;
-
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('确认发送'),
-        content: Text('确定要发送这段${_recordingSeconds}秒的录音吗？'),
+        title: const Text('确认发送'),
+        content: Text('确定要发送这段$_recordingSeconds秒的录音吗？'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _deleteRecordingFile(_currentRecordingPath!);
             },
-            child: Text('取消'),
+            child: const Text('取消'),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               widget.onRecordingComplete(_currentRecordingPath);
             },
-            child: Text('发送'),
+            child: const Text('发送'),
           ),
         ],
       ),
@@ -560,10 +533,9 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
         await file.delete();
       }
     } catch (e) {
-      print('删除录音文件失败: $e');
+      printN('删除录音文件失败: $e');
     }
   }
-
 
   void _onIconPressed(
       ImageSource imageSource, {
@@ -620,6 +592,10 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
         'icon': Icons.video_call,
         'label': '录像',
       },
+      {
+        'icon': Icons.message,
+        'label': '留言',
+      },
     ];
 
     return Container(
@@ -646,11 +622,12 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
               } else if (label == "拍照") {
                 _onIconPressed(
                   ImageSource.camera,
-                  config: sendMessageConfig
-                      ?.imagePickerConfiguration,
+                  config: sendMessageConfig?.imagePickerConfiguration,
                 );
-              }  else {
+              }  else if (label == "录像") {
                 _takeVideo();
+              } else {
+                GoRouter.of(context).push(Routes.ChatMessageRoot,);
               }
             },
             child: Column(
@@ -661,7 +638,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.grey,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -674,8 +651,8 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                 Flexible(
                   child: Text(
                     actions[index]['label'] as String,
-                    style: TextStyle(
-                      color: Colors.black,
+                    style: const TextStyle(
+                      color: Colors.white,
                       fontSize: 11,
                       height: 1.1,
                     ),

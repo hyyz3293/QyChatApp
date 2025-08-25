@@ -35,7 +35,7 @@ enum MessageType {
   file,
   complex,
   links,
-
+  overChat,
   video;
 
   static MessageType? tryParse(String? value) {
@@ -57,6 +57,8 @@ enum MessageType {
       return complex;
     }else if (type == links.name) {
       return links;
+    }else if (type == overChat.name) {
+      return overChat;
     }
     return null;
   }

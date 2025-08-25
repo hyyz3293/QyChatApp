@@ -1,3 +1,4 @@
+import 'package:qychatapp/presentation/ui/chart/chart_message.dart';
 import 'package:qychatapp/presentation/ui/chart/chart_out_view.dart';
 import 'package:qychatapp/presentation/ui/chart_home.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class Routes {
   static const String ChartTestRoot = '/chart-test-root';
   static const String ChartHomeRoot = '/chart-home-root';
   static const String DashChartHomeRoot = '/dash-chart-home-root';
+  static const String ChatMessageRoot = '/chat-message-root';
 
 
   // 初始化GoRouter
@@ -32,15 +34,6 @@ class Routes {
           );
         },
       ),
-      // GoRoute(
-      //   path: Routes.ChartHomeRoot,
-      //   pageBuilder: (context, state) {
-      //     return MaterialPage<dynamic>(
-      //       key: state.pageKey,
-      //       child: ChatScreen(), // 传递字符串参数
-      //     );
-      //   },
-      // ),
       GoRoute(
         path: Routes.ChartTestRoot,
         pageBuilder: (context, state) {
@@ -48,6 +41,15 @@ class Routes {
           return MaterialPage<dynamic>(
             key: state.pageKey,
             child: ChartExternalScreen(channelCode: channelCode), // 传递字符串参数
+          );
+        },
+      ),
+      GoRoute(
+        path: Routes.ChatMessageRoot,
+        pageBuilder: (context, state) {
+          return MaterialPage<dynamic>(
+            key: state.pageKey,
+            child: ChatMessageScreen(), // 传递字符串参数
           );
         },
       ),

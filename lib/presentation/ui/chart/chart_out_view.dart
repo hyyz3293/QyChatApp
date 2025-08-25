@@ -74,9 +74,15 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
       sharedPreferences.setInt("windowOptionAppwebMsg", windowOptionAppwebMsg);
       sharedPreferences.setInt("windowOptionAppwebAgent", windowOptionAppwebAgent);
 
-    }catch(e) {
+      int evaluationFlag = response.data.evaluateParams.evaluationFlag;
+      String serviceEvaluateTxt = response.data.evaluateParams.serviceEvaluateTxt;
 
-    }
+      sharedPreferences.setInt("evaluationFlag", evaluationFlag);
+      sharedPreferences.setString("serviceEvaluateTxt", serviceEvaluateTxt);
+
+
+
+    }catch(e) {}
 
 
     var cid = response.data.accessParams.cid;
@@ -117,13 +123,6 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
 
     sharedPreferences.setString("sence_config", convert.jsonEncode(sceneJson));
 
-    // String test = await sharedPreferences.getString("sence_config") ?? "";
-    // var testMap = convert.jsonDecode(test);
-    // final List<dynamic> sceneJson2 = testMap;
-    // List<SenceConfigModel> sceneList2 = sceneJson2
-    //     .map((item) => SenceConfigModel.fromJson(item))
-    //     .toList();
-    // printN("app-sceneList- ${sceneList2}");
     setState(() {
       isLoadIng = false;
     });

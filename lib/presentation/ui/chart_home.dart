@@ -13,10 +13,8 @@ class ChartHomeScreen extends StatefulWidget {
 
 class _ChartHomeScreenState extends State<ChartHomeScreen> with WidgetsBindingObserver {
 
-  // 创建6个文本控制器
   final List<TextEditingController> _controllers = List.generate(
-    1,
-        (index) => TextEditingController(),
+    1, (index) => TextEditingController(),
   );
 
 
@@ -69,9 +67,7 @@ class _ChartHomeScreenState extends State<ChartHomeScreen> with WidgetsBindingOb
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  //_buildButton('清空', Colors.orange, _clearAllFields),
                   _buildButton('确定', Colors.green, _showValues),
-                  //_buildButton('取消', Colors.red, () {}),
                 ],
               ),
             ],
@@ -93,10 +89,8 @@ class _ChartHomeScreenState extends State<ChartHomeScreen> with WidgetsBindingOb
       showToast("请输入ChannelCode");
       return;
     }
-
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setString("channel_code", channelCode);
-
     GoRouter.of(context).push(Routes.ChartTestRoot, extra: channelCode);
   }
 
@@ -111,7 +105,6 @@ class _ChartHomeScreenState extends State<ChartHomeScreen> with WidgetsBindingOb
 
   @override
   void dispose() {
-    // 销毁所有控制器
     for (var controller in _controllers) {
       controller.dispose();
     }
@@ -124,64 +117,16 @@ class _ChartHomeScreenState extends State<ChartHomeScreen> with WidgetsBindingOb
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
       ),
       child: Text(
         text,
-        style: TextStyle(fontSize: 16, color: Colors.white),
+        style: const TextStyle(fontSize: 16, color: Colors.white),
       ),
     );
   }
-
-
-  // Future<void> loadData() async {
-  //   var json = await DioClient().getChannelConfig();
-  //   //var logger = Logger();
-  //   // 解析
-  //   final response = ApiResponse<ChannelConfigModel>.fromJson(
-  //     json,
-  //         (dataJson) => ChannelConfigModel.fromJson(dataJson),
-  //   );
-  //   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-  //   var cid = response.data.accessParams.cid;
-  //   sharedPreferences.setInt("cid", cid);
-  //   print("app-ChannelConfig- ${response}");
-  //   print("app-cid- ${cid}");
-  //
-  //   var userInfoJson = await DioClient().getUserinfoMessage();
-  //   var userMap = userInfoJson["data"];
-  //   var channelMap = userInfoJson["channel"];
-  //   var userAccount =  UserAccountModel.fromJson(userMap);
-  //   var channelAccount =  ChannelAccountModel.fromJson(channelMap);
-  //
-  //
-  //   sharedPreferences.setString("token", userAccount.token);
-  //   sharedPreferences.setInt("userId", userAccount.id);
-  //   sharedPreferences.setString("accid", userAccount.accid);
-  //   sharedPreferences.setString("cpmpanyAccid", userAccount.cpmpanyAccid);
-  //
-  //   sharedPreferences.setInt("channel_id", channelAccount.id);
-  //   sharedPreferences.setInt("channel_type", channelAccount.type);
-  //   sharedPreferences.setString("channel_name", channelAccount.name);
-  //
-  //   printN("app-token- ${userAccount.token}");
-  //   printN("app-userId- ${userAccount.userid}");
-  //
-  //   printN("app-UserinfoMessage- ${userInfoJson}");
-  //
-  //
-  //   // if (!CSocketIOManager().isConnected) {
-  //   //   CSocketIOManager().connect();
-  //   // }
-  //
-  //   //GoRouter.of(context).push(Routes.ChartTestRoot, extra: c);
-  //
-  // }
-
-
-
 
 }

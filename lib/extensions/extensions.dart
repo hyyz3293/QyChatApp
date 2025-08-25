@@ -118,6 +118,7 @@ extension MessageTypes on MessageType {
 
   bool get isLinks => this == MessageType.links;
 
+  bool get isOverChat => this == MessageType.overChat;
 
 
 }

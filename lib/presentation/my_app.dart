@@ -48,16 +48,6 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
               debugShowCheckedModeBanner: false,
               title: Strings.appName,
               theme: AppThemeData.darkThemeData,
-              // locale: Locale(_languageStore.locale),
-              // supportedLocales: _languageStore.supportedLanguages
-              //     .map((language) => Locale(language.locale, language.code))
-              //     .toList(),
-              // localizationsDelegates: [
-              //   AppLocalizations.delegate,
-              //   GlobalMaterialLocalizations.delegate,
-              //   GlobalWidgetsLocalizations.delegate,
-              //   GlobalCupertinoLocalizations.delegate,
-              // ],
               builder: (context, child) {
                 return MediaQuery(
                   data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(1.0)),
