@@ -192,8 +192,9 @@ class Message {
     bool forceNullValue = false,
     List<ChatMenuItem>? navigationList,
     List<ChatLinkItem>? links,
-
+    List<ImageData>? imgs,
     ComplexData? complex,
+    String? link,
   }) {
     return Message(
       id: id ?? this.id,
@@ -211,7 +212,8 @@ class Message {
       complex: complex ?? this.complex,
       links: links ?? this.links,
       digest: digest ?? this.digest,
-
+      link: link ?? this.link,
+      imgs: imgs ?? this.imgs,
     );
   }
 }

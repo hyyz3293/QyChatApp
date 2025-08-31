@@ -481,13 +481,17 @@ class CSocketIOManager {
       case "knowGraphicText":
         playAudio();
         msgId = messId ?? "";
+
+        printN("knowGraphicText imgs= ${imgs}");
+
+        printN("knowGraphicText link= ${link}");
         // 增加空安全判断，避免空指针
         var message = Message(
             createdAt: dateTime,
             status: MessageStatus.delivered,
             message: "$title",
             sentBy: '$userId',
-            messageType: MessageType.navigation,
+            messageType: MessageType.knowGraphicText,
             imgs: imgs,
             link: link
         );
@@ -527,7 +531,6 @@ class CSocketIOManager {
 
       case "graphicText":
       case "imClick":
-      case "knowGraphicText":
       case "text":
         playAudio();
         msgId = messId ?? "";
@@ -765,7 +768,6 @@ class CSocketIOManager {
 
       case "graphicText":
       case "imClick":
-      case "knowGraphicText":
       case "text":
         playAudio();
         //文本

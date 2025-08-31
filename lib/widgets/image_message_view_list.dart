@@ -22,6 +22,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_html/flutter_html.dart';
 import 'package:qychatapp/extensions/extensions.dart';
 import 'package:qychatapp/models/models.dart';
 import 'package:qychatapp/presentation/utils/dio/dio_client.dart';
@@ -65,7 +66,7 @@ class ImageTxtMessageView extends StatelessWidget {
   List<ImageData> get imageList => message.imgs ?? [];
 
   // 获取标题
-  String? get title => message.digest;
+  String? get title => message.message;
 
   // 构建图片URL
   String _buildImageUrl(String code) {
@@ -169,7 +170,7 @@ class ImageTxtMessageView extends StatelessWidget {
               return Container(
                 width: double.infinity,
                 height: double.infinity,
-                color: Colors.grey[200],
+                color: Colors.grey[300],
                 child: Center(
                   child: CircularProgressIndicator(
                     value: loadingProgress.expectedTotalBytes != null
@@ -232,6 +233,7 @@ class ImageTxtMessageView extends StatelessWidget {
         maxHeight: imageHeight * ((imageList.length + crossAxisCount - 1) / crossAxisCount).ceil(),
         maxWidth: imageMessageConfig?.width ?? 300,
       ),
+      color: Colors.red,
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -249,28 +251,68 @@ class ImageTxtMessageView extends StatelessWidget {
     );
   }
 
+  // 处理图片URL，添加前缀
+  String _processImageUrls(String html) {
+    return html.replaceAllMapped(
+      RegExp(r'<img\s+[^>]*src="([^"]+)"[^>]*>', caseSensitive: false),
+          (match) {
+        final imgTag = match.group(0)!;
+        final src = match.group(1)!;
+
+        // 如果已经是完整URL，直接返回
+        if (src.startsWith('http://') || src.startsWith('https://')) {
+          return imgTag;
+        }
+
+        // 添加前缀
+        String fullUrl = 'https://uat-ccc.qylink.com:9991';
+        if (!src.startsWith('/')) {
+          fullUrl += '/';
+        }
+        fullUrl += src;
+
+        // 替换原始src，并添加完整URL
+        return imgTag.replaceFirst('src="$src"', 'src="$fullUrl"');
+      },
+    );
+  }
   // 构建标题组件
   Widget _buildTitle() {
     if (title == null || title!.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        title!,
-        style: const TextStyle(
-          fontSize: 14,
-          color: Colors.black87,
-          fontWeight: FontWeight.w500,
+    final processedHtml = _processImageUrls(title!);
+
+    return Html(
+      data: processedHtml,
+      style: {
+        "body": Style(
+          fontSize: FontSize(16.0),
+          color: Colors.white,
+          // margin: EdgeInsets.zero,
+          //padding: EdgeInsets.zero,
         ),
-      ),
+        "p": Style(
+          //margin: EdgeInsets.zero
+        ),
+        "b": Style(fontWeight: FontWeight.bold),
+        "i": Style(fontStyle: FontStyle.italic),
+        "u": Style(textDecoration: TextDecoration.underline),
+        "a": Style(
+          color: Colors.blue,
+          textDecoration: TextDecoration.underline,
+        ),
+        "img": Style(
+          //margin: EdgeInsets.zero,
+          //padding: EdgeInsets.zero,
+          alignment: Alignment.center,
+        ),
+      },
+      onLinkTap: (url, _, __,) {
+        if (url != null) launchUrl(Uri.parse(url));
+      },
+      shrinkWrap: true,
     );
   }
 

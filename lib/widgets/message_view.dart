@@ -306,6 +306,7 @@ class _MessageViewState extends State<MessageView>
                     //outgoingChatBubbleConfig: widget.outgoingChatBubbleConfig,
                   );
                 } else if (widget.message.messageType.isKnowGraphicText) {
+                  print("**********************knowGraphicText****************************");
                   return ImageTxtMessageView(
                     //screenWidth: MediaQuery.of(context).size.width,
                     message: widget.message,
