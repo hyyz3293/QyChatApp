@@ -100,7 +100,7 @@ dependencies:
   sqflite: ^2.3.3
   share_plus: ^7.1.0
   scrollable_positioned_list: ^0.3.8
-  socket_io_client: 1.0.2 #">=1.0.2 <3.0.0"
+  socket_io_client: ^1.0.2 #">=1.0.2 <3.0.0"
   # T
   timeago: ^3.7.0
   # U
