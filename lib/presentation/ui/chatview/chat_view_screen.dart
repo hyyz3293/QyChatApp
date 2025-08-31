@@ -492,9 +492,6 @@ class _ChatScreenState extends State<ChatViewScreen> {
     var map = await DioClient().getHistoryList(page,lastTime);
     MessagePageResponse response = MessagePageResponse.fromJson(map);
 
-
-
-
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var evaluationFlag = sharedPreferences.getInt("sharedPreferences");
     var serviceEvaluateTxt = sharedPreferences.getString("serviceEvaluateTxt");

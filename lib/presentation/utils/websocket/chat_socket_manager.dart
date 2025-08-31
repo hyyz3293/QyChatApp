@@ -376,6 +376,7 @@ class CSocketIOManager {
     String? msg,
     String? msgId,
     String? messId,
+    String? link,
     int? msgSendId,
     int? serviceId,
     ComplexData? complex, // 原msgBean.complex
@@ -477,6 +478,22 @@ class CSocketIOManager {
         );
         _sendMessage(message);
         break;
+      case "knowGraphicText":
+        playAudio();
+        msgId = messId ?? "";
+        // 增加空安全判断，避免空指针
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: "$title",
+            sentBy: '$userId',
+            messageType: MessageType.navigation,
+            imgs: imgs,
+            link: link
+        );
+        _sendMessage(message);
+        break;
+
 
       case "welcomeSpeech":
         playAudio();
@@ -918,7 +935,8 @@ class CSocketIOManager {
           url: msgBean.url,                    // 媒体URL（视频/语音）
           imgs: msgBean.imgs,                  // 图片列表（ImageData 类型）
           attachment: msgBean.attachment,      // 附件列表（AttachmentData 类型）
-          digest: msgBean.digest               // 复杂消息摘要
+          digest: msgBean.digest,               // 复杂消息摘要
+          link: msgBean.link,
       );
     } else if (type != "") {
       switch(type) {

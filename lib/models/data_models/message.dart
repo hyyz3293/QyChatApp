@@ -23,6 +23,7 @@ import 'package:qychatapp/extensions/extensions.dart';
 import 'package:qychatapp/models/data_models/reaction.dart';
 import 'package:qychatapp/models/data_models/reply_message.dart';
 import 'package:qychatapp/presentation/ui/model/im_user_link.dart';
+import 'package:qychatapp/presentation/ui/model/image_bean.dart';
 import 'package:qychatapp/values/enumeration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -65,6 +66,9 @@ class Message {
 
   List<ChatLinkItem>? links;
 
+  List<ImageData>? imgs;
+  String? link;
+
   String? digest;
   ComplexData? complex;
 
@@ -79,6 +83,10 @@ class Message {
     this.voiceMessageDuration,
     this.navigationList,
     this.links,
+
+    this.imgs,
+    this.link,
+
     this.digest,
     this.complex,
     MessageStatus status = MessageStatus.pending,
@@ -136,6 +144,14 @@ class Message {
         .map((e) => ChatMenuItem.fromJson(e as Map<String, dynamic>))
         .toList() : [],
 
+
+    imgs: json['imgs'] != null ? (json['imgs'] as List)
+        .map((e) => ImageData.fromJson(e as Map<String, dynamic>))
+        .toList() : [],
+
+    link: json['link']?.toString() ?? '',
+
+
     links: json['links'] != null ? (json['links'] as List)
         .map((e) => ChatLinkItem.fromJson(e as Map<String, dynamic>))
         .toList() : [],
@@ -146,6 +162,7 @@ class Message {
         'id': id,
     'digest': digest,
         'message': message,
+    'link': link,
         'createdAt': createdAt.toIso8601String(),
         'sentBy': sentBy,
         'reply_message': replyMessage.toJson(),
@@ -155,7 +172,7 @@ class Message {
         'status': status.name,
         'navigationList': navigationList?.map((item) => item.toJson()).toList(),
     'links': links?.map((item) => item.toJson()).toList(),
-
+    'imgs': imgs?.map((item) => item.toJson()).toList(),
 
     'complex': complex?.toJson(),
   };

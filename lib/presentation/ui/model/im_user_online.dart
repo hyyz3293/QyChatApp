@@ -6,6 +6,7 @@ import 'im_user_menu.dart';
 import 'image_bean.dart';
 
 class ImUserOnlineEvent {
+  String? link;
   String? event;
   String? enumType;
   String? type;
@@ -51,6 +52,7 @@ class ImUserOnlineEvent {
   int? serviceId;
 
   ImUserOnlineEvent({
+    this.link,
     this.key,
     this.serviceId,
     this.title,
@@ -98,6 +100,7 @@ class ImUserOnlineEvent {
   factory ImUserOnlineEvent.fromJson(Map<dynamic, dynamic> json) {
     return ImUserOnlineEvent(
       digest: json['digest'],
+      link: json['link'],
 
       key: json['key'],
       serviceId: json['serviceId'],
@@ -155,6 +158,7 @@ class ImUserOnlineEvent {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
     if (digest != null) data['digest'] = digest;
+    if (link != null) data['link'] = link;
 
     if (key != null) data['key'] = key;
     if (serviceId != null) data['serviceId'] = serviceId;

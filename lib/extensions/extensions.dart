@@ -120,6 +120,7 @@ extension MessageTypes on MessageType {
 
   bool get isOverChat => this == MessageType.overChat;
 
+  bool get isKnowGraphicText => this == MessageType.knowGraphicText;
 
 }
 

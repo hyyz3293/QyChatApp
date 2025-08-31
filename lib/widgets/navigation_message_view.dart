@@ -90,7 +90,7 @@ class _NavigationState extends State<NavigationMessageView> {
     List<Widget> items = [];
 
     for (int i = 0; i < _navigationList.length; i++) {
-      if (i == 0) {
+      if (i == 0 && "${widget.message.message}".isNotEmpty) {
         items.add(_buildInfoRow2("${widget.message.message}"));
       }
 

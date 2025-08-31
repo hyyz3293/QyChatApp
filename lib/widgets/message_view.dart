@@ -36,6 +36,7 @@ import '../values/enumeration.dart';
 import '../values/typedefs.dart';
 import 'file_message_view.dart';
 import 'image_message_view.dart';
+import 'image_message_view_list.dart';
 import 'links_message_view.dart';
 import 'text_message_view.dart';
 import 'reaction_widget.dart';
@@ -303,6 +304,12 @@ class _MessageViewState extends State<MessageView>
                     //messageReactionConfig: messageConfig?.messageReactionConfig,
                     //inComingChatBubbleConfig: widget.inComingChatBubbleConfig,
                     //outgoingChatBubbleConfig: widget.outgoingChatBubbleConfig,
+                  );
+                } else if (widget.message.messageType.isKnowGraphicText) {
+                  return ImageTxtMessageView(
+                    //screenWidth: MediaQuery.of(context).size.width,
+                    message: widget.message,
+                    isMessageBySender: widget.isMessageBySender,
                   );
                 }else if (widget.message.messageType.isCustom &&
                     messageConfig?.customMessageBuilder != null) {

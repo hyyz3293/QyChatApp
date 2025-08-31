@@ -32,6 +32,7 @@ enum MessageType {
   voice,
   custom,
   navigation,
+  knowGraphicText,
   file,
   complex,
   links,
@@ -59,6 +60,8 @@ enum MessageType {
       return links;
     }else if (type == overChat.name) {
       return overChat;
+    }else if (type == knowGraphicText.name) {
+      return knowGraphicText;
     }
     return null;
   }
