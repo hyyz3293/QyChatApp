@@ -15,7 +15,12 @@ import '../model/user_account_model.dart';
 
 class ChartExternalScreen extends StatefulWidget {
   final String channelCode;
-  ChartExternalScreen({Key? key, required this.channelCode}) : super(key: key);
+  //final String userId;
+  final String userInfo;
+  ChartExternalScreen({Key? key,
+    required this.channelCode,
+    //required this.userId,
+    required this.userInfo}) : super(key: key);
   @override
   State<ChartExternalScreen> createState() => _ChartHomeScreenState();
 }
@@ -36,6 +41,8 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setString("channel_code", widget.channelCode);
+    sharedPreferences.setString("userInfo", widget.userInfo);
+
 
     var json = await DioClient().getChannelConfig();
     //var logger = Logger();
@@ -80,10 +87,9 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
       sharedPreferences.setInt("evaluationFlag", evaluationFlag);
       sharedPreferences.setString("serviceEvaluateTxt", serviceEvaluateTxt);
       sharedPreferences.setString("imEvaluationDefineList", convert.jsonEncode(response.data.evaluateParams.imEvaluationDefineList));
+    }catch(e) {
 
-
-
-    }catch(e) {}
+    }
 
 
     var cid = response.data.accessParams.cid;

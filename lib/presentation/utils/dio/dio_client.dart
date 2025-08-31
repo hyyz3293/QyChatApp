@@ -346,10 +346,13 @@ class DioClient {
       SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       var cid = sharedPreferences.getInt("cid") ?? 0;
       var channelCode = sharedPreferences.getString("channel_code");
+      var userInfo = sharedPreferences.getString("userInfo");
+
       Map<String, dynamic> dataMap = {};
       dataMap["cid"] = cid;
       dataMap["channelCode"] = channelCode;
       dataMap['userID'] = "";
+      dataMap['userInfo'] = userInfo;
       printN("userinfo---start");
       printN("userinfo---dataMap---.>>>>${dataMap}");
       Map<String, dynamic> response =

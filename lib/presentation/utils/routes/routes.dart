@@ -37,10 +37,12 @@ class Routes {
       GoRoute(
         path: Routes.ChartTestRoot,
         pageBuilder: (context, state) {
-          final String channelCode = state.extra as String? ?? "";
+          final Map urlMap = state.extra as Map? ?? {};
+          final String channelCode = urlMap["channelCode"];
+          final String userInfo = urlMap["userInfo"];
           return MaterialPage<dynamic>(
             key: state.pageKey,
-            child: ChartExternalScreen(channelCode: channelCode), // 传递字符串参数
+            child: ChartExternalScreen(channelCode: channelCode, userInfo: userInfo,), // 传递字符串参数
           );
         },
       ),
