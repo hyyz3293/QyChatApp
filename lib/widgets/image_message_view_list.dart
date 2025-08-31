@@ -158,7 +158,7 @@ class ImageTxtMessageView extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[300]!, width: 1),
+          //border: Border.all(color: Colors.grey[300]!, width: 1),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
@@ -170,7 +170,7 @@ class ImageTxtMessageView extends StatelessWidget {
               return Container(
                 width: double.infinity,
                 height: double.infinity,
-                color: Colors.grey[300],
+                //color: Colors.grey[300],
                 child: Center(
                   child: CircularProgressIndicator(
                     value: loadingProgress.expectedTotalBytes != null
@@ -233,7 +233,7 @@ class ImageTxtMessageView extends StatelessWidget {
         maxHeight: imageHeight * ((imageList.length + crossAxisCount - 1) / crossAxisCount).ceil(),
         maxWidth: imageMessageConfig?.width ?? 300,
       ),
-      color: Colors.red,
+      //color: Colors.red,
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -350,7 +350,7 @@ class ImageTxtMessageView extends StatelessWidget {
                         bottom: message.reaction.reactions.isNotEmpty ? 15 : 0,
                       ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    //color: Colors.white,
                     borderRadius: imageMessageConfig?.borderRadius ??
                         BorderRadius.circular(14),
                     boxShadow: [
