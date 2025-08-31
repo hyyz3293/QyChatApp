@@ -487,7 +487,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
   }
 
   Future<void> loadData() async {
-    lastTime = DateTime.now().toUtc().millisecondsSinceEpoch;
+    //lastTime = DateTime.now().toUtc().millisecondsSinceEpoch;
 
     var map = await DioClient().getHistoryList(page,lastTime);
     MessagePageResponse response = MessagePageResponse.fromJson(map);
@@ -506,7 +506,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
       for(int i = 0; i < response.page!.records!.length; i++) {
         printN("history====${response.page!.records![i].toJson()}");
         var dateTime = DateTime.now();
-        printN("_handleSocketIm  enumType= $enumType");
+        //printN("_handleSocketIm  enumType= $enumType");
         var msgBean = response.page!.records![i];
 
         var messJson = response.page!.records![i].messJson;
@@ -532,11 +532,11 @@ class _ChatScreenState extends State<ChatViewScreen> {
               msgId: msgBean.messId,                // 消息ID（msgBean 原有字段）
               messId: msgBean.messId,              // 消息ID（msgBean 原有字段，与 msgId 区分）
               msgSendId: msgBean.msgSendId,        // 消息发送者ID
-              serviceId: msgBean.serviceId,        // 服务ID（评价相关）
+              serviceId: messJson.serviceId,        // 服务ID（评价相关）
               complex: messJson.complex,            // 复杂消息数据（ComplexData 类型）
               navigationList: messJson.navigationList, // 导航菜单列表（ChatMenuItem 类型）
               title: messJson.title,                // 导航/消息标题
-              welcomeSpeech: msgBean.welcomeSpeech, // 欢迎语数据（WelcomeSpeechData 类型）
+              welcomeSpeech: messJson.welcomeSpeech, // 欢迎语数据（WelcomeSpeechData 类型）
               links: messJson.links,                // 链接列表（ChatLinkItem 类型）
               content: messJson.content,            // 文本/媒体内容
               conversationCode: messJson.conversationCode, // 会话编码（媒体预览用）

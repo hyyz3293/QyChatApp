@@ -467,17 +467,15 @@ class CSocketIOManager {
         playAudio();
         msgId = messId ?? "";
         // 增加空安全判断，避免空指针
-        if (navigationList?.isNotEmpty ?? false) {
-          var message = Message(
-              createdAt: dateTime,
-              status: MessageStatus.delivered,
-              message: "$title",
-              sentBy: '$userId',
-              messageType: MessageType.navigation,
-              navigationList: navigationList
-          );
-          _sendMessage(message);
-        }
+        var message = Message(
+            createdAt: dateTime,
+            status: MessageStatus.delivered,
+            message: "$title",
+            sentBy: '$userId',
+            messageType: MessageType.navigation,
+            navigationList: navigationList
+        );
+        _sendMessage(message);
         break;
 
       case "welcomeSpeech":

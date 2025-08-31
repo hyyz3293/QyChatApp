@@ -421,8 +421,10 @@ class MessJson {
     );
   }
 
+  // 补全后的 toJson() 方法
   Map<String, dynamic> toJson() {
     return {
+      // ---------------------- 基础消息字段 ----------------------
       'content': content,
       'conversationCode': conversationCode,
       'enumType': enumType,
@@ -436,9 +438,51 @@ class MessJson {
       'time': time,
       'to': to,
       'type': type,
-      
+      'digest': digest,
+      'key': key,
+      'serviceId': serviceId,
+      'event': event,
+      'title': title,
 
+      // ---------------------- 场景/设备相关字段 ----------------------
+      'ip': ip,
+      'webUrl': webUrl,
+      'browserTitle': browserTitle,
+      'channelType': channelType,
+      'channelId': channelId,
+      'referrer': referrer,
+      'landing': landing,
+      'channelName': channelName,
+      'browser': browser,
+      'engine': engine,
+      'terminal': terminal,
 
+      // ---------------------- 消息内容扩展字段 ----------------------
+      'msg': msg,
+      'msgId': msgId,
+      'source': source,
+      'id': id,
+      'value': value,
+      'target': target,
+      'url': url,
+      'location': location,
+      'scene': scene,
+      'cid': cid,
+      'channel': channel,
+
+      // ---------------------- 复杂集合字段（需手动序列化） ----------------------
+      // 图片列表：判断非空后，将每个 ImageData 转为 Map
+      'imgs': imgs?.map((img) => img.toJson()).toList(),
+      // 附件列表：判断非空后，将每个 AttachmentData 转为 Map
+      'attachment': attachment?.map((attach) => attach.toJson()).toList(),
+      // 导航菜单列表：判断非空后，将每个 ChatMenuItem 转为 Map
+      'navigationList': navigationList?.map((menu) => menu.toJson()).toList(),
+      // 链接列表：判断非空后，将每个 ChatLinkItem 转为 Map
+      'links': links?.map((link) => link.toJson()).toList(),
+      // 复杂数据：直接调用 ComplexData 的 toJson()（需确保 ComplexData 已实现该方法）
+      'complex': complex?.toJson(),
+      // 欢迎语数据：直接调用 WelcomeSpeechData 的 toJson()（需确保该类已实现）
+      'welcomeSpeech': welcomeSpeech?.toJson(),
     };
   }
 }
