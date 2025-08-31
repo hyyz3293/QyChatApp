@@ -24,7 +24,10 @@ import 'dart:io';
 
 import 'package:qychatapp/extensions/extensions.dart';
 import 'package:qychatapp/models/models.dart';
+import 'package:qychatapp/presentation/utils/dio/dio_client.dart';
+import 'package:qychatapp/presentation/ui/model/image_bean.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'reaction_widget.dart';
 import 'share_icon.dart';
@@ -58,14 +61,41 @@ class ImageTxtMessageView extends StatelessWidget {
   /// Provides scale of highlighted image when user taps on replied image.
   final double highlightScale;
 
-  String get imageUrl => message.message;
+  // 获取图片列表
+  List<ImageData> get imageList => message.imgs ?? [];
+
+  // 获取标题
+  String? get title => message.digest;
+
+  // 构建图片URL
+  String _buildImageUrl(String code) {
+    return '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}$code';
+  }
 
   Widget get iconButton => ShareIcon(
     shareIconConfig: imageMessageConfig?.shareIconConfig,
-    imageUrl: imageUrl,
+    imageUrl: imageList.isNotEmpty ? _buildImageUrl(imageList.first.code) : '',
   );
 
-  void _openFullScreenImage(BuildContext context) {
+  // 处理图片点击跳转
+  Future<void> _onImageTap(ImageData imageData) async {
+    if (imageData.href.isNotEmpty) {
+      final Uri uri = Uri.parse(imageData.href);
+      try {
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(
+            uri,
+            mode: LaunchMode.externalApplication,
+          );
+        }
+      } catch (e) {
+        debugPrint('无法打开链接: ${imageData.href}');
+      }
+    }
+  }
+
+  // 打开全屏图片查看
+  void _openFullScreenImage(BuildContext context, ImageData imageData) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -76,16 +106,32 @@ class ImageTxtMessageView extends StatelessWidget {
               children: [
                 Center(
                   child: InteractiveViewer(
-                      panEnabled: true,
-                      minScale: 0.1,
-                      maxScale: 4.0,
-                      child: _buildFullScreenImage()),
+                    panEnabled: true,
+                    minScale: 0.1,
+                    maxScale: 4.0,
+                    child: Image.network(
+                      _buildImageUrl(imageData.code),
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 200,
+                          height: 200,
+                          color: Colors.grey[300],
+                          child: const Icon(
+                            Icons.error,
+                            color: Colors.red,
+                            size: 50,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ),
                 Positioned(
                   top: 16,
                   left: 16,
                   child: IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.white),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -98,66 +144,146 @@ class ImageTxtMessageView extends StatelessWidget {
     );
   }
 
-  Widget _buildFullScreenImage() {
-    if (imageUrl.isUrl) {
-      return Image.network(
-        imageUrl,
-        fit: BoxFit.contain,
-      );
-    } else if (imageUrl.fromMemory) {
-      return Image.memory(
-        base64Decode(imageUrl.substring(imageUrl.indexOf('base64') + 7)),
-        fit: BoxFit.contain,
-      );
-    } else {
-      return Image.file(
-        File(imageUrl),
-        fit: BoxFit.contain,
-      );
-    }
-  }
-
-  Widget _buildImageWidget(BuildContext c) {
+  // 构建单个图片组件
+  Widget _buildImageWidget(BuildContext context, ImageData imageData) {
     return GestureDetector(
-      onTap: () => _openFullScreenImage(c),
-      child: (() {
-        if (imageUrl.isUrl) {
-          return Image.network(
-            imageUrl,
-            fit: BoxFit.fitHeight,
+      onTap: () {
+        // 长按打开全屏查看，点击跳转URL
+        _onImageTap(imageData);
+      },
+      onLongPress: () {
+        _openFullScreenImage(context, imageData);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey[300]!, width: 1),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            _buildImageUrl(imageData.code),
+            fit: BoxFit.cover,
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
-              return Center(
-                child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                      : null,
+              return Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.grey[200],
+                child: Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
+                        : null,
+                  ),
                 ),
               );
             },
-          );
-        } else if (imageUrl.fromMemory) {
-          return Image.memory(
-            base64Decode(imageUrl.substring(imageUrl.indexOf('base64') + 7)),
-            fit: BoxFit.fill,
-          );
-        } else {
-          return Image.file(
-            File(imageUrl),
-            fit: BoxFit.fill,
-          );
-        }
-      }()),
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.grey[300],
+                child: const Icon(
+                  Icons.error,
+                  color: Colors.red,
+                  size: 30,
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 构建图片网格
+  Widget _buildImageGrid(BuildContext context) {
+    if (imageList.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // 根据图片数量决定网格布局
+    int crossAxisCount;
+    double childAspectRatio;
+    double imageHeight;
+
+    if (imageList.length == 1) {
+      crossAxisCount = 1;
+      childAspectRatio = 1.2;
+      imageHeight = 200;
+    } else if (imageList.length == 2) {
+      crossAxisCount = 2;
+      childAspectRatio = 1.0;
+      imageHeight = 150;
+    } else if (imageList.length <= 4) {
+      crossAxisCount = 2;
+      childAspectRatio = 1.0;
+      imageHeight = 120;
+    } else {
+      crossAxisCount = 3;
+      childAspectRatio = 1.0;
+      imageHeight = 100;
+    }
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: imageHeight * ((imageList.length + crossAxisCount - 1) / crossAxisCount).ceil(),
+        maxWidth: imageMessageConfig?.width ?? 300,
+      ),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          childAspectRatio: childAspectRatio,
+          crossAxisSpacing: 4,
+          mainAxisSpacing: 4,
+        ),
+        itemCount: imageList.length,
+        itemBuilder: (context, index) {
+          return _buildImageWidget(context, imageList[index]);
+        },
+      ),
+    );
+  }
+
+  // 构建标题组件
+  Widget _buildTitle() {
+    if (title == null || title!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        title!,
+        style: const TextStyle(
+          fontSize: 14,
+          color: Colors.black87,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (imageList.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment:
-      isMessageBySender ? MainAxisAlignment.end : MainAxisAlignment.start,
+          isMessageBySender ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         if (isMessageBySender && !(imageMessageConfig?.hideShareIcon ?? false))
           iconButton,
@@ -173,7 +299,7 @@ class ImageTxtMessageView extends StatelessWidget {
                     ? Alignment.centerRight
                     : Alignment.centerLeft,
                 child: Container(
-                  padding: imageMessageConfig?.padding ?? EdgeInsets.zero,
+                  padding: imageMessageConfig?.padding ?? const EdgeInsets.all(8),
                   margin: imageMessageConfig?.margin ??
                       EdgeInsets.only(
                         top: 6,
@@ -181,12 +307,26 @@ class ImageTxtMessageView extends StatelessWidget {
                         left: isMessageBySender ? 0 : 6,
                         bottom: message.reaction.reactions.isNotEmpty ? 15 : 0,
                       ),
-                  height: imageMessageConfig?.height ?? 200,
-                  width: imageMessageConfig?.width ?? 150,
-                  child: ClipRRect(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
                     borderRadius: imageMessageConfig?.borderRadius ??
                         BorderRadius.circular(14),
-                    child: _buildImageWidget(context),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildImageGrid(context),
+                      _buildTitle(),
+                    ],
                   ),
                 ),
               ),
