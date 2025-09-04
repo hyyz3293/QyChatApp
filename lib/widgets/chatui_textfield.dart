@@ -180,7 +180,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
           decoration: BoxDecoration(
             borderRadius: textFieldConfig?.borderRadius ??
                 BorderRadius.circular(textFieldBorderRadius),
-            color: Colors.transparent,
+            color: Color(0XFFf4f5f7),
           ),
           child: ValueListenableBuilder<bool>(
             valueListenable: isRecording,
@@ -638,7 +638,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.grey,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -652,7 +652,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                   child: Text(
                     actions[index]['label'] as String,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Colors.grey,
                       fontSize: 11,
                       height: 1.1,
                     ),
