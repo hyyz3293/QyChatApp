@@ -41,6 +41,7 @@ class _ChartHomeScreenState extends State<ChartHomeScreen> with WidgetsBindingOb
       backgroundColor: Color(0XFFf4f5f7),
       appBar: AppBar(
         title: Text('聊天'),
+        elevation: 0,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

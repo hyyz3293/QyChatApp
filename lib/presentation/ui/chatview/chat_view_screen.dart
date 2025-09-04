@@ -163,24 +163,45 @@ class _ChatScreenState extends State<ChatViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar:
+      AppBar(
+        title: const Text('小宇客服', style: TextStyle(color: Colors.black),),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.grey, size: 20),
+          onPressed: () => Navigator.of(context).pop(),
+          tooltip: '返回',
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0XFFd5d8e4),
+                Color(0XFFb6bfcb)
+              ],
+            ),
+          ),
+        ),
+        actions: [IconButton(icon: Icon(_isSound ?
+        Icons.volume_up :
+        Icons.volume_off), onPressed: _toggleSound,
+            tooltip: _isSound ? '打开声音' : '关闭声音', color: Colors.grey,)],
+      ),
       //resizeToAvoidBottomInset: true,
       body: SafeArea(child:
-        RefreshIndicator( // <-- 使用 RefreshIndicator 包裹 ChatView
+        RefreshIndicator(
         onRefresh: () async {
-          // 这里是你的刷新逻辑，通常是从服务器重新加载消息
           print("开始刷新");
-          // 模拟一个网络请求延迟
           loadData();
-          //await Future.delayed(Duration(seconds: 2));
-          // TODO: 替换为你的实际数据刷新逻辑，例如：
-          // await _yourDataRefreshFunction();
-          // 刷新完成后，RefreshIndicator 会自动隐藏
           setState(() {
-            // 如果刷新逻辑涉及更新状态，可以在这里调用 setState
           });
     },
-    color: theme.outgoingChatBubbleColor, // 可选项：设置指示器颜色以匹配主题
-    backgroundColor: theme.backgroundColor, // 可选项：设置背景颜色以匹配主题
+    color: Colors.transparent, // 可选项：设置指示器颜色以匹配主题
+    backgroundColor: Colors.white, // 可选项：设置背景颜色以匹配主题
     child:
       ChatView(
         chatController: _chatController,
@@ -195,9 +216,9 @@ class _ChatScreenState extends State<ChatViewScreen> {
           border: Border.all(
             color: isDarkTheme ? Colors.transparent : Colors.grey,
           ),
-          icon: Icon(
+          icon: const Icon(
             Icons.keyboard_arrow_down_rounded,
-            color: theme.themeIconColor,
+            color: Colors.grey,
             weight: 10,
             size: 30,
           ),
@@ -213,57 +234,6 @@ class _ChatScreenState extends State<ChatViewScreen> {
           flashingCircleBrightColor: theme.flashingCircleBrightColor,
           flashingCircleDarkColor: theme.flashingCircleDarkColor,
         ),
-        appBar: AppBar(
-          title: Text('小宇客服'),
-          centerTitle: true,
-          actions: [IconButton(icon: Icon(_isSound ?
-          Icons.volume_up :
-          Icons.volume_off), onPressed: _toggleSound,
-              tooltip: _isSound ? '打开声音' : '关闭声音')],
-        ),
-        // ChatViewAppBar(
-        //   elevation: theme.elevation,
-        //   backGroundColor: theme.appBarColor,
-        //   profilePicture: Data.profileImage,
-        //   backArrowColor: theme.backArrowColor,
-        //   chatTitle: "Chat view",
-        //
-        //   chatTitleTextStyle: TextStyle(
-        //     color: theme.appBarTitleTextStyle,
-        //     fontWeight: FontWeight.bold,
-        //     fontSize: 18,
-        //     letterSpacing: 0.25,
-        //   ),
-        //   userStatus: "online",
-        //   userStatusTextStyle: const TextStyle(color: Colors.grey),
-        //   actions: [
-        //     IconButton(
-        //       onPressed: _onThemeIconTap,
-        //       icon: Icon(
-        //         isDarkTheme
-        //             ? Icons.brightness_4_outlined
-        //             : Icons.dark_mode_outlined,
-        //         color: theme.themeIconColor,
-        //       ),
-        //     ),
-        //     IconButton(
-        //       tooltip: 'Toggle TypingIndicator',
-        //       onPressed: _showHideTypingIndicator,
-        //       icon: Icon(
-        //         Icons.keyboard,
-        //         color: theme.themeIconColor,
-        //       ),
-        //     ),
-        //     IconButton(
-        //       tooltip: 'Simulate Message receive',
-        //       onPressed: receiveMessage,
-        //       icon: Icon(
-        //         Icons.supervised_user_circle,
-        //         color: theme.themeIconColor,
-        //       ),
-        //     ),
-        //   ],
-        // ),
         chatBackgroundConfig: ChatBackgroundConfiguration(
           messageTimeIconColor: theme.messageTimeIconColor,
           messageTimeTextStyle: TextStyle(color: theme.messageTimeTextColor),
@@ -273,7 +243,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
               fontSize: 17,
             ),
           ),
-          backgroundColor: theme.backgroundColor,
+          backgroundColor: Color(0XFFf4f5f7),
         ),
         sendMessageConfig: SendMessageConfiguration(
           imagePickerIconsConfig: ImagePickerIconsConfiguration(
@@ -421,7 +391,8 @@ class _ChatScreenState extends State<ChatViewScreen> {
               _onSendTap(item.text, const ReplyMessage(), MessageType.text),
         ),
       )),
-    ));
+    )
+    );
   }
 
   void _onSendTap(

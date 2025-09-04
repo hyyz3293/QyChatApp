@@ -157,7 +157,7 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
           strokeWidth: 3.0,
         ),
       )
-          : ChatViewScreen(),
+          : const ChatViewScreen(),
     );
   }
 
