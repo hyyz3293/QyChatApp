@@ -38,8 +38,21 @@ class _ChartHomeScreenState extends State<ChartHomeScreen> with WidgetsBindingOb
 
   Widget _buildRoot() {
     return Scaffold(
+      backgroundColor: Color(0XFFf4f5f7),
       appBar: AppBar(
         title: Text('聊天'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0XFFd5d8e4),
+                Color(0XFFb6bfcb)
+              ],
+            ),
+          ),
+        ),
       ),
       body: Padding(
         padding:  EdgeInsets.all(20.0),
@@ -54,10 +67,14 @@ class _ChartHomeScreenState extends State<ChartHomeScreen> with WidgetsBindingOb
                   padding: const EdgeInsets.only(bottom: 15.0),
                   child: TextField(
                     controller: _controllers[i],
+                    style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: i == 0 ? "ChannelCode" :
                       i == 1 ? "userInfo" :
                       '输入框 ${i + 1}',
+                      hintStyle: TextStyle(color: Colors.white),
+                      filled: true,
+                      fillColor: Colors.black,
                       border: OutlineInputBorder(),
                       contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                     ),
