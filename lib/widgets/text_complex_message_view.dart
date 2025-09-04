@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html_table/flutter_html_table.dart';
 import 'package:qychatapp/extensions/extensions.dart';
 import 'package:qychatapp/models/models.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -110,6 +111,7 @@ class TextComplexMessageView extends StatelessWidget {
       }
       return Html(
         data: processedHtml,
+        extensions: [ TableHtmlExtension()],
         style: {
           "body": Style(
             fontSize: FontSize(16.0),
@@ -131,6 +133,26 @@ class TextComplexMessageView extends StatelessWidget {
             //margin: EdgeInsets.zero,
             //padding: EdgeInsets.zero,
             alignment: Alignment.center,
+          ),
+          // Table support
+          "table": Style(
+            border: Border.all(color: Colors.grey, width: 1),
+          ),
+          "thead": Style(
+            backgroundColor: Colors.grey.shade200,
+          ),
+          "tbody": Style(),
+          "tr": Style(
+            border: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 0.5)),
+          ),
+          "th": Style(
+            fontWeight: FontWeight.bold,
+            textAlign: TextAlign.center,
+            backgroundColor: Colors.grey.shade100,
+            border: Border.all(color: Colors.grey.shade400, width: 0.5),
+          ),
+          "td": Style(
+            border: Border.all(color: Colors.grey.shade300, width: 0.5),
           ),
         },
         onLinkTap: (url, _, __,) {

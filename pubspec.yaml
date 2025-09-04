@@ -51,6 +51,7 @@ dependencies:
   flutter_html: ^3.0.0-alpha.6  # 3.x版本可能已解决依赖冲突
   flutter_markdown: ^0.7.7+1
   flutter_link_previewer: ^3.2.2
+  flutter_html_table: ^3.0.0
   # G
   get_it: ^8.0.0
   google_fonts: ^6.2.1
