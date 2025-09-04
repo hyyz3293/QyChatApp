@@ -284,7 +284,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
             ),
             receiptsWidgetConfig:
             const ReceiptsWidgetConfig(showReceiptsIn: ShowReceiptsIn.all),
-            color: theme.outgoingChatBubbleColor,
+            color:  const Color(0xffb9cfe3),
           ),
           inComingChatBubbleConfig: ChatBubble(
             linkPreviewConfig: LinkPreviewConfiguration(
@@ -301,9 +301,8 @@ class _ChatScreenState extends State<ChatViewScreen> {
               /// send your message reciepts to the other client
               debugPrint('Message Read');
             },
-            senderNameTextStyle:
-            TextStyle(color: theme.inComingChatBubbleTextColor),
-            color: theme.inComingChatBubbleColor,
+            senderNameTextStyle: const TextStyle(color: Colors.black),
+            color: Colors.white,
           ),
         ),
         replyPopupConfig: ReplyPopupConfiguration(
@@ -320,7 +319,6 @@ class _ChatScreenState extends State<ChatViewScreen> {
         ),
         messageConfig: MessageConfiguration(
           messageReactionConfig: MessageReactionConfiguration(
-            backgroundColor: theme.messageReactionBackGroundColor,
             borderColor: theme.messageReactionBackGroundColor,
             reactedUserCountTextStyle:
             TextStyle(color: theme.inComingChatBubbleTextColor),
@@ -352,12 +350,10 @@ class _ChatScreenState extends State<ChatViewScreen> {
             ),
           ),
         ),
-        profileCircleConfig: ProfileCircleConfiguration(
-
+        profileCircleConfig: const ProfileCircleConfiguration(
           profileImageUrl: Data.profileImage,
         ),
         repliedMessageConfig: RepliedMessageConfiguration(
-          backgroundColor: theme.repliedMessageColor,
           verticalBarColor: theme.verticalBarColor,
           repliedMsgAutoScrollConfig:   RepliedMsgAutoScrollConfig(
             enableHighlightRepliedMsg: true,

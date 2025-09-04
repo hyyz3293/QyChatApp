@@ -65,10 +65,8 @@ class TextComplexMessageView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Container(
-                  child: Text("${message.complex!.title}", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),),
-                ),
-                SizedBox(height: 10,),
+                Text(message.complex!.title, style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),),
+                const SizedBox(height: 10,),
                 textMessage.isUrl
                     ? LinkPreview(
                   linkPreviewConfig: _linkPreviewConfig,

@@ -63,7 +63,7 @@ class _NavigationState extends State<NavigationMessageView> {
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12), // 使用较小的圆角
-            color: Color(0xff383152),
+            color: Colors.white,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch, // 让子项填充宽度
@@ -132,7 +132,7 @@ class _NavigationState extends State<NavigationMessageView> {
                 child: Text(
                   "${scene.menuTitle}",
                   style: TextStyle(
-                    color: Colors.grey,
+                    color: Colors.black,
                     fontSize: 16,
                   ),
                   softWrap: true, // 允许换行
@@ -166,7 +166,7 @@ class _NavigationState extends State<NavigationMessageView> {
                 child: Text(
                   "${scene}",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontSize: 18,
                   ),
                   softWrap: true, // 允许换行

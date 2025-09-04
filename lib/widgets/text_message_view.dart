@@ -81,16 +81,9 @@ class TextMessageView extends StatelessWidget {
   // 构建文本内容（支持富文本或普通文本）
   Widget _buildTextContent(TextTheme textTheme, String textMessage, InlineSpan? richText) {
     final defaultStyle = _textStyle ?? textTheme.bodyMedium!.copyWith(
-      color: Colors.white,
+      color: Colors.black,
       fontSize: 16,
     );
-
-    // if (richText != null) {
-    //   return RichText(
-    //     text: richText,
-    //     textAlign: TextAlign.start,
-    //   );
-    // }
 
     // 检测并处理简单富文本标记
     if (_containsSimpleRichText(textMessage)) {
@@ -102,7 +95,7 @@ class TextMessageView extends StatelessWidget {
         style: {
           "body": Style(
             fontSize: FontSize(16.0),
-            color: Colors.white,
+            color: Colors.black,
             // margin: EdgeInsets.zero,
             //padding: EdgeInsets.zero,
           ),
@@ -113,7 +106,7 @@ class TextMessageView extends StatelessWidget {
           "i": Style(fontStyle: FontStyle.italic),
           "u": Style(textDecoration: TextDecoration.underline),
           "a": Style(
-            color: Colors.blue,
+            color: Colors.black,
             textDecoration: TextDecoration.underline,
           ),
           "img": Style(
@@ -167,87 +160,9 @@ class TextMessageView extends StatelessWidget {
     return true;
   }
 
-  // 解析简单富文本标记
-  Widget _parseSimpleRichText(String text, TextStyle defaultStyle) {
-    final spans = <TextSpan>[];
-    final buffer = StringBuffer();
-    bool isBold = false;
-    bool isItalic = false;
-    bool isCode = false;
 
-    for (int i = 0; i < text.length; i++) {
-      final char = text[i];
 
-      // 处理粗体标记
-      if (char == '*' && i + 1 < text.length && text[i + 1] == '*') {
-        if (buffer.isNotEmpty) {
-          spans.add(TextSpan(
-            text: buffer.toString(),
-            style: _getCurrentStyle(defaultStyle, isBold, isItalic, isCode),
-          ));
-          buffer.clear();
-        }
-        isBold = !isBold;
-        i++; // 跳过下一个星号
-        continue;
-      }
 
-      // 处理斜体标记
-      if (char == '*') {
-        if (buffer.isNotEmpty) {
-          spans.add(TextSpan(
-            text: buffer.toString(),
-            style: _getCurrentStyle(defaultStyle, isBold, isItalic, isCode),
-          ));
-          buffer.clear();
-        }
-        isItalic = !isItalic;
-        continue;
-      }
-
-      // 处理代码标记
-      if (char == '`') {
-        if (buffer.isNotEmpty) {
-          spans.add(TextSpan(
-            text: buffer.toString(),
-            style: _getCurrentStyle(defaultStyle, isBold, isItalic, isCode),
-          ));
-          buffer.clear();
-        }
-        isCode = !isCode;
-        continue;
-      }
-
-      buffer.write(char);
-    }
-
-    // 添加剩余文本
-    if (buffer.isNotEmpty) {
-      spans.add(TextSpan(
-        text: buffer.toString(),
-        style: _getCurrentStyle(defaultStyle, isBold, isItalic, isCode),
-      ));
-    }
-
-    return RichText(
-      text: TextSpan(children: spans),
-    );
-  }
-
-  // 获取当前文本样式
-  TextStyle _getCurrentStyle(
-      TextStyle baseStyle,
-      bool isBold,
-      bool isItalic,
-      bool isCode,
-      ) {
-    return baseStyle.copyWith(
-      fontWeight: isBold ? FontWeight.bold : baseStyle.fontWeight,
-      fontStyle: isItalic ? FontStyle.italic : baseStyle.fontStyle,
-      backgroundColor: isCode ? Colors.grey[800] : null,
-      fontFamily: isCode ? 'monospace' : baseStyle.fontFamily,
-    );
-  }
 
   EdgeInsetsGeometry? get _padding => isMessageBySender
       ? outgoingChatBubbleConfig?.padding

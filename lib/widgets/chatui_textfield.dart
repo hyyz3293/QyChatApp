@@ -180,7 +180,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
           decoration: BoxDecoration(
             borderRadius: textFieldConfig?.borderRadius ??
                 BorderRadius.circular(textFieldBorderRadius),
-            color: sendMessageConfig?.textFieldBackgroundColor ?? Colors.white,
+            color: Colors.transparent,
           ),
           child: ValueListenableBuilder<bool>(
             valueListenable: isRecording,
@@ -235,8 +235,8 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                           child: TextField(
                             focusNode: widget.focusNode,
                             controller: widget.textEditingController,
-                            style: textFieldConfig?.textStyle ??
-                                const TextStyle(color: Colors.white),
+                            style:
+                            const TextStyle(color: Colors.black),
                             maxLines: textFieldConfig?.maxLines ?? 5,
                             minLines: textFieldConfig?.minLines ?? 1,
                             keyboardType: textFieldConfig?.textInputType,
@@ -248,7 +248,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                             decoration: InputDecoration(
                               hintText:
                               textFieldConfig?.hintText ?? PackageStrings.message,
-                              fillColor: sendMessageConfig?.textFieldBackgroundColor ??
+                              fillColor:
                                   Colors.white,
                               filled: true,
                               hintStyle: textFieldConfig?.hintStyle ??
@@ -382,9 +382,9 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
               decoration: BoxDecoration(
                 borderRadius: textFieldConfig?.borderRadius ??
                     BorderRadius.circular(textFieldBorderRadius),
-                color: sendMessageConfig?.textFieldBackgroundColor ?? Colors.white,
+                color:  Colors.white,
               ),
-              child: Text("${sence.name}", style: TextStyle(color: voiceRecordingConfig?.recorderIconColor,),),
+              child: Text("${sence.name}", style: TextStyle(color: Colors.black,),),
             ),
           )
         ],
