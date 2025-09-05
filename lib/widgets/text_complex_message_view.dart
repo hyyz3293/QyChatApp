@@ -103,8 +103,8 @@ class TextComplexMessageView extends StatelessWidget {
     // 检测并处理简单富文本标记
     if (_containsSimpleRichText(textMessage)) {
       // 处理图片路径 - 添加前缀
-      final processedHtml = _processImageUrls(message.complex!.content);
-      if (message.digest != "") {
+      final processedHtml = _processImageUrls(message.complex?.content ?? '');
+      if (message.digest != null && message.digest != "") {
         _processImageUrls(message.digest!);
       }
       return Html(
