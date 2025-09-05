@@ -560,10 +560,8 @@ class _ChatScreenState extends State<ChatViewScreen> {
           }
         }
         
-        // 批量添加历史消息到聊天控制器
-        for (Message message in historyMessages.reversed) {
-          _chatController.addMessage(message);
-        }
+        // 批量添加历史消息到聊天控制器（使用loadMoreData确保历史消息在前面）
+        _chatController.loadMoreData(historyMessages);
         
         // 更新聊天状态
         setState(() {
