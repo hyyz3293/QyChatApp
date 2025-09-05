@@ -566,7 +566,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
     required MessageRecord msgBean,
   }) {
     print("____________________---------start---------------------------------------------start");
-    print("____________________${enumType}");
+    print("__________________enumType  ==__${enumType}");
     print("____________________${messJson.toJson()}");
 
     print("____________________---------end---------------------------------------------end");
@@ -575,7 +575,6 @@ class _ChatScreenState extends State<ChatViewScreen> {
       case "imQueueNotice":
         return Message(
           createdAt: dateTime,
-          messageType: MessageType.custom,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
           sentBy: '2'
@@ -585,7 +584,6 @@ class _ChatScreenState extends State<ChatViewScreen> {
         if (evaluationFlag == 1) {
           return Message(
             createdAt: dateTime,
-            messageType: MessageType.custom,
             status: MessageStatus.delivered,
             message: serviceEvaluateTxt ?? '',
             sentBy: '2'
@@ -596,7 +594,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
       case "complex":
         return Message(
           createdAt: dateTime,
-          messageType: MessageType.custom,
+          messageType: MessageType.complex,
           status: MessageStatus.delivered,
           message: messJson.digest ?? '',
           sentBy: '2',
@@ -606,7 +604,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
       case "navigation":
         return Message(
           createdAt: dateTime,
-          messageType: MessageType.custom,
+          messageType: MessageType.navigation,
           status: MessageStatus.delivered,
           message: messJson.title ?? '',
           sentBy: '2',
@@ -616,26 +614,26 @@ class _ChatScreenState extends State<ChatViewScreen> {
       case "knowGraphicText":
         return Message(
           createdAt: dateTime,
-          messageType: MessageType.custom,
+          messageType: MessageType.knowGraphicText,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
           sentBy: '2',
-          imgs: messJson.imgs
+          imgs: messJson.imgs,
+            link: messJson.link
         );
 
       case "welcomeSpeech":
         return Message(
           createdAt: dateTime,
-          messageType: MessageType.custom,
           status: MessageStatus.delivered,
-          message: messJson.content ?? '',
+          message: messJson.welcomeSpeech!.welcomeSpeech ?? '',
           sentBy: '2'
         );
 
       case "link":
         return Message(
           createdAt: dateTime,
-          messageType: MessageType.custom,
+          messageType: MessageType.links,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
           sentBy: '2',
@@ -645,7 +643,6 @@ class _ChatScreenState extends State<ChatViewScreen> {
       case "graphicText":
         return Message(
           createdAt: dateTime,
-          messageType: MessageType.custom,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
           sentBy: '2'
@@ -654,7 +651,6 @@ class _ChatScreenState extends State<ChatViewScreen> {
       case "imClick":
         return Message(
           createdAt: dateTime,
-          messageType: MessageType.custom,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
           sentBy: '2'
@@ -732,7 +728,6 @@ class _ChatScreenState extends State<ChatViewScreen> {
       case "imSeatReturnResult":
         return Message(
           createdAt: dateTime,
-          messageType: MessageType.custom,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
           sentBy: '2'
@@ -741,12 +736,12 @@ class _ChatScreenState extends State<ChatViewScreen> {
       case "imCustomerOverChat":
         return Message(
           createdAt: dateTime,
-          messageType: MessageType.custom,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
           sentBy: '2'
         );
     }
+    print("null------------------------------${enumType}");
     return null;
   }
 

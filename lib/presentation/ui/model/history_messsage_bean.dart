@@ -247,6 +247,7 @@ class MessJson {
   String? to;
   String? type;
 
+  String? link;
 
   String? event;
   //String? enumType;
@@ -293,6 +294,7 @@ class MessJson {
   int? serviceId;
 
   MessJson({
+    this.link,
     this.content,
     this.conversationCode,
     this.enumType,
@@ -352,6 +354,7 @@ class MessJson {
 
   factory MessJson.fromJson(Map<String, dynamic> json) {
     return MessJson(
+      link: json['link'],
       content: json['content'],
       conversationCode: json['conversationCode'],
       enumType: json['enumType'],
@@ -443,7 +446,7 @@ class MessJson {
       'serviceId': serviceId,
       'event': event,
       'title': title,
-
+      'link': link,
       // ---------------------- 场景/设备相关字段 ----------------------
       'ip': ip,
       'webUrl': webUrl,
