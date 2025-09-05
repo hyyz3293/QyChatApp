@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:qychatapp/presentation/constants/assets.dart';
@@ -197,200 +198,218 @@ class _ChatScreenState extends State<ChatViewScreen> {
                 SizedBox(
                   height: double.infinity,
                   width: double.infinity,
-                  child: RefreshIndicator(
-                      onRefresh: () async {
-                        print("开始刷新");
-                        loadData();
-                        setState(() {
-                        });
-                      },
-                      color: Colors.transparent, 
-                      backgroundColor: Colors.grey, 
-                      child:
-                      ChatView(
-                        chatController: _chatController,
-                        onSendTap: _onSendTap,
-                        featureActiveConfig: const FeatureActiveConfig(
-                          lastSeenAgoBuilderVisibility: true,
-                          receiptsBuilderVisibility: true,
-                          enableScrollToBottomButton: true,
+                  child: ChatView(
+                    loadMoreData: loadData,
+                    loadingWidget: Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                theme.outgoingChatBubbleColor ?? Colors.blue,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            '加载更多消息...',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    chatController: _chatController,
+                    onSendTap: _onSendTap,
+                    featureActiveConfig: const FeatureActiveConfig(
+                      lastSeenAgoBuilderVisibility: true,
+                      receiptsBuilderVisibility: true,
+                      enableScrollToBottomButton: true,
+                      enablePagination: true,
+                    ),
+                    scrollToBottomButtonConfig: ScrollToBottomButtonConfig(
+                      backgroundColor: theme.textFieldBackgroundColor,
+                      border: Border.all(
+                        color: isDarkTheme ? Colors.transparent : Colors.grey,
+                      ),
+                      icon: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: Colors.grey,
+                        weight: 10,
+                        size: 30,
+                      ),
+                    ),
+                    chatViewState: ChatViewState.hasMessages,
+                    chatViewStateConfig: ChatViewStateConfiguration(
+                      loadingWidgetConfig: ChatViewStateWidgetConfiguration(
+                        loadingIndicatorColor: theme.outgoingChatBubbleColor,
+                      ),
+                      onReloadButtonTap: () {},
+                    ),
+                    typeIndicatorConfig: TypeIndicatorConfiguration(
+                      flashingCircleBrightColor: theme.flashingCircleBrightColor,
+                      flashingCircleDarkColor: theme.flashingCircleDarkColor,
+                    ),
+                    chatBackgroundConfig: ChatBackgroundConfiguration(
+                      messageTimeIconColor: theme.messageTimeIconColor,
+                      messageTimeTextStyle: TextStyle(color: theme.messageTimeTextColor),
+                      defaultGroupSeparatorConfig: DefaultGroupSeparatorConfiguration(
+                        textStyle: TextStyle(
+                          color: theme.chatHeaderColor,
+                          fontSize: 17,
                         ),
-                        scrollToBottomButtonConfig: ScrollToBottomButtonConfig(
-                          backgroundColor: theme.textFieldBackgroundColor,
+                      ),
+                      backgroundColor: Color(0XFFf4f5f7),
+                    ),
+                    sendMessageConfig: SendMessageConfiguration(
+                      imagePickerIconsConfig: ImagePickerIconsConfiguration(
+                        cameraIconColor: theme.cameraIconColor,
+                        galleryIconColor: theme.galleryIconColor,
+                      ),
+                      replyMessageColor: theme.replyMessageColor,
+                      defaultSendButtonColor: theme.sendButtonColor,
+                      replyDialogColor: theme.replyDialogColor,
+                      replyTitleColor: theme.replyTitleColor,
+                      textFieldBackgroundColor: theme.textFieldBackgroundColor,
+                      closeIconColor: theme.closeIconColor,
+                      textFieldConfig: TextFieldConfiguration(
+                        onMessageTyping: (status) {
+                          /// Do with status
+                          debugPrint(status.toString());
+                        },
+                        compositionThresholdTime: const Duration(seconds: 1),
+                        textStyle: TextStyle(color: theme.textFieldTextColor),
+                      ),
+                      micIconColor: theme.replyMicIconColor,
+                      voiceRecordingConfiguration: VoiceRecordingConfiguration(
+                        backgroundColor: theme.waveformBackgroundColor,
+                        recorderIconColor: theme.recordIconColor,
+                        waveStyle: WaveStyle(
+                          showMiddleLine: false,
+                          waveColor: theme.waveColor ?? Colors.white,
+                          extendWaveform: true,
+                        ),
+                      ),
+                    ),
+                    chatBubbleConfig: ChatBubbleConfiguration(
+                      outgoingChatBubbleConfig: ChatBubble(
+                        linkPreviewConfig: LinkPreviewConfiguration(
+                          backgroundColor: theme.linkPreviewOutgoingChatColor,
+                          bodyStyle: theme.outgoingChatLinkBodyStyle,
+                          titleStyle: theme.outgoingChatLinkTitleStyle,
+                        ),
+                        receiptsWidgetConfig:
+                        const ReceiptsWidgetConfig(showReceiptsIn: ShowReceiptsIn.all),
+                        color:  const Color(0xffb9cfe3),
+                      ),
+                      inComingChatBubbleConfig: ChatBubble(
+                        linkPreviewConfig: LinkPreviewConfiguration(
+                          linkStyle: TextStyle(
+                            color: theme.inComingChatBubbleTextColor,
+                            decoration: TextDecoration.underline,
+                          ),
+                          backgroundColor: theme.linkPreviewIncomingChatColor,
+                          bodyStyle: theme.incomingChatLinkBodyStyle,
+                          titleStyle: theme.incomingChatLinkTitleStyle,
+                        ),
+                        textStyle: TextStyle(color: theme.inComingChatBubbleTextColor),
+                        onMessageRead: (message) {
+                          /// send your message reciepts to the other client
+                          debugPrint('Message Read');
+                        },
+                        senderNameTextStyle: const TextStyle(color: Colors.black),
+                        color: Colors.white,
+                      ),
+                    ),
+                    replyPopupConfig: ReplyPopupConfiguration(
+                      backgroundColor: theme.replyPopupColor,
+                      buttonTextStyle: TextStyle(color: theme.replyPopupButtonColor),
+                      topBorderColor: theme.replyPopupTopBorderColor,
+                    ),
+                    reactionPopupConfig: ReactionPopupConfiguration(
+                      shadow: BoxShadow(
+                        color: isDarkTheme ? Colors.black54 : Colors.grey.shade400,
+                        blurRadius: 20,
+                      ),
+                      backgroundColor: theme.reactionPopupColor,
+                    ),
+                    messageConfig: MessageConfiguration(
+                      messageReactionConfig: MessageReactionConfiguration(
+                        borderColor: theme.messageReactionBackGroundColor,
+                        reactedUserCountTextStyle:
+                        TextStyle(color: theme.inComingChatBubbleTextColor),
+                        reactionCountTextStyle:
+                        TextStyle(color: theme.inComingChatBubbleTextColor),
+                        reactionsBottomSheetConfig: ReactionsBottomSheetConfiguration(
+                          backgroundColor: theme.backgroundColor,
+                          reactedUserTextStyle: TextStyle(
+                            color: theme.inComingChatBubbleTextColor,
+                          ),
+                          reactionWidgetDecoration: BoxDecoration(
+                            color: theme.inComingChatBubbleColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: isDarkTheme ? Colors.black12 : Colors.grey.shade200,
+                                offset: const Offset(0, 20),
+                                blurRadius: 40,
+                              )
+                            ],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      imageMessageConfig: ImageMessageConfiguration(
+                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                        shareIconConfig: ShareIconConfiguration(
+                          defaultIconBackgroundColor: theme.shareIconBackgroundColor,
+                          defaultIconColor: theme.shareIconColor,
+                        ),
+                      ),
+                    ),
+                    profileCircleConfig: const ProfileCircleConfiguration(
+                      profileImageUrl: Data.profileImage,
+                    ),
+                    repliedMessageConfig: RepliedMessageConfiguration(
+                      verticalBarColor: theme.verticalBarColor,
+                      repliedMsgAutoScrollConfig:   RepliedMsgAutoScrollConfig(
+                        enableHighlightRepliedMsg: true,
+                        highlightColor: Colors.pinkAccent.shade100,
+                        highlightScale: 1.1,
+                      ),
+                      textStyle: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.25,
+                      ),
+                      replyTitleTextStyle: TextStyle(color: theme.repliedTitleTextColor),
+                    ),
+                    swipeToReplyConfig: SwipeToReplyConfiguration(
+                      replyIconColor: theme.swipeToReplyIconColor,
+                    ),
+                    replySuggestionsConfig: ReplySuggestionsConfig(
+                      itemConfig: SuggestionItemConfig(
+                        decoration: BoxDecoration(
+                          color: theme.textFieldBackgroundColor,
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: isDarkTheme ? Colors.transparent : Colors.grey,
-                          ),
-                          icon: const Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: Colors.grey,
-                            weight: 10,
-                            size: 30,
+                            color: theme.outgoingChatBubbleColor ?? Colors.white,
                           ),
                         ),
-                        chatViewState: ChatViewState.hasMessages,
-                        chatViewStateConfig: ChatViewStateConfiguration(
-                          loadingWidgetConfig: ChatViewStateWidgetConfiguration(
-                            loadingIndicatorColor: theme.outgoingChatBubbleColor,
-                          ),
-                          onReloadButtonTap: () {},
+                        textStyle: TextStyle(
+                          color: isDarkTheme ? Colors.white : Colors.black,
                         ),
-                        typeIndicatorConfig: TypeIndicatorConfiguration(
-                          flashingCircleBrightColor: theme.flashingCircleBrightColor,
-                          flashingCircleDarkColor: theme.flashingCircleDarkColor,
-                        ),
-                        chatBackgroundConfig: ChatBackgroundConfiguration(
-                          messageTimeIconColor: theme.messageTimeIconColor,
-                          messageTimeTextStyle: TextStyle(color: theme.messageTimeTextColor),
-                          defaultGroupSeparatorConfig: DefaultGroupSeparatorConfiguration(
-                            textStyle: TextStyle(
-                              color: theme.chatHeaderColor,
-                              fontSize: 17,
-                            ),
-                          ),
-                          backgroundColor: Color(0XFFf4f5f7),
-                        ),
-                        sendMessageConfig: SendMessageConfiguration(
-                          imagePickerIconsConfig: ImagePickerIconsConfiguration(
-                            cameraIconColor: theme.cameraIconColor,
-                            galleryIconColor: theme.galleryIconColor,
-                          ),
-                          replyMessageColor: theme.replyMessageColor,
-                          defaultSendButtonColor: theme.sendButtonColor,
-                          replyDialogColor: theme.replyDialogColor,
-                          replyTitleColor: theme.replyTitleColor,
-                          textFieldBackgroundColor: theme.textFieldBackgroundColor,
-                          closeIconColor: theme.closeIconColor,
-                          textFieldConfig: TextFieldConfiguration(
-                            onMessageTyping: (status) {
-                              /// Do with status
-                              debugPrint(status.toString());
-                            },
-                            compositionThresholdTime: const Duration(seconds: 1),
-                            textStyle: TextStyle(color: theme.textFieldTextColor),
-                          ),
-                          micIconColor: theme.replyMicIconColor,
-                          voiceRecordingConfiguration: VoiceRecordingConfiguration(
-                            backgroundColor: theme.waveformBackgroundColor,
-                            recorderIconColor: theme.recordIconColor,
-                            waveStyle: WaveStyle(
-                              showMiddleLine: false,
-                              waveColor: theme.waveColor ?? Colors.white,
-                              extendWaveform: true,
-                            ),
-                          ),
-                        ),
-                        chatBubbleConfig: ChatBubbleConfiguration(
-                          outgoingChatBubbleConfig: ChatBubble(
-                            linkPreviewConfig: LinkPreviewConfiguration(
-                              backgroundColor: theme.linkPreviewOutgoingChatColor,
-                              bodyStyle: theme.outgoingChatLinkBodyStyle,
-                              titleStyle: theme.outgoingChatLinkTitleStyle,
-                            ),
-                            receiptsWidgetConfig:
-                            const ReceiptsWidgetConfig(showReceiptsIn: ShowReceiptsIn.all),
-                            color:  const Color(0xffb9cfe3),
-                          ),
-                          inComingChatBubbleConfig: ChatBubble(
-                            linkPreviewConfig: LinkPreviewConfiguration(
-                              linkStyle: TextStyle(
-                                color: theme.inComingChatBubbleTextColor,
-                                decoration: TextDecoration.underline,
-                              ),
-                              backgroundColor: theme.linkPreviewIncomingChatColor,
-                              bodyStyle: theme.incomingChatLinkBodyStyle,
-                              titleStyle: theme.incomingChatLinkTitleStyle,
-                            ),
-                            textStyle: TextStyle(color: theme.inComingChatBubbleTextColor),
-                            onMessageRead: (message) {
-                              /// send your message reciepts to the other client
-                              debugPrint('Message Read');
-                            },
-                            senderNameTextStyle: const TextStyle(color: Colors.black),
-                            color: Colors.white,
-                          ),
-                        ),
-                        replyPopupConfig: ReplyPopupConfiguration(
-                          backgroundColor: theme.replyPopupColor,
-                          buttonTextStyle: TextStyle(color: theme.replyPopupButtonColor),
-                          topBorderColor: theme.replyPopupTopBorderColor,
-                        ),
-                        reactionPopupConfig: ReactionPopupConfiguration(
-                          shadow: BoxShadow(
-                            color: isDarkTheme ? Colors.black54 : Colors.grey.shade400,
-                            blurRadius: 20,
-                          ),
-                          backgroundColor: theme.reactionPopupColor,
-                        ),
-                        messageConfig: MessageConfiguration(
-                          messageReactionConfig: MessageReactionConfiguration(
-                            borderColor: theme.messageReactionBackGroundColor,
-                            reactedUserCountTextStyle:
-                            TextStyle(color: theme.inComingChatBubbleTextColor),
-                            reactionCountTextStyle:
-                            TextStyle(color: theme.inComingChatBubbleTextColor),
-                            reactionsBottomSheetConfig: ReactionsBottomSheetConfiguration(
-                              backgroundColor: theme.backgroundColor,
-                              reactedUserTextStyle: TextStyle(
-                                color: theme.inComingChatBubbleTextColor,
-                              ),
-                              reactionWidgetDecoration: BoxDecoration(
-                                color: theme.inComingChatBubbleColor,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: isDarkTheme ? Colors.black12 : Colors.grey.shade200,
-                                    offset: const Offset(0, 20),
-                                    blurRadius: 40,
-                                  )
-                                ],
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                          imageMessageConfig: ImageMessageConfiguration(
-                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
-                            shareIconConfig: ShareIconConfiguration(
-                              defaultIconBackgroundColor: theme.shareIconBackgroundColor,
-                              defaultIconColor: theme.shareIconColor,
-                            ),
-                          ),
-                        ),
-                        profileCircleConfig: const ProfileCircleConfiguration(
-                          profileImageUrl: Data.profileImage,
-                        ),
-                        repliedMessageConfig: RepliedMessageConfiguration(
-                          verticalBarColor: theme.verticalBarColor,
-                          repliedMsgAutoScrollConfig:   RepliedMsgAutoScrollConfig(
-                            enableHighlightRepliedMsg: true,
-                            highlightColor: Colors.pinkAccent.shade100,
-                            highlightScale: 1.1,
-                          ),
-                          textStyle: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.25,
-                          ),
-                          replyTitleTextStyle: TextStyle(color: theme.repliedTitleTextColor),
-                        ),
-                        swipeToReplyConfig: SwipeToReplyConfiguration(
-                          replyIconColor: theme.swipeToReplyIconColor,
-                        ),
-                        replySuggestionsConfig: ReplySuggestionsConfig(
-                          itemConfig: SuggestionItemConfig(
-                            decoration: BoxDecoration(
-                              color: theme.textFieldBackgroundColor,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: theme.outgoingChatBubbleColor ?? Colors.white,
-                              ),
-                            ),
-                            textStyle: TextStyle(
-                              color: isDarkTheme ? Colors.white : Colors.black,
-                            ),
-                          ),
-                          onTap: (item) =>
-                              _onSendTap(item.text, const ReplyMessage(), MessageType.text),
-                        ),
-                      )),
+                      ),
+                      onTap: (item) =>
+                          _onSendTap(item.text, const ReplyMessage(), MessageType.text),
+                    ),
+                  )
                 ),
                 const Text("下拉可查看历史消息", style: TextStyle(color: Colors.grey, fontSize: 12),)
               ],
@@ -462,64 +481,280 @@ class _ChatScreenState extends State<ChatViewScreen> {
   }
 
   Future<void> loadData() async {
-    //lastTime = DateTime.now().toUtc().millisecondsSinceEpoch;
+    try {
+      var map = await DioClient().getHistoryList(page, lastTime);
+      MessagePageResponse response = MessagePageResponse.fromJson(map);
 
-    var map = await DioClient().getHistoryList(page,lastTime);
-    MessagePageResponse response = MessagePageResponse.fromJson(map);
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      var evaluationFlag = sharedPreferences.getInt("sharedPreferences");
+      var serviceEvaluateTxt = sharedPreferences.getString("serviceEvaluateTxt");
 
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var evaluationFlag = sharedPreferences.getInt("sharedPreferences");
-    var serviceEvaluateTxt = sharedPreferences.getString("serviceEvaluateTxt");
+      if (response.page!.total! >= 30) {
+        page++;
+      }
 
-    if (response.page!.total! >= 30) {
-      page++;
-    }
-    if (response.page!.records!.isNotEmpty) {
-      for(int i = 0; i < response.page!.records!.length; i++) {
-        printN("history====${response.page!.records![i].toJson()}");
-        var dateTime = DateTime.now();
-        //printN("_handleSocketIm  enumType= $enumType");
-        var msgBean = response.page!.records![i];
+      printN("history==loadData=number=____________${response.page!.records!.length}__________");
 
-        var messJson = response.page!.records![i].messJson;
+      if (response.page!.records!.isNotEmpty) {
+        // 创建历史消息列表
+        List<Message> historyMessages = [];
+        
+        for (int i = 0; i < response.page!.records!.length; i++) {
+          printN("history====${response.page!.records![i].toJson()}");
+          
+          var dateTime = DateTime.now();
+          var msgBean = response.page!.records![i];
+          var messJson = response.page!.records![i].messJson;
 
-        String? enumType = messJson!.enumType;
-        String? type = messJson!.type;
-        int? userId = msgBean.msgSendId ?? 0;
-        String? sendName = msgBean.sendName;
-        String? sendAvatar = msgBean.sendAvatar;
+          // 检查messJson是否为null
+          if (messJson == null) {
+            printN("messJson is null for record $i, skipping...");
+            continue;
+          }
 
-        if (enumType != "") {
-          // 调用提取的方法
-          await CSocketIOManager().handleEnumType(
+          String? enumType = messJson.enumType;
+          if (enumType == null || enumType == "") {
+            enumType = response.page!.records![i].messEnumType;
+          }
+          
+          int? userId = msgBean.msgSendId ?? 0;
+          String? sendName = msgBean.sendName;
+          String? sendAvatar = msgBean.sendAvatar;
+
+          if (enumType != null && enumType != "") {
+            // 创建历史消息对象
+            Message? historyMessage = _createMessageFromHistoryData(
               enumType: enumType,
               dateTime: dateTime,
               sharedPreferences: sharedPreferences,
               evaluationFlag: evaluationFlag,
               serviceEvaluateTxt: serviceEvaluateTxt,
-
-              // -------------------------- 从 msgBean 提取的所有非必传字段 --------------------------
-              type: messJson.type,                  // 消息类型（如 "notice"）
-              msg: messJson.content,                    // 原始消息内容
-              msgId: msgBean.messId,                // 消息ID（msgBean 原有字段）
-              messId: msgBean.messId,              // 消息ID（msgBean 原有字段，与 msgId 区分）
-              msgSendId: msgBean.msgSendId,        // 消息发送者ID
-              serviceId: messJson.serviceId,        // 服务ID（评价相关）
-              complex: messJson.complex,            // 复杂消息数据（ComplexData 类型）
-              navigationList: messJson.navigationList, // 导航菜单列表（ChatMenuItem 类型）
-              title: messJson.title,                // 导航/消息标题
-              welcomeSpeech: messJson.welcomeSpeech, // 欢迎语数据（WelcomeSpeechData 类型）
-              links: messJson.links,                // 链接列表（ChatLinkItem 类型）
-              content: messJson.content,            // 文本/媒体内容
-              conversationCode: messJson.conversationCode, // 会话编码（媒体预览用）
-              url: messJson.url,                    // 媒体URL（视频/语音）
-              imgs: messJson.imgs,                  // 图片列表（ImageData 类型）
-              attachment: messJson.attachment,      // 附件列表（AttachmentData 类型）
-              digest: messJson.digest               // 复杂消息摘要
-          );
+              userId: userId,
+              sendName: sendName,
+              sendAvatar: sendAvatar,
+              messJson: messJson,
+              msgBean: msgBean,
+            );
+            
+            if (historyMessage != null) {
+              historyMessages.add(historyMessage);
+            }
+          }
+        }
+        
+        // 批量添加历史消息到聊天控制器
+        for (Message message in historyMessages.reversed) {
+          _chatController.addMessage(message);
         }
       }
+    } catch (e) {
+      printN("loadData error: $e");
     }
+  }
+
+  // 从历史数据创建Message对象的方法
+  Message? _createMessageFromHistoryData({
+    required String enumType,
+    required DateTime dateTime,
+    required SharedPreferences sharedPreferences,
+    int? evaluationFlag,
+    String? serviceEvaluateTxt,
+    int? userId,
+    String? sendName,
+    String? sendAvatar,
+    required MessJson messJson,
+    required MessageRecord msgBean,
+  }) {
+    print("____________________---------start---------------------------------------------start");
+    print("____________________${enumType}");
+    print("____________________${messJson.toJson()}");
+
+    print("____________________---------end---------------------------------------------end");
+
+    switch (enumType) {
+      case "imQueueNotice":
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.custom,
+          status: MessageStatus.delivered,
+          message: messJson.content ?? '',
+          sentBy: '2'
+        );
+
+      case "imInvitationEvaluate":
+        if (evaluationFlag == 1) {
+          return Message(
+            createdAt: dateTime,
+            messageType: MessageType.custom,
+            status: MessageStatus.delivered,
+            message: serviceEvaluateTxt ?? '',
+            sentBy: '2'
+          );
+        }
+        break;
+
+      case "complex":
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.custom,
+          status: MessageStatus.delivered,
+          message: messJson.digest ?? '',
+          sentBy: '2',
+          complex: messJson.complex
+        );
+
+      case "navigation":
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.custom,
+          status: MessageStatus.delivered,
+          message: messJson.title ?? '',
+          sentBy: '2',
+          navigationList: messJson.navigationList
+        );
+
+      case "knowGraphicText":
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.custom,
+          status: MessageStatus.delivered,
+          message: messJson.content ?? '',
+          sentBy: '2',
+          imgs: messJson.imgs
+        );
+
+      case "welcomeSpeech":
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.custom,
+          status: MessageStatus.delivered,
+          message: messJson.content ?? '',
+          sentBy: '2'
+        );
+
+      case "link":
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.custom,
+          status: MessageStatus.delivered,
+          message: messJson.content ?? '',
+          sentBy: '2',
+          links: messJson.links
+        );
+
+      case "graphicText":
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.custom,
+          status: MessageStatus.delivered,
+          message: messJson.content ?? '',
+          sentBy: '2'
+        );
+
+      case "imClick":
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.custom,
+          status: MessageStatus.delivered,
+          message: messJson.content ?? '',
+          sentBy: '2'
+        );
+
+      case "text":
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.text,
+          status: MessageStatus.delivered,
+          message: messJson.content ?? '',
+          sentBy: '2'
+        );
+
+      case "media":
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.text,
+          status: MessageStatus.delivered,
+          message: messJson.content ?? '',
+          sentBy: '2'
+        );
+
+      case "video":
+        var url = '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${messJson.conversationCode}';
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.video,
+          status: MessageStatus.delivered,
+          message: url,
+          sentBy: '2'
+        );
+
+      case "voice":
+        var url = '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${messJson.conversationCode}';
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.voice,
+          status: MessageStatus.delivered,
+          message: url,
+          sentBy: '2'
+        );
+
+      case "image":
+      case "img":
+        if (messJson.imgs?.isNotEmpty ?? false) {
+          return Message(
+            createdAt: dateTime,
+            messageType: MessageType.image,
+            status: MessageStatus.delivered,
+            message: jsonEncode(messJson.imgs!.map((img) => img.toJson()).toList()),
+            sentBy: '2',
+            imgs: messJson.imgs
+          );
+        }
+        break;
+
+      case "attachment":
+        if (messJson.attachment?.isNotEmpty ?? false) {
+          var attachment = messJson.attachment!;
+          for (int i = 0; i < attachment.length; i++) {
+            var url = '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${attachment[i].code}';
+            bool isAudio = _isAudioFile(attachment[i].fileName);
+            return Message(
+              createdAt: dateTime,
+              messageType: isAudio ? MessageType.voice : MessageType.file,
+              status: MessageStatus.delivered,
+              message: url,
+              sentBy: '2'
+            );
+          }
+        }
+        break;
+
+      case "imSeatReturnResult":
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.custom,
+          status: MessageStatus.delivered,
+          message: messJson.content ?? '',
+          sentBy: '2'
+        );
+
+      case "imCustomerOverChat":
+        return Message(
+          createdAt: dateTime,
+          messageType: MessageType.custom,
+          status: MessageStatus.delivered,
+          message: messJson.content ?? '',
+          sentBy: '2'
+        );
+    }
+    return null;
+  }
+
+  // 检查文件是否为音频文件
+  bool _isAudioFile(String? fileName) {
+    if (fileName == null) return false;
+    final audioExtensions = ['.mp3', '.wav', '.aac', '.m4a', '.ogg', '.flac'];
+    return audioExtensions.any((ext) => fileName.toLowerCase().endsWith(ext));
   }
 
 }
