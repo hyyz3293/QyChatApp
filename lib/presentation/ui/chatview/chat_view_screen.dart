@@ -56,6 +56,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
   late final ChatController _chatController;
   bool _isSound = true;
   String _currentUserId = "user-id";
+  ChatViewState _chatViewState = ChatViewState.noData;
 
   StreamSubscription<Message>? _messageSubscription;
   StreamSubscription<Message>? _messageSubscription2;
@@ -98,6 +99,10 @@ class _ChatScreenState extends State<ChatViewScreen> {
       //msg.sentBy = "2";
       var _msg = msg.copyWith(sentBy: "2");
       _chatController.addMessage(_msg);
+      // 更新聊天状态
+      setState(() {
+        _chatViewState = ChatViewState.hasMessages;
+      });
     });
     // 订阅消息流
     _messageSubscription2 = CSocketIOManager().messagesStream2.listen((msg) {
@@ -105,6 +110,10 @@ class _ChatScreenState extends State<ChatViewScreen> {
       //msg.sentBy = "2";
       var _msg = msg.copyWith(sentBy: "${_currentUserId}");
       _chatController.addMessage(_msg);
+      // 更新聊天状态
+      setState(() {
+        _chatViewState = ChatViewState.hasMessages;
+      });
     });
     _chatController = ChatController(
       initialMessageList: [],
@@ -246,12 +255,14 @@ class _ChatScreenState extends State<ChatViewScreen> {
                         size: 30,
                       ),
                     ),
-                    chatViewState: ChatViewState.hasMessages,
+                    chatViewState: _chatViewState,
                     chatViewStateConfig: ChatViewStateConfiguration(
                       loadingWidgetConfig: ChatViewStateWidgetConfiguration(
                         loadingIndicatorColor: theme.outgoingChatBubbleColor,
                       ),
-                      onReloadButtonTap: () {},
+                      onReloadButtonTap: () {
+                        loadData();
+                      },
                     ),
                     typeIndicatorConfig: TypeIndicatorConfiguration(
                       flashingCircleBrightColor: theme.flashingCircleBrightColor,
@@ -438,6 +449,11 @@ class _ChatScreenState extends State<ChatViewScreen> {
     _chatController.addMessage(
       messageObj,
     );
+    
+    // 更新聊天状态
+    setState(() {
+      _chatViewState = ChatViewState.hasMessages;
+    });
 
     Future.delayed(const Duration(milliseconds: 300), () {
       final index = _chatController.initialMessageList.indexOf(messageObj);
@@ -546,9 +562,25 @@ class _ChatScreenState extends State<ChatViewScreen> {
         for (Message message in historyMessages.reversed) {
           _chatController.addMessage(message);
         }
+        
+        // 更新聊天状态
+        setState(() {
+          _chatViewState = _chatController.initialMessageList.isEmpty 
+              ? ChatViewState.noData 
+              : ChatViewState.hasMessages;
+        });
+      } else {
+        // 如果没有数据，确保状态为noData
+        setState(() {
+          _chatViewState = ChatViewState.noData;
+        });
       }
     } catch (e) {
       printN("loadData error: $e");
+      // 发生错误时设置为错误状态
+      setState(() {
+        _chatViewState = ChatViewState.error;
+      });
     }
   }
 
@@ -668,7 +700,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
       case "media":
         return Message(
           createdAt: dateTime,
-          messageType: MessageType.text,
+          messageType: MessageType.image,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
           sentBy: '2'
