@@ -551,7 +551,9 @@ class _ChatScreenState extends State<ChatViewScreen> {
               messJson: messJson,
               msgBean: msgBean,
             );
-            
+
+
+
             if (historyMessage != null) {
               historyMessages.add(historyMessage);
             }
