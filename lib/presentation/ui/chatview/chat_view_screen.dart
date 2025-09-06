@@ -576,6 +576,9 @@ class _ChatScreenState extends State<ChatViewScreen> {
           }
         }
         
+        // 倒序展示历史消息
+        historyMessages = historyMessages.reversed.toList();
+        
         // 批量添加历史消息到聊天控制器（使用loadMoreData确保历史消息在前面）
         _chatController.loadMoreData(historyMessages);
         
