@@ -154,7 +154,8 @@ class _ChatGroupedListWidgetState extends State<ChatGroupedListWidget>
     return SingleChildScrollView(
       reverse: true,
       // When reaction popup is being appeared at that user should not scroll.
-      physics: showPopUp ? const NeverScrollableScrollPhysics() : null,
+      // But always allow scrolling for RefreshIndicator to work properly
+      physics: showPopUp ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
       controller: widget.scrollController,
       child: Column(
         mainAxisSize: MainAxisSize.min,

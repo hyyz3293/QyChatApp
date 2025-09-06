@@ -5,6 +5,7 @@ import 'package:qychatapp/extensions/extensions.dart';
 import 'package:qychatapp/models/models.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:qychatapp/presentation/ui/chart/press_view.dart';
+import 'package:qychatapp/presentation/utils/websocket/chat_socket_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../presentation/ui/model/channel_config_model.dart';
@@ -121,8 +122,7 @@ class TextOverMessageView extends StatelessWidget {
       // );
       print('完整对象: $selectedItem');
 
-
-
+      CSocketIOManager().sendPress(selectedItem);
     }
   }
 
@@ -130,7 +130,7 @@ class TextOverMessageView extends StatelessWidget {
   // 构建文本内容（支持富文本或普通文本）
   Widget _buildTextContent(TextTheme textTheme, String textMessage, InlineSpan? richText) {
     final defaultStyle = _textStyle ?? textTheme.bodyMedium!.copyWith(
-      color: Colors.white,
+      color: Colors.black,
       fontSize: 16,
     );
 
@@ -151,7 +151,7 @@ class TextOverMessageView extends StatelessWidget {
         style: {
           "body": Style(
             fontSize: FontSize(16.0),
-            color: Colors.white,
+            color: Colors.black,
             // margin: EdgeInsets.zero,
             //padding: EdgeInsets.zero,
           ),

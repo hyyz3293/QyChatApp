@@ -11,7 +11,7 @@ class Endpoints {
   Endpoints._();
 
   // 正式 url
-  static const String baseUrl = "https://uat-ccc.qylink.com:9991";
+  static const String baseUrl = "https://uat-ccc.qylink.com:7100";
 
 
   // connectTimeout

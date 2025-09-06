@@ -1145,10 +1145,12 @@ class CSocketIOManager {
     //bean.channelId = id;
     //bean.channelType = type;
     bean.enumType = "accessMsg";
+    bean.channel = id;
     bean.type = 'notice';
     bean.cid  = cid;
     //bean.ip = '127.0.0.1';
     bean.content = "";
+
 
     //bean.webUrl = "https://uat-ccc.qylink.com:9991/static/im/mobileChannel.html?channelCode=${channelCode}";
     //bean.browserTitle = "在线客服";
