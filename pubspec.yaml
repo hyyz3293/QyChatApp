@@ -8,7 +8,7 @@ description: A flutter qychatapp project created using MobX and Provider.
 # build by specifying --build-name and --build-number, respectively.
 # Read more about versioning at semver.org.
 
-version: 1.0.0-dev.4
+version: 1.0.0-dev.5
 
 homepage: https://github.com/hyyz3293/QyChatApp.git
 repository: https://github.com/hyyz3293/QyChatApp.git

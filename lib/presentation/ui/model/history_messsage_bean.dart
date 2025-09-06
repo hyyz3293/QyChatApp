@@ -235,6 +235,7 @@ class MessageRecord {
 class MessJson {
   String? content;
   String? conversationCode;
+  String? code;
   String? enumType;
   String? from;
   int? fromType;
@@ -296,6 +297,7 @@ class MessJson {
   MessJson({
     this.link,
     this.content,
+    this.code,
     this.conversationCode,
     this.enumType,
     this.from,
@@ -354,6 +356,7 @@ class MessJson {
 
   factory MessJson.fromJson(Map<String, dynamic> json) {
     return MessJson(
+      code: json['code'],
       link: json['link'],
       content: json['content'],
       conversationCode: json['conversationCode'],
@@ -429,6 +432,7 @@ class MessJson {
     return {
       // ---------------------- 基础消息字段 ----------------------
       'content': content,
+      'code': code,
       'conversationCode': conversationCode,
       'enumType': enumType,
       'from': from,

@@ -42,6 +42,7 @@ import '../../utils/global_utils.dart';
 import '../../utils/service_locator.dart';
 import '../../utils/websocket/chat_socket_manager.dart';
 import '../model/history_messsage_bean.dart';
+import '../model/image_bean.dart';
 import 'chat_data.dart';
 
 class ChatViewScreen extends StatefulWidget {
@@ -716,9 +717,9 @@ class _ChatScreenState extends State<ChatViewScreen> {
       case "media":
         return Message(
           createdAt: dateTime,
-          messageType: MessageType.image,
+          messageType: MessageType.video,
           status: MessageStatus.delivered,
-          message: messJson.content ?? '',
+          message: '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${messJson.code}',
           sentBy:sentBy
         );
 

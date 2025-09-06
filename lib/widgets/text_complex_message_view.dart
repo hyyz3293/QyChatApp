@@ -65,8 +65,10 @@ class TextComplexMessageView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(message.complex?.title ?? '', style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),),
-                const SizedBox(height: 10,),
+                // 只有当title不为空时才显示标题
+                if (message.complex?.title != null && message.complex!.title.isNotEmpty)
+                  Text(message.complex!.title, style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 10),
                 textMessage.isUrl
                     ? LinkPreview(
                   linkPreviewConfig: _linkPreviewConfig,
@@ -74,11 +76,12 @@ class TextComplexMessageView extends StatelessWidget {
                 )
                     : GestureDetector(
                   onTap: () {
-                    // if (message.digest != "") {
-                    //   if (message.digest != null) launchUrl(Uri.parse(message.digest));
-                    // }
+                    // 处理digest点击事件
+                    if (message.digest != null && message.digest!.isNotEmpty) {
+                      launchUrl(Uri.parse(message.digest!));
+                    }
                   },
-                  child:_buildTextContent(textTheme, textMessage, richText),
+                  child: _buildTextContent(textTheme, textMessage, richText),
                 ),
               ],
             )
@@ -100,13 +103,21 @@ class TextComplexMessageView extends StatelessWidget {
       color: Colors.grey,
       fontSize: 16,
     );
+    
+    // 获取要显示的内容，优先使用complex.content，如果为空则使用textMessage，最后考虑digest
+    String contentToShow = '';
+    if (message.complex?.content != null && message.complex!.content.isNotEmpty) {
+      contentToShow = message.complex!.content;
+    } else if (textMessage.isNotEmpty) {
+      contentToShow = textMessage;
+    } else if (message.digest != null && message.digest!.isNotEmpty) {
+      contentToShow = message.digest!;
+    }
+    
     // 检测并处理简单富文本标记
-    if (_containsSimpleRichText(textMessage)) {
+    if (_containsSimpleRichText(contentToShow)) {
       // 处理图片路径 - 添加前缀
-      final processedHtml = _processImageUrls(message.complex?.content ?? '');
-      if (message.digest != null && message.digest != "") {
-        _processImageUrls(message.digest!);
-      }
+      final processedHtml = _processImageUrls(contentToShow);
       return Html(
         data: processedHtml,
         extensions: [ TableHtmlExtension()],
@@ -161,7 +172,7 @@ class TextComplexMessageView extends StatelessWidget {
     }
 
     return Text(
-      textMessage,
+      contentToShow,
       style: defaultStyle,
     );
   }
