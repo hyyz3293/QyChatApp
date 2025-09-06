@@ -1,7 +1,6 @@
-
 import 'package:flutter/material.dart';
-
 import '../model/channel_config_model.dart';
+
 class EvaluationSelectorDialog extends StatefulWidget {
   final List<ImEvaluationDefine> options;
   final String title;
@@ -59,8 +58,13 @@ class _EvaluationSelectorDialogState extends State<EvaluationSelectorDialog> {
                         _selectedItem = value;
                       });
                     },
-                    activeColor: Colors.grey,
-
+                    // 设置选中和非选中颜色
+                    fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                      if (states.contains(MaterialState.selected)) {
+                        return Colors.blue; // 选中时的颜色
+                      }
+                      return Colors.grey; // 非选中时的颜色
+                    }),
                   ),
                   title: Text(
                     option.pressValue,
@@ -79,7 +83,7 @@ class _EvaluationSelectorDialogState extends State<EvaluationSelectorDialog> {
                   ),
                   tileColor: _selectedItem == option
                       ? Colors.blue.withOpacity(0.1)
-                      : Colors.grey.withOpacity(0.1),
+                      : Colors.grey.withOpacity(0.05), // 调整非选中时的背景色透明度
                   onTap: () {
                     setState(() {
                       _selectedItem = option;
@@ -110,12 +114,12 @@ class _EvaluationSelectorDialogState extends State<EvaluationSelectorDialog> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    foregroundColor: Colors.black,
+                    foregroundColor: Colors.white, // 修改文字颜色为白色
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text("确定", style: TextStyle(color: Colors.black),),
+                  child: const Text("确定"),
                 ),
               ],
             ),
