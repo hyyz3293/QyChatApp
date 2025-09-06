@@ -13,7 +13,7 @@ import '../utils/constants/constants.dart';
 import 'link_preview.dart';
 import 'reaction_widget.dart';
 
-class TextOverMessageView extends StatelessWidget {
+class TextOverMessageView extends StatefulWidget {
   TextOverMessageView({
     Key? key,
     required this.isMessageBySender,
@@ -39,23 +39,29 @@ class TextOverMessageView extends StatelessWidget {
   // 新增富文本构建器参数
   final RichTextBuilder? richTextBuilder;
 
+  @override
+  State<TextOverMessageView> createState() => _TextOverMessageViewState();
+}
+
+class _TextOverMessageViewState extends State<TextOverMessageView> {
   final TextEditingController _textController = TextEditingController();
+  bool _hasShownDialog = false; // 添加标记，记录是否已经显示过弹窗
 
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final textMessage = message.message;
+    final textMessage = widget.message.message;
 
     // 获取富文本内容（如果可用）
-    final richText = richTextBuilder?.call(message);
+    final richText = widget.richTextBuilder?.call(widget.message);
 
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Container(
           constraints: BoxConstraints(
-              maxWidth: chatBubbleMaxWidth ??
+              maxWidth: widget.chatBubbleMaxWidth ??
                   MediaQuery.of(context).size.width * 0.75),
           padding: _padding ??
               const EdgeInsets.symmetric(
@@ -64,9 +70,9 @@ class TextOverMessageView extends StatelessWidget {
               ),
           margin: _margin ??
               EdgeInsets.fromLTRB(
-                  5, 0, 6, message.reaction.reactions.isNotEmpty ? 15 : 2),
+                  5, 0, 6, widget.message.reaction.reactions.isNotEmpty ? 15 : 2),
           decoration: BoxDecoration(
-            color: highlightMessage ? highlightColor : _color,
+            color: widget.highlightMessage ? widget.highlightColor : _color,
             borderRadius: _borderRadius(textMessage),
           ),
           child: textMessage.isUrl
@@ -76,20 +82,19 @@ class TextOverMessageView extends StatelessWidget {
           )
               : GestureDetector(
             onTap: () {
-              //_showDialog(context);
-
-              showDialogPress(context);
-
+              // 检查是否已经显示过弹窗
+              if (!_hasShownDialog) {
+                showDialogPress(context);
+              }
             },
             child: _buildTextContent(textTheme, textMessage, richText),
           ),
         ),
-        if (message.reaction.reactions.isNotEmpty)
+        if (widget.message.reaction.reactions.isNotEmpty)
           ReactionWidget(
-            key: key,
-            isMessageBySender: isMessageBySender,
-            reaction: message.reaction,
-            messageReactionConfig: messageReactionConfig,
+            isMessageBySender: widget.isMessageBySender,
+            reaction: widget.message.reaction,
+            messageReactionConfig: widget.messageReactionConfig,
           ),
       ],
     );
@@ -117,6 +122,11 @@ class TextOverMessageView extends StatelessWidget {
     );
 
     if (selectedItem != null) {
+      // 设置标记，表示已经显示过弹窗并且用户已确定
+      setState(() {
+        _hasShownDialog = true;
+      });
+      
       // ScaffoldMessenger.of(context).showSnackBar(
       //   SnackBar(content: Text('您选择了: ${selectedItem.pressValue} (ID: ${selectedItem.id})')),
       // );
@@ -144,7 +154,7 @@ class TextOverMessageView extends StatelessWidget {
     // 检测并处理简单富文本标记
     if (_containsSimpleRichText(textMessage)) {
       // 处理图片路径 - 添加前缀
-      final processedHtml = _processImageUrls(message.message);
+      final processedHtml = _processImageUrls(widget.message.message);
 
       return Html(
         data: processedHtml,
@@ -255,35 +265,35 @@ class TextOverMessageView extends StatelessWidget {
 
 
 
-  EdgeInsetsGeometry? get _padding => isMessageBySender
-      ? outgoingChatBubbleConfig?.padding
-      : inComingChatBubbleConfig?.padding;
+  EdgeInsetsGeometry? get _padding => widget.isMessageBySender
+      ? widget.outgoingChatBubbleConfig?.padding
+      : widget.inComingChatBubbleConfig?.padding;
 
-  EdgeInsetsGeometry? get _margin => isMessageBySender
-      ? outgoingChatBubbleConfig?.margin
-      : inComingChatBubbleConfig?.margin;
+  EdgeInsetsGeometry? get _margin => widget.isMessageBySender
+      ? widget.outgoingChatBubbleConfig?.margin
+      : widget.inComingChatBubbleConfig?.margin;
 
-  LinkPreviewConfiguration? get _linkPreviewConfig => isMessageBySender
-      ? outgoingChatBubbleConfig?.linkPreviewConfig
-      : inComingChatBubbleConfig?.linkPreviewConfig;
+  LinkPreviewConfiguration? get _linkPreviewConfig => widget.isMessageBySender
+      ? widget.outgoingChatBubbleConfig?.linkPreviewConfig
+      : widget.inComingChatBubbleConfig?.linkPreviewConfig;
 
-  TextStyle? get _textStyle => isMessageBySender
-      ? outgoingChatBubbleConfig?.textStyle
-      : inComingChatBubbleConfig?.textStyle;
+  TextStyle? get _textStyle => widget.isMessageBySender
+      ? widget.outgoingChatBubbleConfig?.textStyle
+      : widget.inComingChatBubbleConfig?.textStyle;
 
-  BorderRadiusGeometry _borderRadius(String message) => isMessageBySender
-      ? outgoingChatBubbleConfig?.borderRadius ??
+  BorderRadiusGeometry _borderRadius(String message) => widget.isMessageBySender
+      ? widget.outgoingChatBubbleConfig?.borderRadius ??
       (message.length < 37
           ? BorderRadius.circular(replyBorderRadius1)
           : BorderRadius.circular(replyBorderRadius2))
-      : inComingChatBubbleConfig?.borderRadius ??
+      : widget.inComingChatBubbleConfig?.borderRadius ??
       (message.length < 29
           ? BorderRadius.circular(replyBorderRadius1)
           : BorderRadius.circular(replyBorderRadius2));
 
-  Color get _color => isMessageBySender
-      ? outgoingChatBubbleConfig?.color ?? Colors.purple
-      : inComingChatBubbleConfig?.color ?? Colors.grey.shade500;
+  Color get _color => widget.isMessageBySender
+      ? widget.outgoingChatBubbleConfig?.color ?? Colors.purple
+      : widget.inComingChatBubbleConfig?.color ?? Colors.grey.shade500;
 }
 
 // 富文本构建器类型定义

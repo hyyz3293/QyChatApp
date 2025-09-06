@@ -59,7 +59,8 @@ class _EvaluationSelectorDialogState extends State<EvaluationSelectorDialog> {
                         _selectedItem = value;
                       });
                     },
-                    activeColor: Colors.blue,
+                    activeColor: Colors.grey,
+
                   ),
                   title: Text(
                     option.pressValue,
@@ -114,7 +115,7 @@ class _EvaluationSelectorDialogState extends State<EvaluationSelectorDialog> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text("确定"),
+                  child: const Text("确定", style: TextStyle(color: Colors.black),),
                 ),
               ],
             ),
