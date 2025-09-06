@@ -46,6 +46,82 @@ class TextOverMessageView extends StatefulWidget {
 class _TextOverMessageViewState extends State<TextOverMessageView> {
   final TextEditingController _textController = TextEditingController();
   bool _hasShownDialog = false; // 添加标记，记录是否已经显示过弹窗
+  ImEvaluationDefine? _selectedItem;
+  List<ImEvaluationDefine> _evaluationOptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvaluationOptions();
+  }
+
+  // 加载评价选项
+  void _loadEvaluationOptions() async {
+    try {
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+      String test = await sharedPreferences.getString("imEvaluationDefineList") ?? "";
+      var testMap = convert.jsonDecode(test);
+      final List<dynamic> sceneJson2 = testMap;
+      List<ImEvaluationDefine> satisfactionOptions = sceneJson2
+          .map((item) => ImEvaluationDefine.fromJson(item))
+          .toList();
+      setState(() {
+        _evaluationOptions = satisfactionOptions;
+      });
+    } catch (e) {
+      print('加载评价选项失败: $e');
+    }
+  }
+
+  // 构建评价选项列表
+  Widget _buildEvaluationOptions() {
+    if (_evaluationOptions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        children: _evaluationOptions.map((option) {
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedItem = option;
+                _hasShownDialog = true;
+              });
+              CSocketIOManager().sendPress(option);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: _selectedItem?.id == option.id 
+                    ? Colors.blue.withOpacity(0.2)
+                    : Colors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _selectedItem?.id == option.id 
+                      ? Colors.blue
+                      : Colors.grey.withOpacity(0.3),
+                ),
+              ),
+              child: Text(
+                option.pressValue ?? '',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: _selectedItem?.id == option.id 
+                      ? Colors.blue
+                      : Colors.black87,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 
 
   @override
@@ -80,14 +156,12 @@ class _TextOverMessageViewState extends State<TextOverMessageView> {
             linkPreviewConfig: _linkPreviewConfig,
             url: textMessage,
           )
-              : GestureDetector(
-            onTap: () {
-              // 检查是否已经显示过弹窗
-              if (!_hasShownDialog) {
-                showDialogPress(context);
-              }
-            },
-            child: _buildTextContent(textTheme, textMessage, richText),
+              : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTextContent(textTheme, textMessage, richText),
+              if (!_hasShownDialog) _buildEvaluationOptions(),
+            ],
           ),
         ),
         if (widget.message.reaction.reactions.isNotEmpty)
@@ -100,41 +174,7 @@ class _TextOverMessageViewState extends State<TextOverMessageView> {
     );
   }
 
-  Future<void> showDialogPress(BuildContext context) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
-    String test = await sharedPreferences.getString("imEvaluationDefineList") ?? "";
-     var testMap = convert.jsonDecode(test);
-    final List<dynamic> sceneJson2 = testMap;
-    List<ImEvaluationDefine> satisfactionOptions = sceneJson2
-        .map((item) => ImEvaluationDefine.fromJson(item))
-        .toList();
-
-    // 显示对话框并等待用户选择
-    final selectedItem = await showDialog<ImEvaluationDefine>(
-      context: context,
-      builder: (BuildContext context) {
-        return EvaluationSelectorDialog(
-          options: satisfactionOptions,
-          title: "请选择满意度",
-        );
-      },
-    );
-
-    if (selectedItem != null) {
-      // 设置标记，表示已经显示过弹窗并且用户已确定
-      setState(() {
-        _hasShownDialog = true;
-      });
-      
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text('您选择了: ${selectedItem.pressValue} (ID: ${selectedItem.id})')),
-      // );
-      print('完整对象: $selectedItem');
-
-      CSocketIOManager().sendPress(selectedItem);
-    }
-  }
 
 
   // 构建文本内容（支持富文本或普通文本）

@@ -55,7 +55,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
   bool isDarkTheme = false;
   late final ChatController _chatController;
   bool _isSound = true;
-  String _currentUserId = "user-id";
+  final String _currentUserId = "user-id";
   ChatViewState _chatViewState = ChatViewState.noData;
 
   StreamSubscription<Message>? _messageSubscription;
@@ -109,6 +109,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
       print("===>>>2222> Msg DATA ${msg.sentBy}");
       //msg.sentBy = "2";
       var _msg = msg.copyWith(sentBy: "${_currentUserId}");
+      print("===>>>2222> Msg DATA ${_msg.sentBy}");
       _chatController.addMessage(_msg);
       // 更新聊天状态
       setState(() {
@@ -159,7 +160,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
         id: DateTime.now().toString(),
         message: 'I will schedule the meeting.',
         createdAt: DateTime.now(),
-        sentBy: '2',
+        sentBy:"2"
       ),
     );
     await Future.delayed(const Duration(milliseconds: 500));
@@ -533,9 +534,22 @@ class _ChatScreenState extends State<ChatViewScreen> {
             enumType = response.page!.records![i].messEnumType;
           }
           
-          int? userId = msgBean.msgSendId ?? 0;
+          int? userId = msgBean.messJson!.msgSendId ?? 0;
           String? sendName = msgBean.sendName;
           String? sendAvatar = msgBean.sendAvatar;
+          var userIdMy = sharedPreferences.getInt("userId") ?? 0;
+          String sentBy = "2";
+
+          print("======================start");
+          print("======================userId=${userId}======userIdMy=${userIdMy}");
+
+          print("======================end");
+          if (userIdMy == userId) {
+            sentBy = "user-id";
+          }
+
+
+          print("userId===================${userId}");
 
           if (enumType != null && enumType != "") {
             // 创建历史消息对象
@@ -550,6 +564,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
               sendAvatar: sendAvatar,
               messJson: messJson,
               msgBean: msgBean,
+              sentBy: sentBy
             );
 
 
@@ -596,10 +611,11 @@ class _ChatScreenState extends State<ChatViewScreen> {
     String? sendAvatar,
     required MessJson messJson,
     required MessageRecord msgBean,
+    required String sentBy
   }) {
     print("____________________---------start---------------------------------------------start");
     print("__________________enumType  ==__${enumType}");
-    print("____________________${messJson.toJson()}");
+
 
     print("____________________---------end---------------------------------------------end");
 
@@ -609,7 +625,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
           createdAt: dateTime,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
-          sentBy: '2'
+          sentBy:sentBy
         );
 
       case "imInvitationEvaluate":
@@ -618,7 +634,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
             createdAt: dateTime,
             status: MessageStatus.delivered,
             message: serviceEvaluateTxt ?? '',
-            sentBy: '2'
+            sentBy:sentBy
           );
         }
         break;
@@ -629,7 +645,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
           messageType: MessageType.complex,
           status: MessageStatus.delivered,
           message: messJson.digest ?? '',
-          sentBy: '2',
+          sentBy:sentBy,
           complex: messJson.complex
         );
 
@@ -639,7 +655,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
           messageType: MessageType.navigation,
           status: MessageStatus.delivered,
           message: messJson.title ?? '',
-          sentBy: '2',
+          sentBy:sentBy,
           navigationList: messJson.navigationList
         );
 
@@ -649,7 +665,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
           messageType: MessageType.knowGraphicText,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
-          sentBy: '2',
+          sentBy:sentBy,
           imgs: messJson.imgs,
             link: messJson.link
         );
@@ -659,7 +675,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
           createdAt: dateTime,
           status: MessageStatus.delivered,
           message: messJson.welcomeSpeech!.welcomeSpeech ?? '',
-          sentBy: '2'
+          sentBy:sentBy
         );
 
       case "link":
@@ -668,7 +684,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
           messageType: MessageType.links,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
-          sentBy: '2',
+          sentBy:sentBy,
           links: messJson.links
         );
 
@@ -677,16 +693,16 @@ class _ChatScreenState extends State<ChatViewScreen> {
           createdAt: dateTime,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
-          sentBy: '2'
+          sentBy:sentBy
         );
 
-      case "imClick":
-        return Message(
-          createdAt: dateTime,
-          status: MessageStatus.delivered,
-          message: messJson.content ?? '',
-          sentBy: '2'
-        );
+      // case "imClick":
+      //   return Message(
+      //     createdAt: dateTime,
+      //     status: MessageStatus.delivered,
+      //     message: messJson.content ?? '',
+      //     sentBy:sentBy
+      //   );
 
       case "text":
         return Message(
@@ -694,7 +710,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
           messageType: MessageType.text,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
-          sentBy: '2'
+          sentBy:sentBy
         );
 
       case "media":
@@ -703,7 +719,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
           messageType: MessageType.image,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
-          sentBy: '2'
+          sentBy:sentBy
         );
 
       case "video":
@@ -713,7 +729,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
           messageType: MessageType.video,
           status: MessageStatus.delivered,
           message: url,
-          sentBy: '2'
+          sentBy:sentBy
         );
 
       case "voice":
@@ -723,7 +739,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
           messageType: MessageType.voice,
           status: MessageStatus.delivered,
           message: url,
-          sentBy: '2'
+          sentBy:sentBy
         );
 
       case "image":
@@ -734,7 +750,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
             messageType: MessageType.image,
             status: MessageStatus.delivered,
             message: jsonEncode(messJson.imgs!.map((img) => img.toJson()).toList()),
-            sentBy: '2',
+            sentBy:sentBy,
             imgs: messJson.imgs
           );
         }
@@ -751,7 +767,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
               messageType: isAudio ? MessageType.voice : MessageType.file,
               status: MessageStatus.delivered,
               message: url,
-              sentBy: '2'
+              sentBy:sentBy
             );
           }
         }
@@ -762,7 +778,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
           createdAt: dateTime,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
-          sentBy: '2'
+          sentBy:sentBy
         );
 
       case "imCustomerOverChat":
@@ -770,7 +786,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
           createdAt: dateTime,
           status: MessageStatus.delivered,
           message: messJson.content ?? '',
-          sentBy: '2'
+          sentBy:sentBy
         );
     }
     print("null------------------------------${enumType}");
