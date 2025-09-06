@@ -715,16 +715,19 @@ class _ChatScreenState extends State<ChatViewScreen> {
         );
 
       case "media":
+        var url = '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${messJson.code}';
+        printN("url=media==${url}");
         return Message(
           createdAt: dateTime,
           messageType: MessageType.video,
           status: MessageStatus.delivered,
-          message: '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${messJson.code}',
+          message: '${url}',
           sentBy:sentBy
         );
 
       case "video":
         var url = '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${messJson.conversationCode}';
+        printN("url=video==${url}");
         return Message(
           createdAt: dateTime,
           messageType: MessageType.video,
