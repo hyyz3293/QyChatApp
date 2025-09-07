@@ -589,10 +589,10 @@ class _ChatScreenState extends State<ChatViewScreen> {
               : ChatViewState.hasMessages;
         });
       } else {
-        // 如果没有数据，确保状态为noData
-        setState(() {
-          _chatViewState = ChatViewState.noData;
-        });
+        // // 如果没有数据，确保状态为noData
+        // setState(() {
+        //   _chatViewState = ChatViewState.noData;
+        // });
       }
     } catch (e) {
       printN("loadData error: $e");
@@ -729,18 +729,21 @@ class _ChatScreenState extends State<ChatViewScreen> {
         );
 
       case "video":
-        var url = '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${messJson.conversationCode}';
-        printN("url=video==${url}");
+        var url1 = '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${messJson.conversationCode}';
+        var url2 = '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${messJson.code}';
+        printN("url=video=1=${url1}");
+        printN("url=video=2=${url2}");
         return Message(
           createdAt: dateTime,
           messageType: MessageType.video,
           status: MessageStatus.delivered,
-          message: url,
+          message: url2,
           sentBy:sentBy
         );
 
+      case "voiceRecord":
       case "voice":
-        var url = '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${messJson.conversationCode}';
+        var url = '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${messJson.code}';
         return Message(
           createdAt: dateTime,
           messageType: MessageType.voice,
@@ -756,7 +759,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
             createdAt: dateTime,
             messageType: MessageType.image,
             status: MessageStatus.delivered,
-            message: jsonEncode(messJson.imgs!.map((img) => img.toJson()).toList()),
+            message: '${Endpoints.baseUrl}${'/api/fileservice/file/preview/'}${messJson.imgs![0].code}',
             sentBy:sentBy,
             imgs: messJson.imgs
           );

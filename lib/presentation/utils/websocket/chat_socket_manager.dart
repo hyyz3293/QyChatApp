@@ -74,6 +74,7 @@ class CSocketIOManager {
 
   bool isReturnMsg = false;
 
+  bool isConfigMsg = false;
 
   late StreamController<Message> _messagesController;
   late StreamController<Message> _messagesController2;
@@ -430,11 +431,18 @@ class CSocketIOManager {
 
       case "imUserOnline":
         playAudio();
-        sendSenseConfigMsg();
+        if (!isConfigMsg) {
+          isConfigMsg = true;
+          sendSenseConfigMsg();
+        }
+
         break;
 
       case "imOnlineed":
-        sendSenseConfigMsg();
+        if (!isConfigMsg) {
+          isConfigMsg = true;
+          sendSenseConfigMsg();
+        }
         playAudio();
         break;
 

@@ -375,6 +375,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
             onTap: () {
               printN("people==== ${sence.toJson()}");
               CSocketIOManager().sendChatConfig(sence);
+              CSocketIOManager().sendTextMessage(sence.name);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
