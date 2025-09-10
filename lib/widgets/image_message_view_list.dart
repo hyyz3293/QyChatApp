@@ -231,7 +231,7 @@ class ImageTxtMessageView extends StatelessWidget {
     return Container(
       constraints: BoxConstraints(
         maxHeight: imageHeight * ((imageList.length + crossAxisCount - 1) / crossAxisCount).ceil(),
-        maxWidth: imageMessageConfig?.width ?? 300,
+        maxWidth: imageMessageConfig?.width ?? MediaQuery.of(context).size.width * 0.6,
       ),
       //color: Colors.red,
       child: GridView.builder(
@@ -349,6 +349,9 @@ class ImageTxtMessageView extends StatelessWidget {
                         left: isMessageBySender ? 0 : 6,
                         bottom: message.reaction.reactions.isNotEmpty ? 15 : 0,
                       ),
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.75,
+                  ),
                   decoration: BoxDecoration(
                     //color: Colors.white,
                     borderRadius: imageMessageConfig?.borderRadius ??
