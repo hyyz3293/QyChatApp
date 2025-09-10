@@ -435,7 +435,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
       String message,
       ReplyMessage replyMessage,
       MessageType messageType,
-      ) {
+      ) async {
     print("===>>>2222> Msg ${_chatController.currentUser.id}");
     final messageObj = Message(
       id: DateTime.now().toString(),
@@ -444,9 +444,8 @@ class _ChatScreenState extends State<ChatViewScreen> {
       sentBy: _chatController.currentUser.id,
       replyMessage: replyMessage,
       messageType: messageType,
-    );
 
-    CSocketIOManager().sendMessage(message, replyMessage, messageType);
+    );
 
     _chatController.addMessage(
       messageObj,
@@ -457,15 +456,28 @@ class _ChatScreenState extends State<ChatViewScreen> {
       _chatViewState = ChatViewState.hasMessages;
     });
 
-    Future.delayed(const Duration(milliseconds: 300), () {
+    // 消息初始状态为pending（发送中），等待网络请求结果
+
+    // 发送消息并根据结果更新状态
+    try {
+      bool sendResult = await CSocketIOManager().sendMessage(message, replyMessage, messageType);
+      
+      // 根据发送结果更新消息状态
       final index = _chatController.initialMessageList.indexOf(messageObj);
-      _chatController.initialMessageList[index].setStatus =
-          MessageStatus.undelivered;
-    });
-    Future.delayed(const Duration(seconds: 1), () {
+      if (index != -1) {
+        _chatController.initialMessageList[index].setStatus = 
+            sendResult ? MessageStatus.read : MessageStatus.undelivered;
+      }
+      
+      print("消息发送结果: $sendResult");
+    } catch (e) {
+      print("消息发送失败: $e");
+      // 发送失败，保持undelivered状态
       final index = _chatController.initialMessageList.indexOf(messageObj);
-      _chatController.initialMessageList[index].setStatus = MessageStatus.read;
-    });
+      if (index != -1) {
+        _chatController.initialMessageList[index].setStatus = MessageStatus.undelivered;
+      }
+    }
   }
 
   void _onThemeIconTap() {

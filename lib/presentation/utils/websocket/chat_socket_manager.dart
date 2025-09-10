@@ -1197,27 +1197,25 @@ class CSocketIOManager {
   }
 
   // 发送文本消息
-  Future<void> sendMessage(String message,
+  Future<bool> sendMessage(String message,
       ReplyMessage replyMessage,
       MessageType messageType) async {
     if (messageType == MessageType.text) {
-      sendTextMessage(message);
+      return await sendTextMessage(message);
     } else if (messageType == MessageType.image) {
-      sendPictureMessage(message);
+      return await sendPictureMessage(message);
     }else if (messageType == MessageType.video) {
-      sendVideoMessage(message);
+      return await sendVideoMessage(message);
     }else if (messageType == MessageType.voice) {
-      sendAudioMessage(message);
+      return await sendAudioMessage(message);
     }
-
-
-
+    return false;
   }
 
 
   // 发送文本消息
-  Future<void> sendTextMessage(String text) async {
-    if (text.isEmpty) return;
+  Future<bool> sendTextMessage(String text) async {
+    if (text.isEmpty) return false;
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var cid = sharedPreferences.getInt("cid") ?? 0;
     var accid = sharedPreferences.getString("accid") ?? "";
@@ -1252,11 +1250,12 @@ class CSocketIOManager {
     printN("sendData====${message}");
     var sendData = await DioClient().sendMessage(serviceMessageBean);
     printN("sendData====${sendData}");
+    return sendData;
   }
 
   // 发送图片消息
-  Future<void> sendPictureMessage(String imgPath) async {
-    if (imgPath.isEmpty) return;
+  Future<bool> sendPictureMessage(String imgPath) async {
+    if (imgPath.isEmpty) return false;
 
     print("sendPictureMessage-----path= ${imgPath}");
 
@@ -1325,6 +1324,7 @@ class CSocketIOManager {
 
     var sendMsg = await DioClient().sendMessage(serviceMessageBean);
     printN("sendMsg file ====${sendMsg}");
+    return sendMsg;
 
     // Message updatedMessage = message.copyWith(status: MessageStatus.sent, authorId: message.authorId);
     // if (sendData) {
@@ -1339,8 +1339,8 @@ class CSocketIOManager {
 
 
   // 发送视频消息
-  Future<void> sendVideoMessage(String imgPath) async {
-    if (imgPath.isEmpty) return;
+  Future<bool> sendVideoMessage(String imgPath) async {
+    if (imgPath.isEmpty) return false;
 
     print("sendPictureMessage-----path= ${imgPath}");
 
@@ -1411,12 +1411,13 @@ class CSocketIOManager {
 
     var sendMsg = await DioClient().sendMessage(serviceMessageBean);
     printN("sendMsg file ====${sendMsg}");
+    return sendMsg;
    }
 
 
   // 发送语音消息
-  Future<void> sendAudioMessage(String imgPath) async {
-    if (imgPath.isEmpty) return;
+  Future<bool> sendAudioMessage(String imgPath) async {
+    if (imgPath.isEmpty) return false;
 
     print("sendPictureMessage-----path= ${imgPath}");
 
@@ -1496,6 +1497,7 @@ class CSocketIOManager {
 
     var sendMsg = await DioClient().sendMessage(serviceMessageBean);
     printN("sendMsg file ====${sendMsg}");
+    return sendMsg;
     // Message updatedMessage = message.copyWith(status: MessageStatus.sent, authorId: message.authorId);
     // if (sendData) {
     //   printN("sendData=success= 更新 msg  ${msgId}" );
