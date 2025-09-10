@@ -72,7 +72,9 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
   PlayerWaveStyle playerWaveStyle = const PlayerWaveStyle(scaleFactor: 70);
 
   // 新增状态变量
-  bool _isLoading = false;
+  bool _isLoading = false; // 是否正在下载
+  bool _isCurrentlyPlaying = false; // 当前是否正在播放
+  bool _shouldAutoPlay = false; // 是否需要自动播放
   double _downloadProgress = 0;
   String? _localFilePath; // 下载后的本地文件路径
   CancelToken? _downloadToken; // 用于取消下载
@@ -156,7 +158,53 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
       });
 
     playerStateSubscription = controller.onPlayerStateChanged
-        .listen((state) => _playerState.value = state);
+        .listen((state) {
+          setState(() {
+            _playerState.value = state;
+          });
+          print("播放器状态变化: $state");
+          
+          // 当播放器初始化完成时，如果需要自动播放则开始播放
+          if (state == PlayerState.initialized && _shouldAutoPlay) {
+            print("播放器已初始化，开始自动播放...");
+            _shouldAutoPlay = false; // 重置标志
+            try {
+              controller.startPlayer();
+              print("自动播放启动成功");
+            } catch (e) {
+              print("自动播放启动失败: $e");
+            }
+          }
+          
+          // 根据播放器状态更新_isCurrentlyPlaying
+          if (state == PlayerState.playing) {
+            setState(() {
+              _isCurrentlyPlaying = true;
+            });
+            print("开始播放，_isCurrentlyPlaying设为true");
+          } else if (state == PlayerState.paused || state == PlayerState.stopped) {
+            setState(() {
+              _isCurrentlyPlaying = false;
+            });
+            print("暂停/停止播放，_isCurrentlyPlaying设为false");
+          }
+          
+          // 播放完成后重新准备播放器，确保下次能正常播放
+          if (state == PlayerState.stopped) {
+            Future.delayed(const Duration(milliseconds: 200), () {
+              if (mounted && _localFilePath != null) {
+                print("播放完成，重新准备播放器");
+                // 重新准备播放器
+                controller.preparePlayer(
+                  path: _localFilePath!,
+                  noOfSamples: widget.config?.playerWaveStyle
+                      ?.getSamplesForWidth(widget.screenWidth * 0.5) ??
+                      playerWaveStyle.getSamplesForWidth(widget.screenWidth * 0.5),
+                );
+              }
+            });
+          }
+        });
   }
 
   @override
@@ -287,12 +335,39 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
         defaultTargetPlatform == TargetPlatform.android,
     "Voice messages are only supported with android and ios platform",
     );
-    if (playerState.isInitialised ||
-        playerState.isPaused ||
-        playerState.isStopped) {
-      controller.startPlayer();
+    
+    print("当前播放器状态: ${playerState.name}");
+    print("音频文件路径: $_localFilePath");
+    print("播放器是否已初始化: ${playerState.isInitialised}");
+    print("播放器是否暂停: ${playerState.isPaused}");
+    print("播放器是否停止: ${playerState.isStopped}");
+    
+    if (playerState.isPlaying) {
+      print("准备暂停播放...");
+      try {
+        controller.pausePlayer();
+        print("pausePlayer调用成功");
+      } catch (e) {
+        print("pausePlayer调用失败: $e");
+      }
     } else {
-      controller.pausePlayer();
+      // 如果播放器未初始化，先准备播放器
+      if (!playerState.isInitialised && _localFilePath != null) {
+        print("播放器未初始化，先准备播放器...");
+        _shouldAutoPlay = true; // 设置自动播放标志
+        _preparePlayer(_localFilePath!);
+      } else {
+        print("准备开始播放...");
+        try {
+          controller.startPlayer();
+          print("startPlayer调用成功");
+        } catch (e) {
+          print("startPlayer调用失败: $e");
+          setState(() {
+            _isCurrentlyPlaying = false;
+          });
+        }
+      }
     }
   }
 }
