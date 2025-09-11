@@ -62,6 +62,9 @@ class ImageTxtMessageView extends StatelessWidget {
   /// Provides scale of highlighted image when user taps on replied image.
   final double highlightScale;
 
+  // 新增：图片+文本消息气泡背景色（与文本消息默认风格一致）
+  Color get _bubbleColor => isMessageBySender ? Colors.purple : Colors.grey.shade500;
+
   // 获取图片列表
   List<ImageData> get imageList => message.imgs ?? [];
 
@@ -353,7 +356,7 @@ class ImageTxtMessageView extends StatelessWidget {
                     maxWidth: MediaQuery.of(context).size.width * 0.75,
                   ),
                   decoration: BoxDecoration(
-                    //color: Colors.white,
+                    color: Color(0xffb9cfe3),
                     borderRadius: imageMessageConfig?.borderRadius ??
                         BorderRadius.circular(14),
                     boxShadow: [
@@ -384,8 +387,8 @@ class ImageTxtMessageView extends StatelessWidget {
               ),
           ],
         ),
-        if (!isMessageBySender && !(imageMessageConfig?.hideShareIcon ?? false))
-          iconButton,
+        // if (!isMessageBySender && !(imageMessageConfig?.hideShareIcon ?? false))
+        //   iconButton,
       ],
     );
   }

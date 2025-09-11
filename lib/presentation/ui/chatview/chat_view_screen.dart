@@ -607,11 +607,11 @@ class _ChatScreenState extends State<ChatViewScreen> {
         // });
       }
     } catch (e) {
-      printN("loadData error: $e");
-      // 发生错误时设置为错误状态
-      setState(() {
-        _chatViewState = ChatViewState.error;
-      });
+      // printN("loadData error: $e");
+      // // 发生错误时设置为错误状态
+      // setState(() {
+      //   _chatViewState = ChatViewState.error;
+      // });
     }
   }
 

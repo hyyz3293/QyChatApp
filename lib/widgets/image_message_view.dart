@@ -60,6 +60,9 @@ class ImageMessageView extends StatelessWidget {
 
   String get imageUrl => message.message;
 
+  // 新增：图片消息气泡背景色（与文本消息默认风格一致）
+  Color get _bubbleColor => isMessageBySender ? Colors.purple : Colors.grey.shade500;
+
   Widget get iconButton => ShareIcon(
     shareIconConfig: imageMessageConfig?.shareIconConfig,
     imageUrl: imageUrl,
@@ -159,8 +162,6 @@ class ImageMessageView extends StatelessWidget {
       mainAxisAlignment:
       isMessageBySender ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        // if (isMessageBySender && !(imageMessageConfig?.hideShareIcon ?? false))
-        //   iconButton,
         Stack(
           children: [
             GestureDetector(
@@ -173,7 +174,7 @@ class ImageMessageView extends StatelessWidget {
                     ? Alignment.centerRight
                     : Alignment.centerLeft,
                 child: Container(
-                  padding: imageMessageConfig?.padding ?? EdgeInsets.zero,
+                  padding: imageMessageConfig?.padding ?? const EdgeInsets.all(8),
                   margin: imageMessageConfig?.margin ??
                       EdgeInsets.only(
                         top: 6,
@@ -186,9 +187,20 @@ class ImageMessageView extends StatelessWidget {
                   constraints: BoxConstraints(
                     maxWidth: MediaQuery.of(context).size.width * 0.6,
                   ),
+                  decoration: BoxDecoration(
+                    color: Color(0xffb9cfe3),
+                    borderRadius: imageMessageConfig?.borderRadius ?? BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
                   child: ClipRRect(
-                    borderRadius: imageMessageConfig?.borderRadius ??
-                        BorderRadius.circular(14),
+                    borderRadius: imageMessageConfig?.borderRadius ?? BorderRadius.circular(14),
                     child: _buildImageWidget(context),
                   ),
                 ),
@@ -202,8 +214,8 @@ class ImageMessageView extends StatelessWidget {
               ),
           ],
         ),
-        if (!isMessageBySender && !(imageMessageConfig?.hideShareIcon ?? false))
-          iconButton,
+        // if (!isMessageBySender && !(imageMessageConfig?.hideShareIcon ?? false))
+        //   iconButton,
       ],
     );
   }
