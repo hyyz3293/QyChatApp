@@ -112,7 +112,6 @@ class _VideoMessageViewState extends State<VideoMessageView> {
       );
     }
 
-    final aspectRatio = _controller.value.aspectRatio;
     return GestureDetector(
       onTap: _togglePlayPause,
       onLongPress: () => widget.videoMessageConfig?.onLongPress?.call(widget.message),
@@ -120,9 +119,15 @@ class _VideoMessageViewState extends State<VideoMessageView> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          AspectRatio(
-            aspectRatio: aspectRatio > 0 ? aspectRatio : 16 / 9,
-            child: VideoPlayer(_controller),
+          SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.cover, // 填满容器，可能会裁剪部分内容
+              child: SizedBox(
+                width: _controller.value.size.width,
+                height: _controller.value.size.height,
+                child: VideoPlayer(_controller),
+              ),
+            ),
           ),
           if (!_isPlaying || _hideControlsTimer == null || _showFullScreenControls)
             AnimatedOpacity(
