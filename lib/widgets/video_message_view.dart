@@ -272,8 +272,8 @@ class _VideoMessageViewState extends State<VideoMessageView> {
       mainAxisAlignment:
       widget.isMessageBySender ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        if (widget.isMessageBySender &&
-            !(widget.videoMessageConfig?.hideShareIcon ?? false)) iconButton,
+        // if (widget.isMessageBySender &&
+        //     !(widget.videoMessageConfig?.hideShareIcon ?? false)) iconButton,
         Stack(
           children: [
             GestureDetector(
@@ -310,8 +310,8 @@ class _VideoMessageViewState extends State<VideoMessageView> {
               ),
           ],
         ),
-        if (!widget.isMessageBySender &&
-            !(widget.videoMessageConfig?.hideShareIcon ?? false)) iconButton,
+        // if (!widget.isMessageBySender &&
+        //     !(widget.videoMessageConfig?.hideShareIcon ?? false)) iconButton,
       ],
     );
   }
