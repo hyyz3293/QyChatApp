@@ -142,11 +142,12 @@ class TextMessageView extends StatelessWidget {
         }
 
         // 添加前缀
-        String fullUrl = 'https://uat-ccc.qylink.com:9991';
+        String fullUrl = 'https://uat-ccc.qylink.com:7100';
         if (!src.startsWith('/')) {
           fullUrl += '/';
         }
         fullUrl += src;
+        print("===-====${fullUrl}");
 
         // 替换原始src，并添加完整URL
         return imgTag.replaceFirst('src="$src"', 'src="$fullUrl"');

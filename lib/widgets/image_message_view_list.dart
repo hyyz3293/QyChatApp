@@ -356,7 +356,7 @@ class ImageTxtMessageView extends StatelessWidget {
                     maxWidth: MediaQuery.of(context).size.width * 0.75,
                   ),
                   decoration: BoxDecoration(
-                    color: Color(0xffb9cfe3),
+                    color: isMessageBySender ? Color(0xffb9cfe3) : Colors.white,
                     borderRadius: imageMessageConfig?.borderRadius ??
                         BorderRadius.circular(14),
                     boxShadow: [

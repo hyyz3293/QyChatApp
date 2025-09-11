@@ -343,7 +343,7 @@ class _VideoMessageViewState extends State<VideoMessageView> {
                     maxWidth: MediaQuery.of(context).size.width * 0.6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xffb9cfe3),
+                    color: widget.isMessageBySender ? Color(0xffb9cfe3) : Colors.white,
                     borderRadius: widget.videoMessageConfig?.borderRadius ?? BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
