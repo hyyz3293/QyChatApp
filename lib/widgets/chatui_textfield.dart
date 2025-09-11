@@ -788,6 +788,8 @@ class _ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSt
           source: ImageSource.gallery,
         );
 
+        printN("_pickVideoFromGallery==${image!.path}");
+
         if (image != null) {
           widget.onVideoSelected(image.path ?? '', '');
           setState(() {

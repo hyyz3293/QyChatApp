@@ -13,6 +13,7 @@ class Endpoints {
   // 正式 url
   static const String baseUrl = "https://uat-ccc.qylink.com:7100";
 
+  static const String baseUrlImg = "https://uat-ccc.qylink.com:9991";
 
   // connectTimeout
   static const Duration connectionTimeout = Duration(milliseconds: 1200000);

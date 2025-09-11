@@ -554,7 +554,7 @@ class CSocketIOManager {
 
       case "media":
         playAudio();
-        var video = '${Endpoints.baseUrl}${"/api/fileservice/file/preview/"}${conversationCode ?? ""}';
+        var video = '${Endpoints.baseUrlImg}${"/api/fileservice/file/preview/"}${conversationCode ?? ""}';
         var message = Message(
             createdAt: dateTime,
             status: MessageStatus.delivered,
