@@ -144,24 +144,44 @@ class _VideoMessageViewState extends State<VideoMessageView> {
             bottom: 5,
             left: 10,
             right: 10,
-            child: Row(
-              children: [
-                Expanded(
-                  child: VideoProgressIndicator(
-                    _controller,
-                    allowScrubbing: true,
-                    colors: const VideoProgressColors(
-                      playedColor: Colors.red,
-                      bufferedColor: Colors.grey,
-                      backgroundColor: Colors.white24,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: (widget.videoMessageConfig?.width ?? 150) - 20, // 减去左右padding
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end, // 整体右对齐
+                children: [
+                  Expanded(
+                    flex: 2, // 减少进度条占用空间
+                    child: Container(
+                      height: 12, // 减小高度从20到12
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(2),
+                        child: VideoProgressIndicator(
+                          _controller,
+                          allowScrubbing: true,
+                          colors: const VideoProgressColors(
+                            playedColor: Colors.red,
+                            bufferedColor: Colors.grey,
+                            backgroundColor: Colors.white24,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.fullscreen, color: Colors.white, size: 20),
-                  onPressed: _toggleFullScreen,
-                ),
-              ],
+                  SizedBox(width: 6), // 增加间距
+                  Container(
+                    width: 28,
+                    height: 28,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints.tightFor(width: 28, height: 28),
+                      icon: Icon(Icons.fullscreen, color: Colors.white, size: 16),
+                      onPressed: _toggleFullScreen,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -207,24 +227,44 @@ class _VideoMessageViewState extends State<VideoMessageView> {
                   bottom: 5,
                   left: 10,
                   right: 10,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: VideoProgressIndicator(
-                          _controller,
-                          allowScrubbing: true,
-                          colors: const VideoProgressColors(
-                            playedColor: Colors.red,
-                            bufferedColor: Colors.grey,
-                            backgroundColor: Colors.white24,
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width - 20, // 全屏时使用屏幕宽度
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end, // 整体右对齐
+                      children: [
+                        Expanded(
+                          flex: 2, // 减少进度条占用空间
+                          child: Container(
+                            height: 12, // 减小高度从20到12
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: VideoProgressIndicator(
+                                _controller,
+                                allowScrubbing: true,
+                                colors: const VideoProgressColors(
+                                  playedColor: Colors.red,
+                                  bufferedColor: Colors.grey,
+                                  backgroundColor: Colors.white24,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.fullscreen_exit, color: Colors.white, size: 20),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
+                        SizedBox(width: 6), // 增加间距
+                        Container(
+                          width: 28,
+                          height: 28,
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints.tightFor(width: 28, height: 28),
+                            icon: Icon(Icons.fullscreen_exit, color: Colors.white, size: 16),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 if (!_isPlaying)
@@ -284,7 +324,7 @@ class _VideoMessageViewState extends State<VideoMessageView> {
                     ? Alignment.centerRight
                     : Alignment.centerLeft,
                 child: Container(
-                  padding: widget.videoMessageConfig?.padding ?? EdgeInsets.zero,
+                  padding: widget.videoMessageConfig?.padding ?? const EdgeInsets.all(8),
                   margin: widget.videoMessageConfig?.margin ??
                       EdgeInsets.only(
                         top: 6,
@@ -294,6 +334,21 @@ class _VideoMessageViewState extends State<VideoMessageView> {
                       ),
                   height: widget.videoMessageConfig?.height ?? 200,
                   width: widget.videoMessageConfig?.width ?? 150,
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffb9cfe3),
+                    borderRadius: widget.videoMessageConfig?.borderRadius ?? BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
                   child: ClipRRect(
                     borderRadius: widget.videoMessageConfig?.borderRadius ??
                         BorderRadius.circular(14),
