@@ -58,12 +58,11 @@ class ChatUITextField extends StatefulWidget {
 
   final StringsCallBack onTopSelected;
 
-
   @override
   State<ChatUITextField> createState() => _ChatUITextFieldState();
 }
 
-class _ChatUITextFieldState extends State<ChatUITextField> {
+class _ChatUITextFieldState extends State<ChatUITextField> with TickerProviderStateMixin  {
   final ValueNotifier<String> _inputText = ValueNotifier('');
 
   final ImagePicker _imagePicker = ImagePicker();
@@ -107,6 +106,10 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
 
   List<SenceConfigModel> _senseList = [];
 
+  // 添加动画控制器
+  late AnimationController _panelController;
+  late Animation<double> _panelAnimation;
+
   @override
   void initState() {
     attachListeners();
@@ -119,6 +122,17 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
       controller = RecorderController();
     }
     loadData();
+
+    // 初始化动画控制器
+    _panelController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _panelAnimation = CurvedAnimation(
+      parent: _panelController,
+      curve: Curves.easeInOut,
+    );
   }
 
   Future<void> loadData() async {
@@ -147,6 +161,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     composingStatus.dispose();
     isRecording.dispose();
     _inputText.dispose();
+    _panelController.dispose(); // 释放动画控制器
     super.dispose();
   }
 
@@ -162,16 +177,17 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     final outlineBorder = _outLineBorder;
     return Column(
       children: [
-        SizedBox(
-          height: 60,
+        // 场景按钮列表 - 升高位置
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          height: (_hasPhoto || _hasEmoji) ? 0 : 60, // 当面板展开时隐藏场景按钮
           width: double.infinity,
           child: ListView.builder(
             itemCount: _senseList.length,
-              scrollDirection: Axis.horizontal,
-            itemBuilder:
-              (BuildContext context, int index) {
-                return _buildInfoRow(_senseList[index]);
-              },
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (BuildContext context, int index) {
+              return _buildInfoRow(_senseList[index]);
+            },
           ),
         ),
         Container(
@@ -235,8 +251,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                           child: TextField(
                             focusNode: widget.focusNode,
                             controller: widget.textEditingController,
-                            style:
-                            const TextStyle(color: Colors.black),
+                            style: const TextStyle(color: Colors.black),
                             maxLines: textFieldConfig?.maxLines ?? 5,
                             minLines: textFieldConfig?.minLines ?? 1,
                             keyboardType: textFieldConfig?.textInputType,
@@ -247,8 +262,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                                 TextCapitalization.sentences,
                             decoration: InputDecoration(
                               hintText: "输入消息...",
-                              fillColor:
-                                  Colors.white,
+                              fillColor: Colors.white,
                               filled: true,
                               hintStyle: textFieldConfig?.hintStyle ??
                                   TextStyle(
@@ -350,12 +364,19 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                         ),
                     ],
                   ),
-                  (_hasPhoto || _hasEmoji) && !isRecordingValue && !widget.focusNode.hasFocus ? Container(
-                    color: Colors.transparent,
-                    height: 200,
-                    width: double.infinity,
-                    child: _hasPhoto ? _buildMorePanel() : _hasEmoji ? _buildEmojiPanel() : Container(),
-                  ) : Container()
+                  // 面板展开动画
+                  SizeTransition(
+                    sizeFactor: _panelAnimation,
+                    axisAlignment: -1.0,
+                    child: (_hasPhoto || _hasEmoji) && !isRecordingValue && !widget.focusNode.hasFocus
+                        ? Container(
+                      color: Colors.transparent,
+                      height: 200,
+                      width: double.infinity,
+                      child: _hasPhoto ? _buildMorePanel() : _hasEmoji ? _buildEmojiPanel() : Container(),
+                    )
+                        : Container(),
+                  ),
                 ],
               );
             },
@@ -382,7 +403,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
               decoration: BoxDecoration(
                 borderRadius: textFieldConfig?.borderRadius ??
                     BorderRadius.circular(textFieldBorderRadius),
-                color:  Colors.white,
+                color: Colors.white,
               ),
               child: Text("${sence.name}", style: TextStyle(color: Colors.black,),),
             ),
@@ -395,16 +416,18 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
   void _handleEmojiSend() {
     setState(() {
       if (_hasEmoji) {
-        // 第二次点击同一个按钮 - 收起面板并打开键盘
+        // 收起面板
         _hasEmoji = false;
+        _panelController.reverse();
         // 延迟一点时间再打开键盘，确保面板完全收起
         Future.delayed(Duration(milliseconds: 50), () {
           FocusScope.of(context).requestFocus(widget.focusNode);
         });
       } else {
-        // 第一次点击 - 打开表情面板
+        // 打开表情面板
         _hasEmoji = true;
         _hasPhoto = false;
+        _panelController.forward();
         _closeKeyboard();
       }
     });
@@ -414,13 +437,15 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     setState(() {
       if (_hasPhoto) {
         _hasPhoto = false;
+        _panelController.reverse();
         Future.delayed(const Duration(milliseconds: 50), () {
           FocusScope.of(context).requestFocus(widget.focusNode);
         });
       } else {
-        // 第一次点击 - 打开添加面板
+        // 打开添加面板
         _hasPhoto = true;
         _hasEmoji = false;
+        _panelController.forward();
         _closeKeyboard();
       }
     });
@@ -430,6 +455,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     FocusScope.of(context).unfocus();
   }
 
+  // 其他方法保持不变...
   FutureOr<void> _cancelRecording() async {
     assert(
     defaultTargetPlatform == TargetPlatform.iOS ||
@@ -558,6 +584,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
       setState(() {
         _hasEmoji = false;
         _hasPhoto = false;
+        _panelController.reverse();
       });
       widget.onImageSelected(imagePath ?? '', '');
     } catch (e) {
@@ -723,7 +750,10 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
 
       if (photo != null) {
         widget.onVideoSelected(photo.path ?? '', '');
-        setState(() => _hasPhoto = false);
+        setState(() {
+          _hasPhoto = false;
+          _panelController.reverse();
+        });
       }
     } catch (e) {
       print('拍照失败: $e');
@@ -740,7 +770,10 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
 
       if (photo != null) {
         widget.onVideoSelected(photo.path ?? '', '');
-        setState(() => _hasPhoto = false);
+        setState(() {
+          _hasPhoto = false;
+          _panelController.reverse();
+        });
       }
     } catch (e) {
       print('录像失败: $e');
@@ -757,7 +790,10 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
 
         if (image != null) {
           widget.onVideoSelected(image.path ?? '', '');
-          setState(() => _hasPhoto = false);
+          setState(() {
+            _hasPhoto = false;
+            _panelController.reverse();
+          });
         }
       }
     } catch (e) {
