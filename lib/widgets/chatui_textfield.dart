@@ -246,8 +246,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                             textCapitalization: textFieldConfig?.textCapitalization ??
                                 TextCapitalization.sentences,
                             decoration: InputDecoration(
-                              hintText:
-                              textFieldConfig?.hintText ?? PackageStrings.message,
+                              hintText: "输入消息...",
                               fillColor:
                                   Colors.white,
                               filled: true,
