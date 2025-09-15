@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:io' show File, Platform;
-
+import 'package:file_picker/file_picker.dart';
 import 'package:audio_waveforms/audio_waveforms.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:qychatapp/presentation/ui/model/sence_config_model.dart';
 import 'package:qychatapp/utils/constants/constants.dart';
 import 'package:event_bus/event_bus.dart';
@@ -782,24 +783,311 @@ class _ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSt
 
   Future<void> _pickVideoFromGallery() async {
     try {
+      // 检查权限（根据你的需求调整权限检查）
       final permission = await PhotoManager.requestPermissionExtend();
-      if (permission.isAuth || permission.hasAccess) {
-        final XFile? image = await _imagePicker.pickVideo(
-          source: ImageSource.gallery,
-        );
+      if (!permission.isAuth && !permission.hasAccess) {
+        return;
+      }
 
-        printN("_pickVideoFromGallery==${image!.path}");
+      // 使用 file_picker 选择视频文件
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.video,
+        allowMultiple: false,
+      );
 
-        if (image != null) {
-          widget.onVideoSelected(image.path ?? '', '');
-          setState(() {
-            _hasPhoto = false;
-            _panelController.reverse();
-          });
-        }
+      if (result != null && result.files.single.path != null) {
+        String videoPath = result.files.single.path!;
+
+        printN("选择的视频路径: $videoPath");
+
+        // 直接传递视频路径
+        widget.onVideoSelected(videoPath, '');
+
+        setState(() {
+          _hasPhoto = false;
+          _panelController.reverse();
+        });
       }
     } catch (e) {
-      print('选择视频失败: $e');
+      printN('选择视频失败: $e');
+      widget.onVideoSelected('', e.toString());
     }
   }
+
+  // Future<void> _pickVideoFromGallery() async {
+  //   try {
+  //     final permission = await PhotoManager.requestPermissionExtend();
+  //     if (permission.isAuth || permission.hasAccess) {
+  //       final XFile? videoFile = await _imagePicker.pickVideo(
+  //         source: ImageSource.gallery,
+  //       );
+  //
+  //       printN("_pickVideoFromGallery== ${videoFile?.path}");
+  //
+  //       if (videoFile != null) {
+  //         // 检查文件扩展名是否正确
+  //         String videoPath = videoFile.path;
+  //         String? mimeType = lookupMimeType(videoPath);
+  //
+  //         printN("检测到的MIME类型: $mimeType");
+  //
+  //         // 如果扩展名不正确（如.jpg），但实际上是视频文件
+  //         if (mimeType != null && mimeType.startsWith('video/')) {
+  //           // 这是一个视频文件，即使扩展名不正确
+  //           printN("检测到视频文件，即使扩展名不正确");
+  //           widget.onVideoSelected(videoPath, '');
+  //         } else if (videoPath.endsWith('.jpg') || videoPath.endsWith('.jpeg')) {
+  //           // 如果路径以.jpg结尾，但实际上是视频文件
+  //           // 尝试读取文件内容并保存为正确的视频文件
+  //           try {
+  //             final bytes = await videoFile.readAsBytes();
+  //
+  //             // 检查文件内容是否是视频
+  //             final tempDir = await getTemporaryDirectory();
+  //             final tempPath = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.mp4';
+  //             final tempFile = File(tempPath);
+  //             await tempFile.writeAsBytes(bytes);
+  //
+  //             // 再次检查MIME类型
+  //             String? newMimeType = lookupMimeType(tempPath);
+  //             printN("重新检测的MIME类型: $newMimeType");
+  //
+  //             if (newMimeType != null && newMimeType.startsWith('video/')) {
+  //               // 确认是视频文件
+  //               printN("确认是视频文件，使用新路径: $tempPath");
+  //               widget.onVideoSelected(tempPath, '');
+  //             } else {
+  //               printN("文件不是视频格式");
+  //               widget.onVideoSelected('', '选择的文件不是视频格式');
+  //             }
+  //           } catch (e) {
+  //             printN("处理视频文件失败: $e");
+  //             widget.onVideoSelected('', '处理视频文件失败: $e');
+  //           }
+  //         } else {
+  //           // 既不是视频MIME类型，也不是错误的.jpg扩展名
+  //           printN("选择的文件不是视频格式");
+  //           widget.onVideoSelected('', '选择的文件不是视频格式');
+  //         }
+  //
+  //         setState(() {
+  //           _hasPhoto = false;
+  //           _panelController.reverse();
+  //         });
+  //       }
+  //     }
+  //   } catch (e) {
+  //     printN('选择视频失败: $e');
+  //     widget.onVideoSelected('', e.toString());
+  //   }
+  // }
+
+  String? lookupMimeType(String path, {List<int>? headerBytes}) {
+    // 首先根据文件扩展名判断
+    final extension = _getExtension(path);
+    final mimeFromExtension = _mimeTypes[extension];
+    if (mimeFromExtension != null) {
+      return mimeFromExtension;
+    }
+
+    // 如果有提供文件头字节，尝试根据文件头判断
+    if (headerBytes != null && headerBytes.length >= 12) {
+      return _getMimeTypeFromHeader(headerBytes);
+    }
+
+    return null;
+  }
+
+  String _getExtension(String path) {
+    final index = path.lastIndexOf('.');
+    if (index == -1 || index == path.length - 1) {
+      return '';
+    }
+    return path.substring(index + 1).toLowerCase();
+  }
+
+  String? _getMimeTypeFromHeader(List<int> headerBytes) {
+    // 检查常见的文件类型签名
+    if (_isJpeg(headerBytes)) return 'image/jpeg';
+    if (_isPng(headerBytes)) return 'image/png';
+    if (_isGif(headerBytes)) return 'image/gif';
+    if (_isWebp(headerBytes)) return 'image/webp';
+    if (_isMp4(headerBytes)) return 'video/mp4';
+    if (_isAvi(headerBytes)) return 'video/x-msvideo';
+    if (_isMov(headerBytes)) return 'video/quicktime';
+    if (_isMkv(headerBytes)) return 'video/x-matroska';
+    if (_isFlv(headerBytes)) return 'video/x-flv';
+    if (_isWmv(headerBytes)) return 'video/x-ms-wmv';
+    if (_is3gp(headerBytes)) return 'video/3gpp';
+
+    return null;
+  }
+
+  bool _isJpeg(List<int> bytes) {
+    return bytes.length >= 3 &&
+        bytes[0] == 0xFF &&
+        bytes[1] == 0xD8 &&
+        bytes[2] == 0xFF;
+  }
+
+  bool _isPng(List<int> bytes) {
+    return bytes.length >= 8 &&
+        bytes[0] == 0x89 &&
+        bytes[1] == 0x50 &&
+        bytes[2] == 0x4E &&
+        bytes[3] == 0x47 &&
+        bytes[4] == 0x0D &&
+        bytes[5] == 0x0A &&
+        bytes[6] == 0x1A &&
+        bytes[7] == 0x0A;
+  }
+
+  bool _isGif(List<int> bytes) {
+    return bytes.length >= 6 &&
+        bytes[0] == 0x47 &&
+        bytes[1] == 0x49 &&
+        bytes[2] == 0x46 &&
+        bytes[3] == 0x38 &&
+        (bytes[4] == 0x37 || bytes[4] == 0x39) &&
+        bytes[5] == 0x61;
+  }
+
+  bool _isWebp(List<int> bytes) {
+    return bytes.length >= 12 &&
+        bytes[0] == 0x52 &&
+        bytes[1] == 0x49 &&
+        bytes[2] == 0x46 &&
+        bytes[3] == 0x46 &&
+        bytes[8] == 0x57 &&
+        bytes[9] == 0x45 &&
+        bytes[10] == 0x42 &&
+        bytes[11] == 0x50;
+  }
+
+  bool _isMp4(List<int> bytes) {
+    // MP4文件通常以 'ftyp' 开头
+    return bytes.length >= 12 &&
+        bytes[4] == 0x66 &&
+        bytes[5] == 0x74 &&
+        bytes[6] == 0x79 &&
+        bytes[7] == 0x70;
+  }
+
+  bool _isAvi(List<int> bytes) {
+    // AVI文件以 'RIFF' 开头，然后是 'AVI '
+    return bytes.length >= 12 &&
+        bytes[0] == 0x52 &&
+        bytes[1] == 0x49 &&
+        bytes[2] == 0x46 &&
+        bytes[3] == 0x46 &&
+        bytes[8] == 0x41 &&
+        bytes[9] == 0x56 &&
+        bytes[10] == 0x49 &&
+        bytes[11] == 0x20;
+  }
+
+  bool _isMov(List<int> bytes) {
+    // MOV文件也是以 'ftyp' 开头，但可能有不同的品牌
+    return bytes.length >= 12 &&
+        bytes[4] == 0x66 &&
+        bytes[5] == 0x74 &&
+        bytes[6] == 0x79 &&
+        bytes[7] == 0x70;
+  }
+
+  bool _isMkv(List<int> bytes) {
+    // Matroska (MKV) 文件以 0x1A45DFA3 开头
+    return bytes.length >= 4 &&
+        bytes[0] == 0x1A &&
+        bytes[1] == 0x45 &&
+        bytes[2] == 0xDF &&
+        bytes[3] == 0xA3;
+  }
+
+  bool _isFlv(List<int> bytes) {
+    // FLV文件以 'FLV' 开头
+    return bytes.length >= 3 &&
+        bytes[0] == 0x46 &&
+        bytes[1] == 0x4C &&
+        bytes[2] == 0x56;
+  }
+
+  bool _isWmv(List<int> bytes) {
+    // ASF/WMV文件以 0x30 0x26 0xB2 0x75 0x8E 0x66 0xCF 0x11 开头
+    return bytes.length >= 9 &&
+        bytes[0] == 0x30 &&
+        bytes[1] == 0x26 &&
+        bytes[2] == 0xB2 &&
+        bytes[3] == 0x75 &&
+        bytes[4] == 0x8E &&
+        bytes[5] == 0x66 &&
+        bytes[6] == 0xCF &&
+        bytes[7] == 0x11 &&
+        bytes[8] == 0xA6 &&
+        bytes[9] == 0xD9;
+  }
+
+  bool _is3gp(List<int> bytes) {
+    // 3GP文件也是以 'ftyp' 开头
+    return bytes.length >= 12 &&
+        bytes[4] == 0x66 &&
+        bytes[5] == 0x74 &&
+        bytes[6] == 0x79 &&
+        bytes[7] == 0x70;
+  }
+
+// 常见文件扩展名到MIME类型的映射
+  final Map<String, String> _mimeTypes = {
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+    'gif': 'image/gif',
+    'webp': 'image/webp',
+    'bmp': 'image/bmp',
+    'ico': 'image/x-icon',
+    'tiff': 'image/tiff',
+    'tif': 'image/tiff',
+    'svg': 'image/svg+xml',
+
+    'mp4': 'video/mp4',
+    'avi': 'video/x-msvideo',
+    'mov': 'video/quicktime',
+    'wmv': 'video/x-ms-wmv',
+    'flv': 'video/x-flv',
+    'webm': 'video/webm',
+    'mkv': 'video/x-matroska',
+    '3gp': 'video/3gpp',
+    '3g2': 'video/3gpp2',
+    'mpeg': 'video/mpeg',
+    'mpg': 'video/mpeg',
+
+    'mp3': 'audio/mpeg',
+    'wav': 'audio/wav',
+    'ogg': 'audio/ogg',
+    'flac': 'audio/flac',
+    'aac': 'audio/aac',
+    'm4a': 'audio/mp4',
+
+    'pdf': 'application/pdf',
+    'zip': 'application/zip',
+    'rar': 'application/x-rar-compressed',
+    '7z': 'application/x-7z-compressed',
+    'tar': 'application/x-tar',
+    'gz': 'application/gzip',
+    'doc': 'application/msword',
+    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'xls': 'application/vnd.ms-excel',
+    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'ppt': 'application/vnd.ms-powerpoint',
+    'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+
+    'txt': 'text/plain',
+    'html': 'text/html',
+    'htm': 'text/html',
+    'css': 'text/css',
+    'js': 'application/javascript',
+    'json': 'application/json',
+    'xml': 'application/xml',
+  };
+
 }
