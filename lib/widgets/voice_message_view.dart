@@ -110,6 +110,7 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
       }
     } else {
       // 本地文件直接播放
+      _localFilePath = path; // 确保本地文件路径也被保存
       _preparePlayer(path);
     }
   }
@@ -189,20 +190,35 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
             print("暂停/停止播放，_isCurrentlyPlaying设为false");
           }
           
-          // 播放完成后重新准备播放器，确保下次能正常播放
+          // 播放完成后重置播放器状态，确保下次能正常播放
           if (state == PlayerState.stopped) {
-            Future.delayed(const Duration(milliseconds: 200), () {
+            print("播放完成，重置播放器状态");
+            // 不需要重新创建播放器，只需重置状态
+            setState(() {
+              _isCurrentlyPlaying = false;
+            });
+            
+            // 使用seekTo回到开始位置，而不是重新创建播放器
+            try {
+              controller.seekTo(0);
+              print("播放器已重置到起始位置");
+            } catch (e) {
+              print("重置播放器位置失败: $e");
+              
+              // 如果seekTo失败，尝试重新准备播放器
               if (mounted && _localFilePath != null) {
-                print("播放完成，重新准备播放器");
-                // 重新准备播放器
+                print("尝试重新准备播放器");
                 controller.preparePlayer(
                   path: _localFilePath!,
                   noOfSamples: widget.config?.playerWaveStyle
                       ?.getSamplesForWidth(widget.screenWidth * 0.5) ??
                       playerWaveStyle.getSamplesForWidth(widget.screenWidth * 0.5),
-                );
+                ).whenComplete(() {
+                  widget.onMaxDuration?.call(controller.maxDuration);
+                  print("播放器重新准备完成");
+                });
               }
-            });
+            }
           }
         });
   }

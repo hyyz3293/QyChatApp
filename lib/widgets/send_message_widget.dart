@@ -83,6 +83,7 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
   final _textEditingController = TextEditingController();
   final ValueNotifier<ReplyMessage> _replyMessage =
       ValueNotifier(const ReplyMessage());
+  final GlobalKey<ChatUITextFieldState> _chatUITextFieldKey = GlobalKey<ChatUITextFieldState>();
 
   ReplyMessage get replyMessage => _replyMessage.value;
   final _focusNode = FocusNode();
@@ -267,6 +268,7 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
                                 valueListenable: _replyMessage,
                               ),
                               ChatUITextField(
+                                key: _chatUITextFieldKey,
                                 focusNode: _focusNode,
                                 textEditingController: _textEditingController,
                                 onPressed: _onPressed,
@@ -364,6 +366,10 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
               ? bottomPadding2
               : bottomPadding3)
       : bottomPadding3;
+
+  void stopRecordingIfActive() {
+    _chatUITextFieldKey.currentState?.stopRecordingIfActive();
+  }
 
   @override
   void dispose() {

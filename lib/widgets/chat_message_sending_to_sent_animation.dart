@@ -26,12 +26,13 @@ class SendingMessageAnimatingWidget extends StatefulWidget {
 
 class _SendingMessageAnimatingWidgetState
     extends State<SendingMessageAnimatingWidget> with TickerProviderStateMixin {
-  bool get isSent => widget.status != MessageStatus.pending;
+  bool get isSent => widget.status != MessageStatus.pending && widget.status != MessageStatus.offline;
+  bool get isOffline => widget.status == MessageStatus.offline;
 
   bool isVisible = false;
 
   _attachOnStatusChangeListeners() {
-    if (isSent) {
+    if (isSent && !isOffline) {
       Future.delayed(const Duration(milliseconds: 400), () {
         isVisible = true;
         if (mounted) {
@@ -44,6 +45,19 @@ class _SendingMessageAnimatingWidgetState
   @override
   Widget build(BuildContext context) {
     _attachOnStatusChangeListeners();
+    
+    // 离线消息显示感叹号图标
+    if (isOffline) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 5, bottom: 8),
+        child: Icon(
+          Icons.error_outline,
+          color: Colors.red[700],
+          size: 14,
+        ),
+      );
+    }
+    
     return AnimatedPadding(
       curve: Curves.easeInOutExpo,
       duration: const Duration(seconds: 1),

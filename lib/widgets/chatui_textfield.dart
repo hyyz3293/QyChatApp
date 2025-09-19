@@ -60,10 +60,10 @@ class ChatUITextField extends StatefulWidget {
   final StringsCallBack onTopSelected;
 
   @override
-  State<ChatUITextField> createState() => _ChatUITextFieldState();
+  State<ChatUITextField> createState() => ChatUITextFieldState();
 }
 
-class _ChatUITextFieldState extends State<ChatUITextField> with TickerProviderStateMixin  {
+class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderStateMixin {
   final ValueNotifier<String> _inputText = ValueNotifier('');
 
   final ImagePicker _imagePicker = ImagePicker();
@@ -166,6 +166,12 @@ class _ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSt
     super.dispose();
   }
 
+  void stopRecordingIfActive() {
+    if (isRecording.value) {
+      _cancelRecording();
+    }
+  }
+
   void attachListeners() {
     composingStatus.addListener(() {
       widget.sendMessageConfig?.textFieldConfig?.onMessageTyping
@@ -178,19 +184,6 @@ class _ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSt
     final outlineBorder = _outLineBorder;
     return Column(
       children: [
-        // 场景按钮列表 - 升高位置
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          height: (_hasPhoto || _hasEmoji) ? 0 : 60, // 当面板展开时隐藏场景按钮
-          width: double.infinity,
-          child: ListView.builder(
-            itemCount: _senseList.length,
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (BuildContext context, int index) {
-              return _buildInfoRow(_senseList[index]);
-            },
-          ),
-        ),
         Container(
           padding: textFieldConfig?.padding ?? const EdgeInsets.symmetric(horizontal: 6),
           margin: textFieldConfig?.margin,
@@ -374,7 +367,27 @@ class _ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSt
                       color: Colors.transparent,
                       height: 200,
                       width: double.infinity,
-                      child: _hasPhoto ? _buildMorePanel() : _hasEmoji ? _buildEmojiPanel() : Container(),
+                      child: Column(
+                        children: [
+                          // 场景按钮列表 - 放在面板内部
+                          if (_hasPhoto && _senseList.isNotEmpty)
+                            Container(
+                              height: 60,
+                              width: double.infinity,
+                              child: ListView.builder(
+                                itemCount: _senseList.length,
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return _buildInfoRow(_senseList[index]);
+                                },
+                              ),
+                            ),
+                          // 原有面板内容
+                          Expanded(
+                            child: _hasPhoto ? _buildMorePanel() : _hasEmoji ? _buildEmojiPanel() : Container(),
+                          ),
+                        ],
+                      ),
                     )
                         : Container(),
                   ),
@@ -813,74 +826,6 @@ class _ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSt
       widget.onVideoSelected('', e.toString());
     }
   }
-
-  // Future<void> _pickVideoFromGallery() async {
-  //   try {
-  //     final permission = await PhotoManager.requestPermissionExtend();
-  //     if (permission.isAuth || permission.hasAccess) {
-  //       final XFile? videoFile = await _imagePicker.pickVideo(
-  //         source: ImageSource.gallery,
-  //       );
-  //
-  //       printN("_pickVideoFromGallery== ${videoFile?.path}");
-  //
-  //       if (videoFile != null) {
-  //         // 检查文件扩展名是否正确
-  //         String videoPath = videoFile.path;
-  //         String? mimeType = lookupMimeType(videoPath);
-  //
-  //         printN("检测到的MIME类型: $mimeType");
-  //
-  //         // 如果扩展名不正确（如.jpg），但实际上是视频文件
-  //         if (mimeType != null && mimeType.startsWith('video/')) {
-  //           // 这是一个视频文件，即使扩展名不正确
-  //           printN("检测到视频文件，即使扩展名不正确");
-  //           widget.onVideoSelected(videoPath, '');
-  //         } else if (videoPath.endsWith('.jpg') || videoPath.endsWith('.jpeg')) {
-  //           // 如果路径以.jpg结尾，但实际上是视频文件
-  //           // 尝试读取文件内容并保存为正确的视频文件
-  //           try {
-  //             final bytes = await videoFile.readAsBytes();
-  //
-  //             // 检查文件内容是否是视频
-  //             final tempDir = await getTemporaryDirectory();
-  //             final tempPath = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.mp4';
-  //             final tempFile = File(tempPath);
-  //             await tempFile.writeAsBytes(bytes);
-  //
-  //             // 再次检查MIME类型
-  //             String? newMimeType = lookupMimeType(tempPath);
-  //             printN("重新检测的MIME类型: $newMimeType");
-  //
-  //             if (newMimeType != null && newMimeType.startsWith('video/')) {
-  //               // 确认是视频文件
-  //               printN("确认是视频文件，使用新路径: $tempPath");
-  //               widget.onVideoSelected(tempPath, '');
-  //             } else {
-  //               printN("文件不是视频格式");
-  //               widget.onVideoSelected('', '选择的文件不是视频格式');
-  //             }
-  //           } catch (e) {
-  //             printN("处理视频文件失败: $e");
-  //             widget.onVideoSelected('', '处理视频文件失败: $e');
-  //           }
-  //         } else {
-  //           // 既不是视频MIME类型，也不是错误的.jpg扩展名
-  //           printN("选择的文件不是视频格式");
-  //           widget.onVideoSelected('', '选择的文件不是视频格式');
-  //         }
-  //
-  //         setState(() {
-  //           _hasPhoto = false;
-  //           _panelController.reverse();
-  //         });
-  //       }
-  //     }
-  //   } catch (e) {
-  //     printN('选择视频失败: $e');
-  //     widget.onVideoSelected('', e.toString());
-  //   }
-  // }
 
   String? lookupMimeType(String path, {List<int>? headerBytes}) {
     // 首先根据文件扩展名判断
