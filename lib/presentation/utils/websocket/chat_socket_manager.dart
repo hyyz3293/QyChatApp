@@ -166,44 +166,34 @@ class CSocketIOManager {
       if (_connectivitySubscription != null) {
         _connectivitySubscription!.cancel();
         _connectivitySubscription = null;
-        print('🔄 已取消旧的网络监听');
       }
       
-      // 使用Future.delayed确保不会立即执行，给其他流订阅时间初始化
-      Future.delayed(Duration(milliseconds: 500), () {
-        // 先检查当前网络状态
-        Connectivity().checkConnectivity().then((List<ConnectivityResult> initialResults) {
-          print('🌐 初始网络状态: $initialResults');
-          _wasConnected = _socket?.connected ?? false;
-          print('📡 初始连接状态: $_wasConnected');
-        });
+      // 先检查当前网络状态
+      Connectivity().checkConnectivity().then((List<ConnectivityResult> initialResults) {
+        print('🌐 初始网络状态: $initialResults');
+        _wasConnected = _socket?.connected ?? false;
+        print('📡 初始连接状态: $_wasConnected');
+      });
+      
+      _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
+        print('🌐 网络状态变化: $results');
         
-        // 使用微任务确保不会阻塞UI或其他流程
-        Future.microtask(() {
-          _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
-            print('🌐 网络状态变化: $results');
-            
-            // 检查是否有任何连接可用
-            bool hasConnection = results.isNotEmpty && results.any((result) => result != ConnectivityResult.none);
-            
-            if (!hasConnection) {
-              // 网络断开，记录状态
-              _wasConnected = _socket?.connected ?? false;
-              print('📵 网络已断开，之前连接状态: $_wasConnected');
-            } else {
-              // 网络恢复，强制尝试重连
-              print('🔌 网络已恢复，当前连接状态: ${_socket?.connected}');
-              if (_socket?.connected != true) {
-                print('🔄 尝试重新连接');
-                _isConnecting = false;
-                // 使用延迟执行connect，避免与消息流冲突
-                Future.delayed(Duration(milliseconds: 300), () {
-                  connect();
-                });
-              }
-            }
-          });
-        });
+        // 检查是否有任何连接可用
+        bool hasConnection = results.isNotEmpty && results.any((result) => result != ConnectivityResult.none);
+        
+        if (!hasConnection) {
+          // 网络断开，记录状态
+          _wasConnected = _socket?.connected ?? false;
+          print('📵 网络已断开，之前连接状态: $_wasConnected');
+        } else {
+          // 网络恢复，强制尝试重连
+          print('🔌 网络已恢复，当前连接状态: ${_socket?.connected}');
+          if (_socket?.connected != true) {
+            print('🔄 尝试重新连接');
+            _isConnecting = false;
+            connect();
+          }
+        }
       });
     } catch (e) {
       print('⚠️ 初始化网络监听失败: $e');
@@ -260,17 +250,17 @@ class CSocketIOManager {
 
   /// 连接到 Socket.IO 服务器
   Future<void> connect() async {
+    print('🔄 开始连接Socket...');
 
-    // bool _isInternetAvailable = await isInternetAvailable();
-    // if (!_isInternetAvailable) {
-    //   return;
-    // }
-
-
-    if (_isConnecting || _socket?.connected == true) {
-      if (_socket?.connected == true) {
-        sendOnlineMsg();
-      }
+    // 检查连接状态
+    if (_isConnecting) {
+      print('⚠️ 已有连接正在进行中，跳过');
+      return;
+    }
+    
+    if (_socket?.connected == true) {
+      print('✅ 已连接，发送在线消息');
+      sendOnlineMsg();
       return;
     }
 
@@ -285,14 +275,14 @@ class CSocketIOManager {
     var useridReal = sharedPreferences.getString("userIdReal");
     var accid = sharedPreferences.getString("accid");
 
-    if (token == "")
+    if (token == null || token.isEmpty) {
+      print('❌ Token为空，取消连接');
+      _isConnecting = false;
       return;
-
+    }
 
     _currentUserId = userid!;
-    //_currentUser = User(id: "${userid}");
-
-    print("userId======${userid}");
+    print("🆔 userId: ${userid}");
 
     // 构建连接URL和参数
     String url = "wss://uat-ccc.qylink.com:9991/qy.im.socket.io/"
@@ -303,8 +293,16 @@ class CSocketIOManager {
         "&EIO=3"
         "&transport=websocket";
 
-    printN("url: == ${url}");
+    print("🔗 连接URL: ${url}");
     _serverUrl = url;
+
+    // 设置连接超时
+    Timer? connectionTimeout = Timer(Duration(seconds: 15), () {
+      if (_socket?.connected != true) {
+        print('⏱️ 连接超时，重置状态');
+        _isConnecting = false;
+      }
+    });
 
     try {
       _socket = io.io(
@@ -323,33 +321,41 @@ class CSocketIOManager {
       );
 
       // 注册 Socket.IO 核心事件监听
+      print('📡 注册Socket事件监听');
       _socket!
         ..onConnect((_) {
           print('✅ 连接成功');
+          connectionTimeout?.cancel();
           _onConnected();
+        })
+        ..onConnectError((data) {
+          print('❌ 连接错误: $data');
+          _isConnecting = false;
         })
         ..onDisconnect((_) {
           print('❌ 断开连接');
           _onDisconnected();
         })
-        ..onError((data) => printN('❌ 错误: $data'))
-        ..on('msgContent', (data) => printN('📩 收到消息: $data'))
-        ..on('event', (data) => printN('📩 收到消息: $data'))
+        ..onError((data) {
+          print('❌ 错误: $data');
+          _isConnecting = false;
+        })
+        ..on('msgContent', (data) => print('📩 收到消息: $data'))
+        ..on('event', (data) => print('📩 收到事件: $data'))
         ..on('socket-im-communication', (data) {
-          printN('📩 收到消息: $data');
+          print('📩 收到通信消息');
           handleSocketMessage('$data');
         })
-          // 监听服务器发送的 ping 事件，回复 pong
         ..on('ping', (_) => _handleServerPing())
-          // 监听客户端发送 pong 后的确认（部分服务器会触发）
         ..on('pong', (_) => _handleServerPongAck());
-         // 监听自定义心跳响应
-        //..on('heartbeat_response', (_) => _onHeartbeatResponse());
 
+      print('🔄 执行连接...');
       await _socket!.connect();
+      print('🔄 连接命令已发送');
     } catch (e) {
       print('❌ Socket连接失败: $e');
       _isConnecting = false;
+      connectionTimeout?.cancel();
     }
   }
 
