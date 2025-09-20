@@ -25,9 +25,14 @@ import '../../ui/model/image_bean.dart';
 import '../../ui/model/message_send_model.dart';
 import '../../ui/model/sence_config_model.dart';
 import '../../ui/model/socket_im_message.dart';
+import '../../ui/model/user_account_model.dart';
 import '../../ui/model/welcomeSpeech_bean.dart';
 import '../dio/dio_client.dart';
 import '../service_locator.dart';
+
+// 定义重新加载数据的事件
+class ReloadDataEvent {}
+
 
 class SocketIoProtocol {
   // Engine.IO 消息类型
@@ -62,6 +67,8 @@ class CSocketIOManager {
   int _reconnectAttempt = 0;
   Timer? _reconnectTimer;
   late String _serverUrl;
+  // 连接尝试时间戳，用于限制连接频率
+  int _lastConnectAttempt = 0;
   
   // 网络连接状态监听
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
@@ -123,7 +130,10 @@ class CSocketIOManager {
 
 
   // 私有构造函数
-  CSocketIOManager._();
+  CSocketIOManager._() {
+    // 在构造函数中初始化 EventBus，确保只初始化一次
+    eventBus = EventBus();
+  }
 
   /// 获取单例实例（自动初始化）
   factory CSocketIOManager() {
@@ -151,7 +161,6 @@ class CSocketIOManager {
     //_usersController = StreamController<List<User>>.broadcast();
     _roomMessages = [];
     _audioPlayer = AudioPlayer();
-    eventBus = EventBus();
     
     // 初始化网络状态监听
     _initConnectivityListener();
@@ -191,7 +200,8 @@ class CSocketIOManager {
           if (_socket?.connected != true) {
             print('🔄 尝试重新连接');
             _isConnecting = false;
-            connect();
+            // 在重连前调用ChartExternalScreen的loadData方法刷新数据
+            _reloadDataBeforeConnect();
           }
         }
       });
@@ -199,6 +209,25 @@ class CSocketIOManager {
       print('⚠️ 初始化网络监听失败: $e');
     }
   }
+  
+  // /// 在重连前触发数据重新加载
+  // Future<void> _reloadDataBeforeConnect() async {
+  //   try {
+  //     print('📡 触发数据重新加载事件');
+  //     // 发送重新加载数据事件
+  //     eventBus.fire(ReloadDataEvent());
+  //
+  //     // 等待一段时间让数据加载完成
+  //     await Future.delayed(Duration(milliseconds: 500));
+  //
+  //     // 然后再进行连接
+  //     connect();
+  //   } catch (e) {
+  //     print('❌ 重新加载数据失败: $e');
+  //     // 即使加载失败也尝试连接
+  //     connect();
+  //   }
+  // }
 
   // 添加到这里 ↓
   void dispose() {
@@ -264,6 +293,15 @@ class CSocketIOManager {
       return;
     }
 
+    // 限制连接频率，至少间隔3秒
+    int now = DateTime.now().millisecondsSinceEpoch;
+    if (now - _lastConnectAttempt < 3000) {
+      print('🚫 连接请求过于频繁，已限流 (${(now - _lastConnectAttempt) / 1000}秒)');
+      _isConnecting = false;
+      return;
+    }
+    _lastConnectAttempt = now;
+    
     _isConnecting = true;
     _resetReconnect();
 
@@ -275,8 +313,29 @@ class CSocketIOManager {
     var useridReal = sharedPreferences.getString("userIdReal");
     var accid = sharedPreferences.getString("accid");
 
+    // 检查Token是否存在
     if (token == null || token.isEmpty) {
-      print('❌ Token为空，取消连接');
+      print('❌ Token为空，尝试重新获取Token');
+      try {
+        // 尝试重新获取Token
+        var userInfoJson = await DioClient().getUserinfoMessage();
+        var userMap = userInfoJson["data"];
+        var userAccount = UserAccountModel.fromJson(userMap);
+        
+        // 更新Token
+        token = userAccount.token;
+        sharedPreferences.setString("token", token);
+        print('✅ 成功重新获取Token');
+      } catch (e) {
+        print('❌ 重新获取Token失败: $e');
+        _isConnecting = false;
+        return;
+      }
+    }
+    
+    // 再次检查Token
+    if (token == null || token.isEmpty) {
+      print('❌ Token仍然为空，取消连接');
       _isConnecting = false;
       return;
     }
@@ -326,11 +385,16 @@ class CSocketIOManager {
         ..onConnect((_) {
           print('✅ 连接成功');
           connectionTimeout?.cancel();
+          _isConnecting = false;
           _onConnected();
         })
         ..onConnectError((data) {
           print('❌ 连接错误: $data');
           _isConnecting = false;
+          // 尝试重新连接，但先重新获取Token
+          Future.delayed(Duration(seconds: 2), () {
+            _reloadDataBeforeConnect();
+          });
         })
         ..onDisconnect((_) {
           print('❌ 断开连接');
@@ -339,6 +403,10 @@ class CSocketIOManager {
         ..onError((data) {
           print('❌ 错误: $data');
           _isConnecting = false;
+          // 尝试重新连接，但先重新获取Token
+          Future.delayed(Duration(seconds: 2), () {
+            _reloadDataBeforeConnect();
+          });
         })
         ..on('msgContent', (data) => print('📩 收到消息: $data'))
         ..on('event', (data) => print('📩 收到事件: $data'))
@@ -390,12 +458,35 @@ class CSocketIOManager {
       //isReturnMsg = true;
       sendOnlineMsg();
     //}
+    
+    // 发送事件通知连接已恢复，让监听器重新注册
+    print('📢 发送连接恢复事件');
+    eventBus.fire(ReloadDataEvent());
   }
 
   /// 断开连接处理
   void _onDisconnected() {
     _isConnecting = false;
     _handleDisconnect();
+  }
+  
+  /// 在重连前重新加载数据
+  Future<void> _reloadDataBeforeConnect() async {
+    print('🔄 重连前重新加载数据...');
+    try {
+      // 使用EventBus发送重新加载数据的事件
+      eventBus.fire(ReloadDataEvent());
+      
+      // 延迟一点时间等待数据加载
+      await Future.delayed(Duration(milliseconds: 500));
+      
+      // 执行连接
+      connect();
+    } catch (e) {
+      print('❌ 重新加载数据失败: $e');
+      // 即使加载失败也尝试连接
+      connect();
+    }
   }
 
   // ---------------------- Socket.IO 标准 Ping/Pong 机制 ----------------------
@@ -527,9 +618,20 @@ class CSocketIOManager {
         break;
 
       case "imOnlineed":
+        // 防止重复处理imOnlineed事件导致循环连接
+        printN("处理imOnlineed事件，当前isConfigMsg状态: $isConfigMsg");
         if (!isConfigMsg) {
           isConfigMsg = true;
-          sendSenseConfigMsg();
+          // 添加延迟，避免立即发送导致的循环
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (_socket != null && _socket!.connected) {
+              sendSenseConfigMsg();
+            } else {
+              printN("Socket未连接，跳过sendSenseConfigMsg调用");
+            }
+          });
+        } else {
+          printN("已经处理过imOnlineed事件，跳过重复处理");
         }
         playAudio();
         break;

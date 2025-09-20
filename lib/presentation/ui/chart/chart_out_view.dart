@@ -28,6 +28,7 @@ class ChartExternalScreen extends StatefulWidget {
 class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindingObserver {
 
   bool isLoadIng = true;
+  StreamSubscription? _reloadSubscription;
 
   @override
   void initState() {
@@ -35,22 +36,39 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
     initApp();
     //CSocketIOManager();
     loadData();
+    
+    // 监听重新加载数据事件
+    _reloadSubscription = CSocketIOManager().eventBus.on<ReloadDataEvent>().listen((_) {
+      print('📡 收到重新加载数据事件');
+      loadData();
+    });
   }
 
+  // 防止重复加载的标志
+  bool _isLoading = false;
+  
   Future<void> loadData() async {
+    // 如果已经在加载中，则跳过
+    if (_isLoading) {
+      print('⚠️ 数据加载已在进行中，跳过重复请求');
+      return;
+    }
+    
+    _isLoading = true;
+    print('🔄 开始加载数据...');
+    
 
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString("channel_code", widget.channelCode);
-    sharedPreferences.setString("userInfo", widget.userInfo);
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      sharedPreferences.setString("channel_code", widget.channelCode);
+      sharedPreferences.setString("userInfo", widget.userInfo);
 
-
-    var json = await DioClient().getChannelConfig();
-    //var logger = Logger();
-    // 解析
-    final response = ApiResponse<ChannelConfigModel>.fromJson(
-      json,
-          (dataJson) => ChannelConfigModel.fromJson(dataJson),
-    );
+      var json = await DioClient().getChannelConfig();
+      //var logger = Logger();
+      // 解析
+      final response = ApiResponse<ChannelConfigModel>.fromJson(
+        json,
+            (dataJson) => ChannelConfigModel.fromJson(dataJson),
+      );
     //SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
     try {
@@ -87,8 +105,11 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
       sharedPreferences.setInt("evaluationFlag", evaluationFlag);
       sharedPreferences.setString("serviceEvaluateTxt", serviceEvaluateTxt);
       sharedPreferences.setString("imEvaluationDefineList", convert.jsonEncode(response.data.evaluateParams.imEvaluationDefineList));
-    }catch(e) {
-
+    } catch(e) {
+      print('❌ 加载配置参数失败: $e');
+    } finally {
+      // 无论成功还是失败，都重置加载状态
+      _isLoading = false;
     }
 
 
@@ -133,6 +154,7 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
     setState(() {
       isLoadIng = false;
     });
+    print('✅ 数据加载完成，初始化Socket连接');
     CSocketIOManager();
   }
 
@@ -163,6 +185,7 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
 
   @override
   void dispose() {
+    _reloadSubscription?.cancel();
     super.dispose();
   }
 }
