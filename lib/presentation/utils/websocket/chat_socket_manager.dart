@@ -154,7 +154,7 @@ class CSocketIOManager {
     eventBus = EventBus();
     
     // 初始化网络状态监听
-    _initConnectivityListener();
+    //_initConnectivityListener();
     
     connect();
   }

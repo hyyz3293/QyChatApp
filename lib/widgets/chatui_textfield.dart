@@ -208,7 +208,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                   // 场景按钮列表 - 始终显示
                   if (_senseList.isNotEmpty)
                     Container(
-                      height: 80,
+                      height: 60,
                       width: double.infinity,
                       child: Column(
                         children: [
@@ -217,7 +217,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                               width: double.infinity,
                               padding: EdgeInsets.symmetric(vertical: 5),
                               alignment: Alignment.center,
-                              child: Text(
+                              child: const Text(
                                 "无在线客服",
                                 style: TextStyle(
                                   color: Colors.red,
