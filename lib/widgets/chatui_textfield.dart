@@ -207,15 +207,15 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                 children: [
                   // 场景按钮列表 - 始终显示
                   if (_senseList.isNotEmpty)
-                    Container(
-                      height: 60,
+                    SizedBox(
+                      height: 80,
                       width: double.infinity,
                       child: Column(
                         children: [
                           if (_showNoOnlineService) // 无在线客服提示
                             Container(
                               width: double.infinity,
-                              padding: EdgeInsets.symmetric(vertical: 5),
+                              padding: const EdgeInsets.symmetric(vertical: 5),
                               alignment: Alignment.center,
                               child: const Text(
                                 "无在线客服",

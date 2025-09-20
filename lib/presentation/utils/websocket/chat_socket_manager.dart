@@ -165,7 +165,13 @@ class CSocketIOManager {
     // 初始化网络状态监听
     _initConnectivityListener();
     
-    connect();
+    // 检查连接状态，避免重复连接
+    if (_socket?.connected != true) {
+      printN("--connected-1");
+      connect();
+    } else {
+      print('✅ 初始化时发现已连接，跳过连接');
+    }
   }
   
   /// 初始化网络连接状态监听
@@ -195,13 +201,16 @@ class CSocketIOManager {
           _wasConnected = _socket?.connected ?? false;
           print('📵 网络已断开，之前连接状态: $_wasConnected');
         } else {
-          // 网络恢复，强制尝试重连
+          // 网络恢复，检查连接状态后再决定是否重连
           print('🔌 网络已恢复，当前连接状态: ${_socket?.connected}');
-          if (_socket?.connected != true) {
-            print('🔄 尝试重新连接');
-            _isConnecting = false;
+          if (_socket?.connected != true && !_isConnecting) {
+            print('🔄 网络恢复后尝试重新连接');
             // 在重连前调用ChartExternalScreen的loadData方法刷新数据
-            _reloadDataBeforeConnect();
+            //_reloadDataBeforeConnect();
+          } else if (_socket?.connected == true) {
+            print('✅ 网络恢复时发现已连接，跳过重连');
+          } else if (_isConnecting) {
+            print('⏳ 网络恢复时发现正在连接中，跳过重连');
           }
         }
       });
@@ -279,7 +288,18 @@ class CSocketIOManager {
 
   /// 连接到 Socket.IO 服务器
   Future<void> connect() async {
+
+
+
     print('🔄 开始连接Socket...');
+
+    bool _oin = await isInternetAvailable();
+    // 检查WIFI状态
+    if (!_oin) {
+      print('⚠️ 无网络，跳过');
+      return;
+    }
+
 
     // 检查连接状态
     if (_isConnecting) {
@@ -391,10 +411,17 @@ class CSocketIOManager {
         ..onConnectError((data) {
           print('❌ 连接错误: $data');
           _isConnecting = false;
-          // 尝试重新连接，但先重新获取Token
-          Future.delayed(Duration(seconds: 2), () {
-            _reloadDataBeforeConnect();
-          });
+          
+          // 连接错误时，强制断开并重置状态
+          if (_socket?.connected == true) {
+            print('🔄 连接错误但状态显示已连接，强制断开重连');
+            _socket?.disconnect();
+          }
+          
+          // // 延迟后重新连接
+          // Future.delayed(Duration(seconds: 2), () {
+          //   _reloadDataBeforeConnect();
+          // });
         })
         ..onDisconnect((_) {
           print('❌ 断开连接');
@@ -403,10 +430,17 @@ class CSocketIOManager {
         ..onError((data) {
           print('❌ 错误: $data');
           _isConnecting = false;
-          // 尝试重新连接，但先重新获取Token
-          Future.delayed(Duration(seconds: 2), () {
-            _reloadDataBeforeConnect();
-          });
+          
+          // 发生错误时，强制断开并重置状态
+          if (_socket?.connected == true) {
+            print('🔄 发生错误但状态显示已连接，强制断开重连');
+            _socket?.disconnect();
+          }
+          
+          // // 延迟后重新连接
+          // Future.delayed(Duration(seconds: 2), () {
+          //   _reloadDataBeforeConnect();
+          // });
         })
         ..on('msgContent', (data) => print('📩 收到消息: $data'))
         ..on('event', (data) => print('📩 收到事件: $data'))
@@ -452,12 +486,12 @@ class CSocketIOManager {
   void _onConnected() {
     _isConnecting = false;
     _resetReconnect();
-    //_startHeartbeatMechanisms(); // 启动所有心跳机制
-
-    //if (!isReturnMsg) {
-      //isReturnMsg = true;
-      sendOnlineMsg();
-    //}
+    
+    // 确保消息监听器正常工作
+    print('✅ 连接成功，重新初始化消息监听');
+    
+    // 重新发送在线消息
+    sendOnlineMsg();
     
     // 发送事件通知连接已恢复，让监听器重新注册
     print('📢 发送连接恢复事件');
@@ -472,20 +506,36 @@ class CSocketIOManager {
   
   /// 在重连前重新加载数据
   Future<void> _reloadDataBeforeConnect() async {
+    // 如果已经连接成功，则不需要重新加载数据和重连
+    if (_socket?.connected == true) {
+      print('✅ 已连接状态，无需重新加载数据和重连');
+      return;
+    }
+    
     print('🔄 重连前重新加载数据...');
     try {
       // 使用EventBus发送重新加载数据的事件
       eventBus.fire(ReloadDataEvent());
       
       // 延迟一点时间等待数据加载
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(Duration(milliseconds: 1500));
+      
+      // 再次检查连接状态，避免在等待期间已经连接成功
+      if (_socket?.connected == true) {
+        print('✅ 数据加载期间已连接成功，跳过重连');
+        return;
+      }
       
       // 执行连接
+      printN("--connected-2");
       connect();
     } catch (e) {
       print('❌ 重新加载数据失败: $e');
-      // 即使加载失败也尝试连接
-      connect();
+      // 即使加载失败也尝试连接，但先检查连接状态
+      if (_socket?.connected != true) {
+        printN("--connected-3");
+        connect();
+      }
     }
   }
 
@@ -1028,14 +1078,28 @@ class CSocketIOManager {
 
   /// 处理断开连接（启动自定义重连）
   void _handleDisconnect() {
+    // 如果已经连接成功，则不需要重连
+    if (_socket?.connected == true) {
+      print('✅ 断开连接处理时发现已连接成功，跳过重连');
+      return;
+    }
+    
     if (_reconnectTimer?.isActive ?? false) return;
 
     _reconnectAttempt++;
     final delaySeconds = (_reconnectAttempt * _reconnectAttempt).clamp(1, 30);
     print('⏳ 将在 ${delaySeconds}s 后尝试第 $_reconnectAttempt 次重连...');
 
-    _reconnectTimer = Timer(Duration(seconds: delaySeconds), () {
+    _reconnectTimer = Timer(Duration(seconds: 30), () {
       print('🔁 尝试重连...');
+      
+      // 再次检查连接状态，避免在等待期间已经连接成功
+      if (_socket?.connected == true) {
+        print('✅ 重连前发现已连接成功，跳过重连');
+        return;
+      }
+      printN("--connected-4");
+
       connect();
     });
   }
