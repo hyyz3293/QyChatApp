@@ -163,6 +163,14 @@ class CSocketIOManager {
   void _initConnectivityListener() {
     try {
       _connectivitySubscription?.cancel();
+      
+      // 先检查当前网络状态
+      Connectivity().checkConnectivity().then((List<ConnectivityResult> initialResults) {
+        print('🌐 初始网络状态: $initialResults');
+        _wasConnected = _socket?.connected ?? false;
+        print('📡 初始连接状态: $_wasConnected');
+      });
+      
       _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
         print('🌐 网络状态变化: $results');
         
@@ -174,9 +182,11 @@ class CSocketIOManager {
           _wasConnected = _socket?.connected ?? false;
           print('📵 网络已断开，之前连接状态: $_wasConnected');
         } else {
-          // 网络恢复，如果之前是已连接状态，则尝试重连
-          if (_wasConnected && (_socket?.connected != true)) {
-            print('🔌 网络已恢复，尝试重新连接');
+          // 网络恢复，强制尝试重连
+          print('🔌 网络已恢复，当前连接状态: ${_socket?.connected}');
+          if (_socket?.connected != true) {
+            print('🔄 尝试重新连接');
+            _isConnecting = false;
             connect();
           }
         }
@@ -486,8 +496,23 @@ class CSocketIOManager {
 
       case "imSeatReturnResult":
         // 处理座席返回结果，通知UI显示"无在线客服"提示
-        if (content!.contains("无在线客服")) {
-          eventBus.fire(NoOnlineServiceEvent(true));
+        try {
+          if (msg!.contains("无在线的客服")) {
+            eventBus.fire(NoOnlineServiceEvent(true));
+          } else {
+            eventBus.fire(NoOnlineServiceEvent(false));
+            msgId = messId ?? "";
+            // 处理welcomeSpeech可能为null的情况
+            var message = Message(
+                createdAt: dateTime,
+                status: MessageStatus.delivered,
+                message: "$msg",
+                sentBy: '$userId'
+            );
+            _sendMessage(message);
+          }
+        } catch (e) {
+          print('解析 imSeatReturnResult 失败: $e');
         }
         break;
 
