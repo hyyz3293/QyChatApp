@@ -154,7 +154,7 @@ class CSocketIOManager {
     eventBus = EventBus();
     
     // 初始化网络状态监听
-    //_initConnectivityListener();
+    _initConnectivityListener();
     
     connect();
   }
@@ -162,34 +162,48 @@ class CSocketIOManager {
   /// 初始化网络连接状态监听
   void _initConnectivityListener() {
     try {
-      _connectivitySubscription?.cancel();
+      // 确保取消之前的订阅，避免重复监听
+      if (_connectivitySubscription != null) {
+        _connectivitySubscription!.cancel();
+        _connectivitySubscription = null;
+        print('🔄 已取消旧的网络监听');
+      }
       
-      // 先检查当前网络状态
-      Connectivity().checkConnectivity().then((List<ConnectivityResult> initialResults) {
-        print('🌐 初始网络状态: $initialResults');
-        _wasConnected = _socket?.connected ?? false;
-        print('📡 初始连接状态: $_wasConnected');
-      });
-      
-      _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
-        print('🌐 网络状态变化: $results');
-        
-        // 检查是否有任何连接可用
-        bool hasConnection = results.isNotEmpty && results.any((result) => result != ConnectivityResult.none);
-        
-        if (!hasConnection) {
-          // 网络断开，记录状态
+      // 使用Future.delayed确保不会立即执行，给其他流订阅时间初始化
+      Future.delayed(Duration(milliseconds: 500), () {
+        // 先检查当前网络状态
+        Connectivity().checkConnectivity().then((List<ConnectivityResult> initialResults) {
+          print('🌐 初始网络状态: $initialResults');
           _wasConnected = _socket?.connected ?? false;
-          print('📵 网络已断开，之前连接状态: $_wasConnected');
-        } else {
-          // 网络恢复，强制尝试重连
-          print('🔌 网络已恢复，当前连接状态: ${_socket?.connected}');
-          if (_socket?.connected != true) {
-            print('🔄 尝试重新连接');
-            _isConnecting = false;
-            connect();
-          }
-        }
+          print('📡 初始连接状态: $_wasConnected');
+        });
+        
+        // 使用微任务确保不会阻塞UI或其他流程
+        Future.microtask(() {
+          _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
+            print('🌐 网络状态变化: $results');
+            
+            // 检查是否有任何连接可用
+            bool hasConnection = results.isNotEmpty && results.any((result) => result != ConnectivityResult.none);
+            
+            if (!hasConnection) {
+              // 网络断开，记录状态
+              _wasConnected = _socket?.connected ?? false;
+              print('📵 网络已断开，之前连接状态: $_wasConnected');
+            } else {
+              // 网络恢复，强制尝试重连
+              print('🔌 网络已恢复，当前连接状态: ${_socket?.connected}');
+              if (_socket?.connected != true) {
+                print('🔄 尝试重新连接');
+                _isConnecting = false;
+                // 使用延迟执行connect，避免与消息流冲突
+                Future.delayed(Duration(milliseconds: 300), () {
+                  connect();
+                });
+              }
+            }
+          });
+        });
       });
     } catch (e) {
       print('⚠️ 初始化网络监听失败: $e');
@@ -231,8 +245,28 @@ class CSocketIOManager {
     print('♻️ SocketIOManager 资源已完全释放');
   }
 
+  // 检查是否有有效的互联网连接
+  Future<bool> isInternetAvailable() async {
+    // 首先检查网络连接类型
+    var connectivityResult = await Connectivity().checkConnectivity();
+
+    // 如果没有网络连接，则肯定没有互联网
+    if (connectivityResult == ConnectivityResult.none) {
+      return false;
+    }
+
+    return true;
+  }
+
   /// 连接到 Socket.IO 服务器
   Future<void> connect() async {
+
+    // bool _isInternetAvailable = await isInternetAvailable();
+    // if (!_isInternetAvailable) {
+    //   return;
+    // }
+
+
     if (_isConnecting || _socket?.connected == true) {
       if (_socket?.connected == true) {
         sendOnlineMsg();
