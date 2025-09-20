@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:convert' as convert;
 import 'package:audioplayers/audioplayers.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:qychatapp/models/data_models/chat_user.dart';
 import 'package:qychatapp/presentation/utils/global_utils.dart';
 import 'package:event_bus/event_bus.dart';
@@ -47,11 +48,12 @@ class SocketIoProtocol {
   static const binaryEvent = '5'; // 二进制事件
 }
 
-// sending	正在发送中	消息已开始发送但尚未离开你的设备（如网络较慢时卡在此状态）。
-// sent	已发送到服务器	消息已从你的设备成功发送至服务商服务器（对方设备尚未收到）。
-// delivered	已送达对方设备	服务器已将消息推送到对方手机/客户端（对方是否查看未知）。
-// seen	已被对方查看	对方在设备上打开了聊天窗口并看到了消息（显示已读回执）。
-// error	发送失败	消息因网络中断、对方号码无效、服务器问题等原因未能发出。
+// 无在线客服事件类
+class NoOnlineServiceEvent {
+  final bool showNoService;
+  
+  NoOnlineServiceEvent(this.showNoService);
+}
 
 class CSocketIOManager {
   static CSocketIOManager? _instance;
@@ -60,6 +62,11 @@ class CSocketIOManager {
   int _reconnectAttempt = 0;
   Timer? _reconnectTimer;
   late String _serverUrl;
+  
+  // 网络连接状态监听
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+
+  bool _wasConnected = false; // 记录上一次的连接状态
 
   // 心跳机制相关变量
   Timer? _heartbeatTimer;        // 自定义心跳发送计时器
@@ -145,7 +152,38 @@ class CSocketIOManager {
     _roomMessages = [];
     _audioPlayer = AudioPlayer();
     eventBus = EventBus();
+    
+    // 初始化网络状态监听
+    _initConnectivityListener();
+    
     connect();
+  }
+  
+  /// 初始化网络连接状态监听
+  void _initConnectivityListener() {
+    try {
+      _connectivitySubscription?.cancel();
+      _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
+        print('🌐 网络状态变化: $results');
+        
+        // 检查是否有任何连接可用
+        bool hasConnection = results.isNotEmpty && results.any((result) => result != ConnectivityResult.none);
+        
+        if (!hasConnection) {
+          // 网络断开，记录状态
+          _wasConnected = _socket?.connected ?? false;
+          print('📵 网络已断开，之前连接状态: $_wasConnected');
+        } else {
+          // 网络恢复，如果之前是已连接状态，则尝试重连
+          if (_wasConnected && (_socket?.connected != true)) {
+            print('🔌 网络已恢复，尝试重新连接');
+            connect();
+          }
+        }
+      });
+    } catch (e) {
+      print('⚠️ 初始化网络监听失败: $e');
+    }
   }
 
   // 添加到这里 ↓
@@ -447,14 +485,10 @@ class CSocketIOManager {
         break;
 
       case "imSeatReturnResult":
-        // playAudio();
-        // var message = Message(
-        //   createdAt: dateTime,
-        //   status: MessageStatus.delivered,
-        //   message: '$msg',
-        //   sentBy: '$userId',
-        // );
-        // _sendMessage(message);
+        // 处理座席返回结果，通知UI显示"无在线客服"提示
+        if (content!.contains("无在线客服")) {
+          eventBus.fire(NoOnlineServiceEvent(true));
+        }
         break;
 
       case "complex":
@@ -1043,6 +1077,15 @@ class CSocketIOManager {
   Future<void> sendChatConfig(SenceConfigModel scene) async {
     printN("场景配置项");
     if (scene.id == -1){
+
+      var message = Message(
+        createdAt: DateTime.now(),
+        message: scene.name,
+        sentBy: "$currentUserId",
+      );
+
+      _messagesController2.add(message);
+
       convertToHumanTranslation();
       return;
     }

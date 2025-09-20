@@ -99,6 +99,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
 
   bool _hasPhoto = false; // 相册/拍照
   bool _hasEmoji = false; // 表情
+  bool _showNoOnlineService = false; // 无在线客服提示
 
   // 添加录音计时相关变量
   Timer? _recordingTimer;
@@ -134,6 +135,13 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
       parent: _panelController,
       curve: Curves.easeInOut,
     );
+    
+    // 监听无在线客服事件
+    CSocketIOManager().eventBus.on<NoOnlineServiceEvent>().listen((event) {
+      setState(() {
+        _showNoOnlineService = event.showNoService;
+      });
+    });
   }
 
   Future<void> loadData() async {
@@ -200,14 +208,33 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                   // 场景按钮列表 - 始终显示
                   if (_senseList.isNotEmpty)
                     Container(
-                      height: 60,
+                      height: 80,
                       width: double.infinity,
-                      child: ListView.builder(
-                        itemCount: _senseList.length,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (BuildContext context, int index) {
-                          return _buildInfoRow(_senseList[index]);
-                        },
+                      child: Column(
+                        children: [
+                          if (_showNoOnlineService) // 无在线客服提示
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(vertical: 5),
+                              alignment: Alignment.center,
+                              child: Text(
+                                "无在线客服",
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: _senseList.length,
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (BuildContext context, int index) {
+                                return _buildInfoRow(_senseList[index]);
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
 

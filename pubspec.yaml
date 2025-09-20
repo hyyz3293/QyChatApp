@@ -37,6 +37,7 @@ dependencies:
   carousel_slider: ^5.0.0
   crop_your_image: ^1.1.0
   crypto: ^3.0.6
+  connectivity_plus: ^7.0.0
   # D
   dio: ^5.7.0
   date_format: ^2.0.2 #日期管理类
