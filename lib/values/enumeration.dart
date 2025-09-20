@@ -78,7 +78,7 @@ enum MessageStatus {
   delivered,
   undelivered,
   pending,
-  offline;  // 添加离线状态
+  offline;
 
   static MessageStatus? tryParse(String? value) {
     final status = value?.trim().toLowerCase();

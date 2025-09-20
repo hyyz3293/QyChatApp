@@ -190,13 +190,27 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
           decoration: BoxDecoration(
             borderRadius: textFieldConfig?.borderRadius ??
                 BorderRadius.circular(textFieldBorderRadius),
-            color: Color(0XFFf4f5f7),
+            color: const Color(0XFFf4f5f7),
           ),
           child: ValueListenableBuilder<bool>(
             valueListenable: isRecording,
             builder: (_, isRecordingValue, child) {
               return Column(
                 children: [
+                  // 场景按钮列表 - 始终显示
+                  if (_senseList.isNotEmpty)
+                    Container(
+                      height: 60,
+                      width: double.infinity,
+                      child: ListView.builder(
+                        itemCount: _senseList.length,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (BuildContext context, int index) {
+                          return _buildInfoRow(_senseList[index]);
+                        },
+                      ),
+                    ),
+
                   Row(
                     children: [
                       if ((sendMessageConfig?.allowRecordingVoice ?? false) &&
@@ -369,19 +383,6 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                       width: double.infinity,
                       child: Column(
                         children: [
-                          // 场景按钮列表 - 放在面板内部
-                          if (_hasPhoto && _senseList.isNotEmpty)
-                            Container(
-                              height: 60,
-                              width: double.infinity,
-                              child: ListView.builder(
-                                itemCount: _senseList.length,
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return _buildInfoRow(_senseList[index]);
-                                },
-                              ),
-                            ),
                           // 原有面板内容
                           Expanded(
                             child: _hasPhoto ? _buildMorePanel() : _hasEmoji ? _buildEmojiPanel() : Container(),

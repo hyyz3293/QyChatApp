@@ -466,16 +466,16 @@ class _ChatScreenState extends State<ChatViewScreen> {
       final index = _chatController.initialMessageList.indexOf(messageObj);
       if (index != -1) {
         _chatController.initialMessageList[index].setStatus = 
-            sendResult ? MessageStatus.read : MessageStatus.undelivered;
+            sendResult ? MessageStatus.read : MessageStatus.offline;
       }
       
       print("消息发送结果: $sendResult");
     } catch (e) {
       print("消息发送失败: $e");
-      // 发送失败，保持undelivered状态
+      // 发送失败，设置为离线状态
       final index = _chatController.initialMessageList.indexOf(messageObj);
       if (index != -1) {
-        _chatController.initialMessageList[index].setStatus = MessageStatus.undelivered;
+        _chatController.initialMessageList[index].setStatus = MessageStatus.offline;
       }
     }
   }
