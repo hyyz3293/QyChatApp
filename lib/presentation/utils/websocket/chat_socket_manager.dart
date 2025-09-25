@@ -1073,7 +1073,7 @@ class CSocketIOManager {
     final delaySeconds = (_reconnectAttempt * _reconnectAttempt).clamp(1, 30);
     print('⏳ 将在 ${delaySeconds}s 后尝试第 $_reconnectAttempt 次重连...');
 
-    _reconnectTimer = Timer(Duration(seconds: 30), () {
+    _reconnectTimer = Timer(Duration(seconds: 20), () {
       print('🔁 尝试重连...');
       printN("--connected-4");
       connect();
