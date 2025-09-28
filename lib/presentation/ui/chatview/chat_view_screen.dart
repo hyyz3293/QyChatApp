@@ -96,7 +96,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
     });
     // 订阅消息流
     _messageSubscription = CSocketIOManager().messagesStream.listen((msg) {
-      print("===>>>> Msg ");
+      print("===>>>> Msg 收到消息: ${msg.message}");
       //msg.sentBy = "2";
       var _msg = msg.copyWith(sentBy: "2");
       _chatController.addMessage(_msg);
@@ -107,7 +107,7 @@ class _ChatScreenState extends State<ChatViewScreen> {
     });
     // 订阅消息流
     _messageSubscription2 = CSocketIOManager().messagesStream2.listen((msg) {
-      print("===>>>2222> Msg DATA ${msg.sentBy}");
+      print("===>>>2222> Msg DATA ${msg.sentBy} - 消息内容: ${msg.message}");
       //msg.sentBy = "2";
       var _msg = msg.copyWith(sentBy: "${_currentUserId}");
       print("===>>>2222> Msg DATA ${_msg.sentBy}");

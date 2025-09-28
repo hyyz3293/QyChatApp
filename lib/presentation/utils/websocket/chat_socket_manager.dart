@@ -151,13 +151,41 @@ class CSocketIOManager {
 
   /// 初始化Socket连接
   void _initSocket() {
-    if (_isConnecting || _socket?.connected == true) return;
+    print('🔄 开始初始化Socket...');
+    
+    // 移除过早的连接状态检查，允许初始化继续进行
+    // if (_isConnecting || _socket?.connected == true) return;
 
-    // 初始化消息和用户控制器
-    _messagesController = StreamController<Message>.broadcast();
-    _messagesController2 = StreamController<Message>.broadcast();
-
-    _updateController = StreamController<Message>.broadcast();
+    // 初始化消息控制器（避免重复初始化）
+    try {
+      if (_messagesController.isClosed) {
+        _messagesController = StreamController<Message>.broadcast();
+        print('🔄 重新初始化 _messagesController (已关闭)');
+      }
+    } catch (e) {
+      _messagesController = StreamController<Message>.broadcast();
+      print('🔄 首次初始化 _messagesController');
+    }
+    
+    try {
+      if (_messagesController2.isClosed) {
+        _messagesController2 = StreamController<Message>.broadcast();
+        print('🔄 重新初始化 _messagesController2 (已关闭)');
+      }
+    } catch (e) {
+      _messagesController2 = StreamController<Message>.broadcast();
+      print('🔄 首次初始化 _messagesController2');
+    }
+    
+    try {
+      if (_updateController.isClosed) {
+        _updateController = StreamController<Message>.broadcast();
+        print('🔄 重新初始化 _updateController (已关闭)');
+      }
+    } catch (e) {
+      _updateController = StreamController<Message>.broadcast();
+      print('🔄 首次初始化 _updateController');
+    }
     //_usersController = StreamController<List<User>>.broadcast();
     _roomMessages = [];
     _audioPlayer = AudioPlayer();
@@ -165,13 +193,9 @@ class CSocketIOManager {
     // 初始化网络状态监听
     _initConnectivityListener();
     
-    // 检查连接状态，避免重复连接
-    if (_socket?.connected != true) {
-      printN("--connected-1");
-      connect();
-    } else {
-      print('✅ 初始化时发现已连接，跳过连接');
-    }
+    // 始终尝试连接，让connect方法内部处理连接状态检查
+    print('🔄 初始化完成，开始连接...');
+    connect();
   }
   
   /// 初始化网络连接状态监听
