@@ -607,7 +607,7 @@ class CSocketIOManager {
   }) async {
     // 从参数直接获取，无需再从msgBean获取
     int? userId = msgSendId ?? 0;
-
+    eventBus.fire(NoOnlineServiceEvent(false));
     switch(enumType) {
       case "imQueueNotice":
         playAudio();
@@ -1141,6 +1141,19 @@ class CSocketIOManager {
     
     // 清理事件监听器
     _eventListeners.clear();
+    
+    // 检查并重新初始化消息控制器（如果已关闭）
+    if (_messagesController.isClosed) {
+      print('🔄 重新初始化_messagesController');
+      _messagesController = StreamController<Message>.broadcast();
+      print('✅ _messagesController 重新初始化完成，hasListener: ${_messagesController.hasListener}');
+    }
+    
+    if (_messagesController2.isClosed) {
+      print('🔄 重新初始化_messagesController2');
+      _messagesController2 = StreamController<Message>.broadcast();
+      print('✅ _messagesController2 重新初始化完成，hasListener: ${_messagesController2.hasListener}');
+    }
     
     print('✅ Socket连接已彻底清理完成');
   }
@@ -1828,10 +1841,31 @@ class CSocketIOManager {
 
   // 添加消息到房间
   void _addMessageToRoom(Message message) {
-    // _roomMessages.insert(0, message);
-    // _messagesController.add(List.from(_roomMessages));
-    _messagesController.add(message);
-    //eventBus.fire(MsgEvent(message));
+    try {
+      // 检查消息控制器状态
+      if (_messagesController.isClosed) {
+        print('⚠️ _messagesController已关闭，重新初始化');
+        _messagesController = StreamController<Message>.broadcast();
+        print('✅ _messagesController 重新初始化完成，hasListener: ${_messagesController.hasListener}');
+      }
+      
+      print('📤 添加消息到控制器: ${message.message}');
+      print('🔍 _messagesController状态 - isClosed: ${_messagesController.isClosed}, hasListener: ${_messagesController.hasListener}');
+      _messagesController.add(message);
+      print('✅ 消息已成功添加到控制器');
+      
+      //eventBus.fire(MsgEvent(message));
+    } catch (e) {
+      print('❌ 添加消息到控制器失败: $e');
+      // 尝试重新初始化控制器
+      _messagesController = StreamController<Message>.broadcast();
+      try {
+        _messagesController.add(message);
+        print('✅ 重新初始化后消息添加成功');
+      } catch (e2) {
+        print('❌ 重新初始化后仍然失败: $e2');
+      }
+    }
   }
 
 }
