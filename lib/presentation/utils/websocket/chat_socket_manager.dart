@@ -553,6 +553,7 @@ class CSocketIOManager {
   void _handleServerPing() {
     print('🏓 收到服务器 ping，回复 pong');
     // 回复 pong 给服务器（Socket.IO 要求客户端必须响应 ping）
+    printN("======================emit======================1");
     _socket?.emit('pong');
     // 重置 ping 超时计时器（证明服务器仍活跃）
     _resetPingTimeoutTimer();
@@ -1117,6 +1118,8 @@ class CSocketIOManager {
       print('⚠️ 发送失败：未连接服务器');
       return;
     }
+    print("====");
+    printN("======================emit======================2");
     _socket?.emit(event, data);
   }
 
@@ -1271,7 +1274,7 @@ class CSocketIOManager {
 
 
     printN("上线；；==  ${msg}");
-
+    printN("======================emit======================3");
     _socket!.emit('socket-im-communication', socketIMMessage.toJson());
 
     var message = Message(
@@ -1335,6 +1338,8 @@ class CSocketIOManager {
 
     printN("上线；；==  ${msg}");
 
+    printN("======================emit======================4");
+
     _socket!.emit('socket-im-communication', socketIMMessage.toJson());
 
     var message = Message(
@@ -1395,6 +1400,7 @@ class CSocketIOManager {
     SocketIMMessage socketIMMessage = SocketIMMessage(toAccid: [accid], event: 'socket-im-communication', msgContent: '${msg}');
     printN("场景配置项  CHat；；=accid=  ${accid}");
     printN("场景配置项 Chat ；；==  ${msg}");
+    printN("======================emit======================5");
     _socket!.emit('socket-im-communication', socketIMMessage.toJson());
     var message = Message(
       createdAt: DateTime.now(),
@@ -1441,6 +1447,9 @@ class CSocketIOManager {
 
 
     printN("上线；；==  ${msg}");
+
+    printN("======================emit======================6");
+
 
     _socket!.emit('socket-im-communication', socketIMMessage.toJson());
   }
@@ -1499,6 +1508,9 @@ class CSocketIOManager {
 
     printN("场景 配置；；==  ${msg}");
 
+    printN("======================emit======================7");
+
+
     _socket!.emit('socket-im-communication', socketIMMessage.toJson());
   }
 
@@ -1515,6 +1527,9 @@ class CSocketIOManager {
 
     SocketIMMessage socketIMMessage = SocketIMMessage(
         toAccid: [accid], event: 'socket-im-communication', msgContent: '${msg}');
+
+    printN("======================emit======================8");
+
     _socket!.emit('socket-im-communication', socketIMMessage.toJson());
   }
 

@@ -437,7 +437,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
             onTap: () {
               printN("people==== ${sence.toJson()}");
               CSocketIOManager().sendChatConfig(sence);
-              CSocketIOManager().sendTextMessage(sence.name);
+              //CSocketIOManager().sendTextMessage(sence.name);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
