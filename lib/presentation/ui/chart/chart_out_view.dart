@@ -154,7 +154,11 @@ class _ChartHomeScreenState extends State<ChartExternalScreen> with WidgetsBindi
     setState(() {
       isLoadIng = false;
     });
-    print('✅ 数据加载完成，初始化Socket连接');
+    print('✅ 数据加载完成，等待token保存后初始化Socket连接');
+    
+    // 确保token等信息已完全保存到SharedPreferences后再初始化Socket
+    await Future.delayed(Duration(milliseconds: 100));
+    print('🔌 开始初始化Socket连接');
     CSocketIOManager();
   }
 

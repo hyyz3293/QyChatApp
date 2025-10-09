@@ -337,9 +337,9 @@ class CSocketIOManager {
       return;
     }
 
-    // 限制连接频率，至少间隔3秒
+    // 限制连接频率，至少间隔3秒（但首次连接不受限制）
     int now = DateTime.now().millisecondsSinceEpoch;
-    if (now - _lastConnectAttempt < 3000) {
+    if (_lastConnectAttempt > 0 && now - _lastConnectAttempt < 3000) {
       print('🚫 连接请求过于频繁，已限流 (${(now - _lastConnectAttempt) / 1000}秒)');
       _isConnecting = false;
       return;
@@ -357,7 +357,7 @@ class CSocketIOManager {
     var useridReal = sharedPreferences.getString("userIdReal");
     var accid = sharedPreferences.getString("accid");
 
-    // 检查Token是否存在
+    // 检查Token是否存在或可能已过期
     if (token == null || token.isEmpty) {
       print('❌ Token为空，尝试重新获取Token');
       try {
@@ -369,11 +369,47 @@ class CSocketIOManager {
         // 更新Token
         token = userAccount.token;
         sharedPreferences.setString("token", token);
-        print('✅ 成功重新获取Token');
+        print('✅ 成功重新获取Token: ${token.substring(0, 10)}...');
       } catch (e) {
         print('❌ 重新获取Token失败: $e');
         _isConnecting = false;
         return;
+      }
+    } else {
+      // Token存在，但可能已过期，先尝试验证
+      print('🔍 Token存在，验证有效性: ${token.substring(0, 10)}...');
+      try {
+        // 通过调用一个需要认证的接口来验证token是否有效
+        var testResponse = await DioClient().getUserinfoMessage();
+        if (testResponse.isEmpty || testResponse["code"] == 401) {
+          print('⚠️ Token可能已过期，重新获取');
+          var userInfoJson = await DioClient().getUserinfoMessage();
+          var userMap = userInfoJson["data"];
+          var userAccount = UserAccountModel.fromJson(userMap);
+          
+          // 更新Token
+          token = userAccount.token;
+          sharedPreferences.setString("token", token);
+          print('✅ Token已更新: ${token?.substring(0, 10)}...');
+        } else {
+          print('✅ Token验证通过');
+        }
+      } catch (e) {
+        print('⚠️ Token验证失败，尝试重新获取: $e');
+        try {
+          var userInfoJson = await DioClient().getUserinfoMessage();
+          var userMap = userInfoJson["data"];
+          var userAccount = UserAccountModel.fromJson(userMap);
+          
+          // 更新Token
+          token = userAccount.token;
+          sharedPreferences.setString("token", token);
+          print('✅ Token重新获取成功: ${token?.substring(0, 10)}...');
+        } catch (refreshError) {
+          print('❌ Token重新获取失败: $refreshError');
+          _isConnecting = false;
+          return;
+        }
       }
     }
     
@@ -436,13 +472,14 @@ class CSocketIOManager {
           print('❌ 连接错误: $data');
           _isConnecting = false;
           
-          // 连接错误时，彻底清理并重连
-          print('🔄 连接错误，彻底清理后重连');
-          
-          // // 延迟后重新连接
-          // Future.delayed(Duration(seconds: 2), () {
-          //   _reloadDataBeforeConnect();
-          // });
+          // 如果是401错误，可能是token问题
+          if (data.toString().contains('401')) {
+            print('🔄 检测到401错误，可能是token过期，尝试重新获取token...');
+            _handleTokenExpiredError();
+          } else {
+            // 连接错误时，彻底清理并重连
+            print('🔄 连接错误，彻底清理后重连');
+          }
         })
         ..onDisconnect((_) {
           print('❌ 断开连接');
@@ -1904,6 +1941,39 @@ class CSocketIOManager {
       } catch (e2) {
         print('❌ 重新初始化后仍然失败: $e2');
       }
+    }
+  }
+
+  /// 处理token过期错误
+  Future<void> _handleTokenExpiredError() async {
+    print('🔄 处理token过期错误...');
+    try {
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      
+      // 清除旧的token
+      await sharedPreferences.remove("token");
+      print('🗑️ 已清除旧token');
+      
+      // 重新获取token
+      var userInfoJson = await DioClient().getUserinfoMessage();
+      if (userInfoJson != null && userInfoJson['data'] != null) {
+        var userMap = userInfoJson["data"];
+        var userAccount = UserAccountModel.fromJson(userMap);
+        
+        // 保存新token
+        await sharedPreferences.setString("token", userAccount.token);
+        print('✅ 新token已保存: ${userAccount.token.substring(0, 10)}...');
+        
+        // 延迟后重新连接
+        Future.delayed(Duration(seconds: 2), () {
+          print('🔄 使用新token重新连接...');
+          connect();
+        });
+      } else {
+        print('❌ 重新获取token失败，响应为空');
+      }
+    } catch (e) {
+      print('❌ 处理token过期错误失败: $e');
     }
   }
 

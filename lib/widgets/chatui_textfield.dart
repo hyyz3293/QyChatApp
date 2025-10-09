@@ -106,11 +106,22 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
   int _recordingSeconds = 0;
   String? _currentRecordingPath; // 存储当前录音路径
 
+  // 微信风格录音相关变量
+  bool _isWeChatRecording = false;
+  bool _isCancellingRecord = false;
+  double _recordingOffsetY = 0;
+  OverlayEntry? _voiceOverlay;
+
   List<SenceConfigModel> _senseList = [];
 
   // 添加动画控制器
   late AnimationController _panelController;
   late Animation<double> _panelAnimation;
+  
+  // 弹窗动画控制器
+  late AnimationController _dialogController;
+  late Animation<double> _dialogScaleAnimation;
+  late Animation<double> _dialogOpacityAnimation;
 
   @override
   void initState() {
@@ -135,6 +146,28 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
       parent: _panelController,
       curve: Curves.easeInOut,
     );
+    
+    // 初始化弹窗动画控制器
+    _dialogController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    
+    _dialogScaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _dialogController,
+      curve: Curves.easeOutBack,
+    ));
+    
+    _dialogOpacityAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _dialogController,
+      curve: Curves.easeOut,
+    ));
     
     // 监听无在线客服事件
     CSocketIOManager().eventBus.on<NoOnlineServiceEvent>().listen((event) {
@@ -171,6 +204,8 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
     isRecording.dispose();
     _inputText.dispose();
     _panelController.dispose(); // 释放动画控制器
+    _dialogController.dispose(); // 释放弹窗动画控制器
+    _voiceOverlay?.remove(); // 清理弹窗
     super.dispose();
   }
 
@@ -242,18 +277,22 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                     children: [
                       if ((sendMessageConfig?.allowRecordingVoice ?? false) &&
                           !kIsWeb && (Platform.isIOS || Platform.isAndroid) && !isRecordingValue)
-                        IconButton(
-                          onPressed: (textFieldConfig?.enabled ?? true)
-                              ? _recordOrStop
-                              : null,
-                          icon: (isRecordingValue
-                              ? voiceRecordingConfig?.stopIcon
-                              : voiceRecordingConfig?.micIcon) ??
-                              Icon(
-                                isRecordingValue ? Icons.stop : Icons.mic,
-                                color:
-                                voiceRecordingConfig?.recorderIconColor,
-                              ),
+                        // 恢复原有的录音按钮样式，但添加长按手势
+                        GestureDetector(
+                          onLongPressStart: (_) => _showWeChatVoiceDialog(),
+                          child: IconButton(
+                            onPressed: (textFieldConfig?.enabled ?? true)
+                                ? _recordOrStop
+                                : null,
+                            icon: (isRecordingValue
+                                ? voiceRecordingConfig?.stopIcon
+                                : voiceRecordingConfig?.micIcon) ??
+                                Icon(
+                                  isRecordingValue ? Icons.stop : Icons.mic,
+                                  color:
+                                  voiceRecordingConfig?.recorderIconColor,
+                                ),
+                          ),
                         ),
 
                       if (isRecordingValue && controller != null && !kIsWeb)
@@ -281,7 +320,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                                 ),
                           ),
                         )
-                      else
+                      else if (!isRecordingValue)
                         Expanded(
                           child: TextField(
                             focusNode: widget.focusNode,
@@ -326,7 +365,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                                   IconButton(
                                     padding: EdgeInsets.all(0),
                                     onPressed: _handleEmojiSend,
-                                    icon: Icon(Icons.emoji_emotions_outlined, color:
+                                    icon: Icon(_hasEmoji ? Icons.keyboard : Icons.emoji_emotions_outlined, color:
                                     voiceRecordingConfig?.recorderIconColor,),
                                   ),
                                   GestureDetector(
@@ -354,7 +393,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                                     if (!isRecording.value)
                                       IconButton(
                                         onPressed: _handleEmojiSend,
-                                        icon: Icon(Icons.emoji_emotions_outlined, color:
+                                        icon: Icon(_hasEmoji ? Icons.keyboard : Icons.emoji_emotions_outlined, color:
                                         voiceRecordingConfig?.recorderIconColor,),
                                       ),
                                     if (!isRecording.value)
@@ -582,6 +621,15 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
           TextButton(
             onPressed: () {
               Navigator.pop(context);
+              widget.onRecordingComplete(_currentRecordingPath);
+              _currentRecordingPath = null; // 发送后清空路径
+              print('📤 录音已发送，路径已清空');
+            },
+            child: const Text('发送'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
               // 取消时删除录音文件并清空路径
               _deleteRecordingFile(_currentRecordingPath!);
               _currentRecordingPath = null; // 清空当前录音路径
@@ -589,18 +637,345 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
             },
             child: const Text('取消'),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              widget.onRecordingComplete(_currentRecordingPath);
-              _currentRecordingPath = null; // 发送后清空路径
-              print('📤 录音已发送，路径已清空');
-            },
-            child: const Text('发送'),
-          ),
         ],
       ),
     );
+  }
+
+  // 显示微信风格的全屏录音界面
+  void _showWeChatVoiceDialog() {
+    if (_voiceOverlay != null) return;
+    
+    _voiceOverlay = OverlayEntry(
+      builder: (context) => _buildWeChatRecordingScreen(),
+    );
+    
+    Overlay.of(context).insert(_voiceOverlay!);
+    _dialogController.forward(); // 启动动画
+    _startWeChatRecording();
+  }
+
+  // 构建微信风格的全屏录音界面
+  Widget _buildWeChatRecordingScreen() {
+    return Positioned.fill(
+      child: AnimatedBuilder(
+        animation: _dialogController,
+        builder: (context, child) {
+          return Container(
+            color: Color(0xFF2C2C2C), // 深灰色背景
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // 顶部状态栏区域
+                  Container(
+                    height: 60,
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '录音中...',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          '${_recordingSeconds}"',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  // 中间录音动画区域
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // 录音动画圆圈
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 500),
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.green.withOpacity(0.3),
+                              border: Border.all(
+                                color: Colors.green,
+                                width: 3,
+                              ),
+                            ),
+                            child: Center(
+                              child: AnimatedContainer(
+                                duration: Duration(milliseconds: 300),
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.green,
+                                ),
+                                child: Icon(
+                                  Icons.mic,
+                                  color: Colors.white,
+                                  size: 40,
+                                ),
+                              ),
+                            ),
+                          ),
+                          
+                          SizedBox(height: 40),
+                          
+                          // 录音提示文字
+                          Text(
+                            '正在录音...',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                          
+                          SizedBox(height: 20),
+                          
+                          // 简单的波形显示
+                          Container(
+                            width: 200,
+                            height: 40,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: List.generate(10, (index) {
+                                return AnimatedContainer(
+                                  duration: Duration(milliseconds: 300 + index * 50),
+                                  width: 4,
+                                  height: 10 + (index % 3) * 15 + (_recordingSeconds % 4) * 5,
+                                  decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
+                  // 底部按钮区域
+                  Container(
+                    height: 120,
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // 左侧取消按钮
+                        GestureDetector(
+                          onTap: _cancelVoiceDialog,
+                          child: Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.red.withOpacity(0.2),
+                              border: Border.all(
+                                color: Colors.red,
+                                width: 2,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.close,
+                                  color: Colors.red,
+                                  size: 30,
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  '取消',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        
+                        // 右侧发送按钮
+                        GestureDetector(
+                          onTap: _sendVoiceDialog,
+                          child: Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.green.withOpacity(0.2),
+                              border: Border.all(
+                                color: Colors.green,
+                                width: 2,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.send,
+                                  color: Colors.green,
+                                  size: 30,
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  '发送',
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // 更新弹窗中的手势位置（保留但简化）
+  void _updateVoiceDialogPosition(DragUpdateDetails details) {
+    // 在全屏界面中不需要复杂的手势检测
+  }
+
+  // 处理弹窗手势结束（保留但简化）
+  void _handleVoiceDialogEnd() {
+    // 在全屏界面中通过按钮操作，不需要手势结束处理
+  }
+
+  // 取消语音录制
+  void _cancelVoiceDialog() {
+    _stopWeChatRecording();
+    _closeVoiceDialog();
+  }
+
+  // 发送语音录制
+  void _sendVoiceDialog() {
+    _stopWeChatRecording();
+    _closeVoiceDialog();
+  }
+
+  // 关闭语音弹窗
+  void _closeVoiceDialog() {
+    _dialogController.reverse().then((_) {
+      _voiceOverlay?.remove();
+      _voiceOverlay = null;
+      _dialogController.reset(); // 重置动画状态
+    });
+    
+    setState(() {
+      _isCancellingRecord = false;
+      _recordingOffsetY = 0;
+    });
+  }
+
+  // 微信风格录音方法
+  Future<void> _startWeChatRecording() async {
+    assert(
+      defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.android,
+      "Voice messages are only supported with android and ios platform",
+    );
+    
+    if (_isWeChatRecording) return;
+    
+    setState(() {
+      _isWeChatRecording = true;
+      _isCancellingRecord = false;
+      _recordingOffsetY = 0;
+    });
+    
+    getIt<EventBus>().fire("audio");
+    
+    await controller?.record(
+      sampleRate: voiceRecordingConfig?.sampleRate,
+      bitRate: voiceRecordingConfig?.bitRate,
+      androidEncoder: voiceRecordingConfig?.androidEncoder,
+      iosEncoder: voiceRecordingConfig?.iosEncoder,
+      androidOutputFormat: voiceRecordingConfig?.androidOutputFormat,
+    );
+    
+    _recordingSeconds = 0;
+    _currentRecordingPath = null;
+    isRecording.value = true;
+    
+    _recordingTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _recordingSeconds = timer.tick;
+      });
+      if (_recordingSeconds >= 60) {
+        _sendVoiceDialog(); // 自动发送
+      }
+    });
+    
+    print('🎤 开始微信风格录音');
+  }
+
+  Future<void> _stopWeChatRecording() async {
+    if (!_isWeChatRecording) return;
+    
+    _recordingTimer?.cancel();
+    isRecording.value = false;
+    
+    final path = await controller?.stop();
+    
+    setState(() {
+      _isWeChatRecording = false;
+    });
+    
+    if (path != null) {
+      _currentRecordingPath = path;
+      
+      if (_isCancellingRecord) {
+        // 取消录音，删除文件
+        await _deleteRecordingFile(path);
+        _currentRecordingPath = null;
+        print('🗑️ 录音已取消');
+      } else if (_recordingSeconds < 1) {
+        // 录音时间太短
+        await _deleteRecordingFile(path);
+        _currentRecordingPath = null;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('录音时间太短')),
+        );
+        print('⚠️ 录音时间太短');
+      } else {
+        // 发送录音
+        widget.onRecordingComplete(_currentRecordingPath);
+        _currentRecordingPath = null;
+        print('📤 录音已发送');
+      }
+    }
+    
+    setState(() {
+      _isCancellingRecord = false;
+      _recordingOffsetY = 0;
+    });
   }
 
   // 删除录音文件

@@ -65,7 +65,7 @@ class ChatViewStateWidget extends StatelessWidget {
                         chatViewStateWidgetConfig?.reloadButtonColor ??
                             const Color(0xffEE5366),
                   ),
-                  child: const Text('Reload'),
+                  child: const Text('重新加载'),
                 )
               ]
             ],
