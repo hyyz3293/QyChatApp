@@ -513,8 +513,11 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
     final file = File(path);
     if (await file.exists()) {
       await file.delete();
+      print('🗑️ 取消录音，文件已删除: $path');
     }
     isRecording.value = false;
+    _currentRecordingPath = null; // 清空当前录音路径
+    print('🗑️ 录音已取消，路径已清空');
   }
 
   Future<void> _recordOrStop() async {
@@ -554,6 +557,8 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
         // 少于3秒，直接丢弃
         if (path != null) {
           _deleteRecordingFile(path);
+          _currentRecordingPath = null; // 清空路径
+          print('🗑️ 录音时间太短，文件已删除，路径已清空');
         }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('录音时间太短（最少3秒）')),
@@ -577,7 +582,10 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
           TextButton(
             onPressed: () {
               Navigator.pop(context);
+              // 取消时删除录音文件并清空路径
               _deleteRecordingFile(_currentRecordingPath!);
+              _currentRecordingPath = null; // 清空当前录音路径
+              print('🗑️ 录音已取消，文件已删除，路径已清空');
             },
             child: const Text('取消'),
           ),
@@ -585,6 +593,8 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
             onPressed: () {
               Navigator.pop(context);
               widget.onRecordingComplete(_currentRecordingPath);
+              _currentRecordingPath = null; // 发送后清空路径
+              print('📤 录音已发送，路径已清空');
             },
             child: const Text('发送'),
           ),
@@ -599,6 +609,9 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
       final file = File(path);
       if (await file.exists()) {
         await file.delete();
+        print('🗑️ 录音文件已删除: $path');
+      } else {
+        print('⚠️ 录音文件不存在: $path');
       }
     } catch (e) {
       printN('删除录音文件失败: $e');
