@@ -880,6 +880,7 @@ class CSocketIOManager {
         playAudio();
         msgId = messId ?? "";
         msg = url;
+        printN("======${Endpoints.baseUrl}${url ?? ""}");
         var message = Message(
             createdAt: dateTime,
             status: MessageStatus.delivered,

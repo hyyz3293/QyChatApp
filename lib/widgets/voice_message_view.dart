@@ -69,7 +69,7 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
   late PlayerController controller;
   late StreamSubscription<PlayerState> playerStateSubscription;
   final ValueNotifier<PlayerState> _playerState = ValueNotifier(PlayerState.stopped);
-  PlayerWaveStyle playerWaveStyle = const PlayerWaveStyle(scaleFactor: 70);
+  PlayerWaveStyle playerWaveStyle = const PlayerWaveStyle(scaleFactor: 70, fixedWaveColor: Colors.grey, liveWaveColor: Colors.grey);
 
   // 新增状态变量
   bool _isLoading = false; // 是否正在下载
@@ -193,46 +193,43 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
           // 播放完成后重置播放器状态，确保下次能正常播放
           if (state == PlayerState.stopped) {
             print("播放完成，重置播放器状态");
+            // 不需要重新创建播放器，只需重置状态
             setState(() {
               _isCurrentlyPlaying = false;
             });
             
-            // 确保播放器重置到起始位置
-            Future.delayed(Duration(milliseconds: 100), () {
-              try {
-                controller.seekTo(0);
-                print("播放器已重置到起始位置");
-              } catch (e) {
-                print("重置播放器位置失败: $e");
-                
-                // 如果seekTo失败，尝试重新准备播放器
-                if (mounted && _localFilePath != null) {
-                  print("尝试重新准备播放器");
-                  controller.preparePlayer(
-                    path: _localFilePath!,
-                    noOfSamples: widget.config?.playerWaveStyle
-                        ?.getSamplesForWidth(widget.screenWidth * 0.5) ??
-                        playerWaveStyle.getSamplesForWidth(widget.screenWidth * 0.5),
-                  ).whenComplete(() {
-                    widget.onMaxDuration?.call(controller.maxDuration);
-                    print("播放器重新准备完成");
-                  });
-                }
+            // 使用seekTo回到开始位置，而不是重新创建播放器
+            try {
+              controller.seekTo(0);
+              print("播放器已重置到起始位置");
+            } catch (e) {
+              print("重置播放器位置失败: $e");
+              
+              // 如果seekTo失败，尝试重新准备播放器
+              if (mounted && _localFilePath != null) {
+                print("尝试重新准备播放器");
+                controller.preparePlayer(
+                  path: _localFilePath!,
+                  noOfSamples: widget.config?.playerWaveStyle
+                      ?.getSamplesForWidth(widget.screenWidth * 0.5) ??
+                      playerWaveStyle.getSamplesForWidth(widget.screenWidth * 0.5),
+                ).whenComplete(() {
+                  widget.onMaxDuration?.call(controller.maxDuration);
+                  print("播放器重新准备完成");
+                });
               }
-            });
+            }
           }
           
           // 当播放器暂停时，也重置到起始位置以确保下次播放从头开始
           if (state == PlayerState.paused) {
             print("播放器暂停，重置到起始位置");
-            Future.delayed(Duration(milliseconds: 50), () {
-              try {
-                controller.seekTo(0);
-                print("暂停时播放器已重置到起始位置");
-              } catch (e) {
-                print("暂停时重置播放器位置失败: $e");
-              }
-            });
+            try {
+              controller.seekTo(0);
+              print("暂停时播放器已重置到起始位置");
+            } catch (e) {
+              print("暂停时重置播放器位置失败: $e");
+            }
           }
         });
   }
@@ -298,12 +295,12 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
                     ? widget.config?.playIcon ??
                     const Icon(
                       Icons.play_arrow,
-                      color: Colors.white,
+                      color: Colors.grey,
                     )
                     : widget.config?.pauseIcon ??
                     const Icon(
                       Icons.stop,
-                      color: Colors.white,
+                      color: Colors.grey,
                     ),
               );
             },
@@ -314,7 +311,7 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
             playerController: controller,
             waveformType: WaveformType.fitWidth,
             playerWaveStyle:
-            widget.config?.playerWaveStyle ?? playerWaveStyle,
+            playerWaveStyle,
             padding: widget.config?.waveformPadding ??
                 const EdgeInsets.only(right: 10),
             margin: widget.config?.waveformMargin,
