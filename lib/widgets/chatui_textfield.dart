@@ -282,7 +282,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                           onLongPressStart: (_) => _showWeChatVoiceDialog(),
                           child: IconButton(
                             onPressed: (textFieldConfig?.enabled ?? true)
-                                ? _recordOrStop
+                                ? _showWeChatVoiceDialog
                                 : null,
                             icon: (isRecordingValue
                                 ? voiceRecordingConfig?.stopIcon
@@ -810,8 +810,10 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                             ),
                           ),
                         ),
-                        
-                        // 右侧发送按钮
+                    
+                    // 提示文字（暂不显示手势提示）
+                    
+                    // 右侧发送按钮
                         GestureDetector(
                           onTap: _sendVoiceDialog,
                           child: Container(
@@ -869,14 +871,18 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
   }
 
   // 取消语音录制
-  void _cancelVoiceDialog() {
-    _stopWeChatRecording();
+  Future<void> _cancelVoiceDialog() async {
+    // 标记为取消，避免在停止录音时误发送
+    setState(() {
+      _isCancellingRecord = true;
+    });
+    await _stopWeChatRecording();
     _closeVoiceDialog();
   }
 
   // 发送语音录制
-  void _sendVoiceDialog() {
-    _stopWeChatRecording();
+  Future<void> _sendVoiceDialog() async {
+    await _stopWeChatRecording();
     _closeVoiceDialog();
   }
 
@@ -965,10 +971,18 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
         );
         print('⚠️ 录音时间太短');
       } else {
-        // 发送录音
-        widget.onRecordingComplete(_currentRecordingPath);
-        _currentRecordingPath = null;
-        print('📤 录音已发送');
+        // 改为弹出发送前确认弹窗（>=3秒可发送，否则提示并丢弃）
+        if (_recordingSeconds < 3) {
+          await _deleteRecordingFile(path);
+          _currentRecordingPath = null;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('录音时间太短（最少3秒）')),
+          );
+          print('⚠️ 录音时间太短（最少3秒）');
+        } else {
+          _showRecordingConfirmation();
+          print('⏳ 等待用户确认是否发送录音');
+        }
       }
     }
     
