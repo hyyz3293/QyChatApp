@@ -79,7 +79,10 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
   bool _shouldAutoPlay = false; // 是否需要自动播放
   double _downloadProgress = 0;
   String? _localFilePath; // 下载后的本地文件路径
-  CancelToken? _downloadToken; // 用于取消下载
+  CancelToken? _downloadToken;
+
+  // 强制重建 AudioFileWaveforms 的 key
+  late Key _waveformKey; // 用于取消下载
 
   PlayerState get playerState => _playerState.value;
 
@@ -158,6 +161,9 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
       }
       return;
     }
+    // 生成唯一 key，强制重建 AudioFileWaveforms
+    _waveformKey = ValueKey('${file.path}_${DateTime.now().millisecondsSinceEpoch}');
+
     controller = PlayerController()
       ..preparePlayer(
         path: path,
@@ -296,6 +302,7 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
             valueListenable: _playerState,
           ),
           AudioFileWaveforms(
+            key: _waveformKey,
             size: Size(widget.screenWidth * 0.50, 60),
             playerController: controller,
             waveformType: WaveformType.fitWidth,
