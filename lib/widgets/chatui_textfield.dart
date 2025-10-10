@@ -365,7 +365,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                                   IconButton(
                                     padding: EdgeInsets.all(0),
                                     onPressed: _handleEmojiSend,
-                                    icon: Icon(_hasEmoji ? Icons.keyboard : Icons.emoji_emotions_outlined, color:
+                                    icon: Icon((_hasEmoji && !widget.focusNode.hasFocus) ? Icons.keyboard : Icons.emoji_emotions_outlined, color:
                                     voiceRecordingConfig?.recorderIconColor,),
                                   ),
                                   GestureDetector(
@@ -393,7 +393,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                                     if (!isRecording.value)
                                       IconButton(
                                         onPressed: _handleEmojiSend,
-                                        icon: Icon(_hasEmoji ? Icons.keyboard : Icons.emoji_emotions_outlined, color:
+                                        icon: Icon((_hasEmoji && !widget.focusNode.hasFocus) ? Icons.keyboard : Icons.emoji_emotions_outlined, color:
                                         voiceRecordingConfig?.recorderIconColor,),
                                       ),
                                     if (!isRecording.value)

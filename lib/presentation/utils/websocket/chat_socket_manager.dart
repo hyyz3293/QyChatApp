@@ -741,13 +741,13 @@ class CSocketIOManager {
             eventBus.fire(NoOnlineServiceEvent(false));
             // msgId = messId ?? "";
             // // 处理welcomeSpeech可能为null的情况
-            // var message = Message(
-            //     createdAt: dateTime,
-            //     status: MessageStatus.delivered,
-            //     message: "$msg",
-            //     sentBy: '$userId'
-            // );
-            // _sendMessage(message);
+            var message = Message(
+                createdAt: dateTime,
+                status: MessageStatus.delivered,
+                message: "$msg",
+                sentBy: '$userId'
+            );
+            _sendMessage(message);
           }
         } catch (e) {
           print('解析 imSeatReturnResult 失败: $e');
