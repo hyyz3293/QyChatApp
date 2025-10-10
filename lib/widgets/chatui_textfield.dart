@@ -970,6 +970,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
           const SnackBar(content: Text('录音时间太短')),
         );
         print('⚠️ 录音时间太短');
+
       } else {
         // 改为弹出发送前确认弹窗（>=3秒可发送，否则提示并丢弃）
         if (_recordingSeconds < 3) {
