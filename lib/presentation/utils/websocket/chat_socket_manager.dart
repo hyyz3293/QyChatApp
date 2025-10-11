@@ -70,6 +70,13 @@ class CSocketIOManager {
   // 连接尝试时间戳，用于限制连接频率
   int _lastConnectAttempt = 0;
   
+  // Token 刷新与 401 保护
+  bool _isRefreshingToken = false;
+  int _tokenRefreshAttempts = 0;
+  final int _maxTokenRefreshAttempts = 3;
+  int _consecutive401 = 0;
+  DateTime? _last401Time;
+  
   // 网络连接状态监听
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
@@ -348,6 +355,8 @@ class CSocketIOManager {
     
     _isConnecting = true;
     _resetReconnect();
+    // 重置 401 计数（开始一次新的连接流程）
+    _consecutive401 = 0;
 
     // 获取本地存储的连接参数
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -466,6 +475,7 @@ class CSocketIOManager {
           print('✅ 连接成功');
           connectionTimeout?.cancel();
           _isConnecting = false;
+          _consecutive401 = 0;
           _onConnected();
         })
         ..onConnectError((data) {
@@ -474,7 +484,13 @@ class CSocketIOManager {
           
           // 如果是401错误，可能是token问题
           if (data.toString().contains('401')) {
-            print('🔄 检测到401错误，可能是token过期，尝试重新获取token...');
+            _consecutive401++;
+            _last401Time = DateTime.now();
+            print('🔄 检测到401错误（第${_consecutive401}次），可能是token过期，尝试重新获取token...');
+            if (_consecutive401 > 3) {
+              print('⛔ 401错误次数过多，暂停自动重连，请检查凭证或网络。');
+              return;
+            }
             _handleTokenExpiredError();
           } else {
             // 连接错误时，彻底清理并重连
@@ -1948,25 +1964,64 @@ class CSocketIOManager {
   /// 处理token过期错误
   Future<void> _handleTokenExpiredError() async {
     print('🔄 处理token过期错误...');
+    if (_isRefreshingToken) {
+      print('⏳ 正在刷新token，跳过重复处理');
+      return;
+    }
+    if (_tokenRefreshAttempts >= _maxTokenRefreshAttempts) {
+      print('⛔ 刷新token失败次数过多（${_tokenRefreshAttempts}），暂停自动重连');
+      return;
+    }
+
+    _isRefreshingToken = true;
+    _tokenRefreshAttempts++;
     try {
       SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-      
+
       // 清除旧的token
       await sharedPreferences.remove("token");
       print('🗑️ 已清除旧token');
-      
-      // 重新获取token
+
+      // 重新获取账号与token
       var userInfoJson = await DioClient().getUserinfoMessage();
       if (userInfoJson != null && userInfoJson['data'] != null) {
         var userMap = userInfoJson["data"];
         var userAccount = UserAccountModel.fromJson(userMap);
-        
+
         // 保存新token
         await sharedPreferences.setString("token", userAccount.token);
         print('✅ 新token已保存: ${userAccount.token.substring(0, 10)}...');
-        
-        // 延迟后重新连接
-        Future.delayed(Duration(seconds: 2), () {
+
+        // 同步更新可能缺失的连接参数（accid、userid、cid）
+        try {
+          if (userMap['accid'] != null) {
+            await sharedPreferences.setString('accid', userMap['accid'].toString());
+          }
+          // userid 可能是 int 或字符串，或存在于 imConversation 中
+          var userid = userMap['userid'] ?? (userMap['imConversation']?['userid']);
+          if (userid != null) {
+            final parsed = int.tryParse(userid.toString());
+            if (parsed != null) {
+              await sharedPreferences.setInt('userId', parsed);
+            }
+          }
+          if (userMap['cid'] != null) {
+            final cidParsed = int.tryParse(userMap['cid'].toString());
+            if (cidParsed != null) {
+              await sharedPreferences.setInt('cid', cidParsed);
+            }
+          }
+        } catch (e) {
+          print('⚠️ 同步连接参数失败: $e');
+        }
+
+        // 清理旧连接后重连（带小延迟）
+        _forceCleanupSocket();
+        Future.delayed(const Duration(seconds: 2), () {
+          if (_isConnecting || _socket?.connected == true) {
+            print('⚠️ 已在连接中或已连接，跳过重连');
+            return;
+          }
           print('🔄 使用新token重新连接...');
           connect();
         });
@@ -1975,6 +2030,8 @@ class CSocketIOManager {
       }
     } catch (e) {
       print('❌ 处理token过期错误失败: $e');
+    } finally {
+      _isRefreshingToken = false;
     }
   }
 
