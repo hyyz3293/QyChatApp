@@ -82,7 +82,7 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
   CancelToken? _downloadToken;
 
   // 强制重建 AudioFileWaveforms 的 key
-  late Key _waveformKey; // 用于取消下载
+  Key? _waveformKey; // 用于取消下载
 
   PlayerState get playerState => _playerState.value;
 
@@ -264,6 +264,13 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
 
   // 构建音频播放器
   Widget _buildAudioPlayer() {
+    if (_waveformKey == null) {
+      return SizedBox(
+        width: widget.screenWidth * 0.5,
+        height: 70,
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
     return Container(
       decoration: widget.config?.decoration ??
           BoxDecoration(
@@ -288,21 +295,21 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
                 onPressed: _playOrPause,
                 icon: state.isStopped || state.isPaused || state.isInitialised
                     ? widget.config?.playIcon ??
-                    const Icon(
-                      Icons.play_arrow,
-                      color: Colors.grey,
-                    )
+                        const Icon(
+                          Icons.play_arrow,
+                          color: Colors.grey,
+                        )
                     : widget.config?.pauseIcon ??
-                    const Icon(
-                      Icons.stop,
-                      color: Colors.grey,
-                    ),
+                        const Icon(
+                          Icons.stop,
+                          color: Colors.grey,
+                        ),
               );
             },
             valueListenable: _playerState,
           ),
           AudioFileWaveforms(
-            key: _waveformKey,
+            key: _waveformKey!,
             size: Size(widget.screenWidth * 0.50, 60),
             playerController: controller,
             waveformType: WaveformType.fitWidth,

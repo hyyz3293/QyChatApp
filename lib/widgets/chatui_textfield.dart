@@ -667,31 +667,31 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
               child: Column(
                 children: [
                   // 顶部状态栏区域
-                  Container(
-                    height: 60,
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '录音中...',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          '${_recordingSeconds}"',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Container(
+                  //   height: 60,
+                  //   padding: EdgeInsets.symmetric(horizontal: 20),
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //     children: [
+                  //       Text(
+                  //         '录音中...',
+                  //         style: TextStyle(
+                  //           color: Colors.white,
+                  //           fontSize: 18,
+                  //           fontWeight: FontWeight.w500,
+                  //         ),
+                  //       ),
+                  //       Text(
+                  //         '${_recordingSeconds}"',
+                  //         style: TextStyle(
+                  //           color: Colors.white,
+                  //           fontSize: 18,
+                  //           fontWeight: FontWeight.bold,
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                   
                   // 中间录音动画区域
                   Expanded(
@@ -732,37 +732,37 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                           
                           SizedBox(height: 40),
                           
-                          // 录音提示文字
-                          Text(
-                            '正在录音...',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                            ),
-                          ),
-                          
-                          SizedBox(height: 20),
-                          
-                          // 简单的波形显示
-                          Container(
-                            width: 200,
-                            height: 40,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: List.generate(10, (index) {
-                                return AnimatedContainer(
-                                  duration: Duration(milliseconds: 300 + index * 50),
-                                  width: 4,
-                                  height: 10 + (index % 3) * 15 + (_recordingSeconds % 4) * 5,
-                                  decoration: BoxDecoration(
-                                    color: Colors.green,
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
-                                );
-                              }),
-                            ),
-                          ),
+                          // // 录音提示文字
+                          // Text(
+                          //   '正在录音...',
+                          //   style: TextStyle(
+                          //     color: Colors.white70,
+                          //     fontSize: 16,
+                          //   ),
+                          // ),
+                          //
+                          // SizedBox(height: 20),
+                          //
+                          // // 简单的波形显示
+                          // Container(
+                          //   width: 200,
+                          //   height: 40,
+                          //   child: Row(
+                          //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          //     crossAxisAlignment: CrossAxisAlignment.end,
+                          //     children: List.generate(10, (index) {
+                          //       return AnimatedContainer(
+                          //         duration: Duration(milliseconds: 300 + index * 50),
+                          //         width: 4,
+                          //         height: 10 + (index % 3) * 15 + (_recordingSeconds % 4) * 5,
+                          //         decoration: BoxDecoration(
+                          //           color: Colors.green,
+                          //           borderRadius: BorderRadius.circular(2),
+                          //         ),
+                          //       );
+                          //     }),
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
@@ -804,6 +804,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                                     color: Colors.red,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
+                                    decoration: TextDecoration.none,
                                   ),
                                 ),
                               ],
@@ -842,6 +843,7 @@ class ChatUITextFieldState extends State<ChatUITextField> with TickerProviderSta
                                     color: Colors.green,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
+                                    decoration: TextDecoration.none,
                                   ),
                                 ),
                               ],
