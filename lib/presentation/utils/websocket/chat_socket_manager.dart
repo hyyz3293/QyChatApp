@@ -69,6 +69,8 @@ class CSocketIOManager {
   late String _serverUrl;
   // 连接尝试时间戳，用于限制连接频率
   int _lastConnectAttempt = 0;
+  // 单例初始化标记，防止重复初始化与连接
+  bool _hasInitialized = false;
   
   // Token 刷新与 401 保护
   bool _isRefreshingToken = false;
@@ -145,7 +147,10 @@ class CSocketIOManager {
   /// 获取单例实例（自动初始化）
   factory CSocketIOManager() {
     _instance ??= CSocketIOManager._();
-    _instance!._initSocket();
+    // 仅在首次获取实例时初始化，避免每次使用都触发初始化/连接
+    if (!_instance!._hasInitialized) {
+      _instance!._initSocket();
+    }
     return _instance!;
   }
 
@@ -159,6 +164,7 @@ class CSocketIOManager {
   /// 初始化Socket连接
   void _initSocket() {
     print('🔄 开始初始化Socket...');
+    _hasInitialized = true;
     
     // 移除过早的连接状态检查，允许初始化继续进行
     // if (_isConnecting || _socket?.connected == true) return;
@@ -517,6 +523,7 @@ class CSocketIOManager {
         ..on('event', (data) => print('📩 收到事件: $data'))
         ..on('socket-im-communication', (data) {
           print('📩 收到通信消息');
+          print('📩 收到通信消息===>>>>>$data');
           handleSocketMessage('$data');
         })
         ..on('ping', (_) => _handleServerPing())
