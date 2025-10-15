@@ -186,17 +186,13 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
           setState(() {
             _playerState.value = state;
           });
-          print("播放器状态变化: $state");
           
           // 当播放器初始化完成时，如果需要自动播放则开始播放
           if (state == PlayerState.initialized && _shouldAutoPlay) {
-            print("播放器已初始化，开始自动播放...");
             _shouldAutoPlay = false; // 重置标志
             try {
               controller.startPlayer();
-              print("自动播放启动成功");
             } catch (e) {
-              print("自动播放启动失败: $e");
             }
           }
           
@@ -205,17 +201,14 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
             setState(() {
               _isCurrentlyPlaying = true;
             });
-            print("开始播放，_isCurrentlyPlaying设为true");
           } else if (state == PlayerState.paused || state == PlayerState.stopped) {
             setState(() {
               _isCurrentlyPlaying = false;
             });
-            print("暂停/停止播放，_isCurrentlyPlaying设为false");
           }
           
           // 播放完成后重置播放器状态，确保下次能正常播放
           if (state == PlayerState.stopped) {
-            print("播放完成，重置播放器状态");
             setState(() {
               _isCurrentlyPlaying = false;
             });
@@ -224,7 +217,6 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
           
           // 当播放器暂停时，保留当前位置以便继续播放
           if (state == PlayerState.paused) {
-            print("播放器暂停，保留当前位置");
           }
         });
   }
@@ -365,33 +357,20 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
     "Voice messages are only supported with android and ios platform",
     );
     
-    print("当前播放器状态: ${playerState.name}");
-    print("音频文件路径: $_localFilePath");
-    print("播放器是否已初始化: ${playerState.isInitialised}");
-    print("播放器是否暂停: ${playerState.isPaused}");
-    print("播放器是否停止: ${playerState.isStopped}");
-    
     if (playerState.isPlaying) {
-      print("准备暂停播放...");
       try {
         controller.pausePlayer();
-        print("pausePlayer调用成功");
       } catch (e) {
-        print("pausePlayer调用失败: $e");
       }
     } else {
       // 如果播放器未初始化，先准备播放器
       if (!playerState.isInitialised && _localFilePath != null) {
-        print("播放器未初始化，先准备播放器...");
         _shouldAutoPlay = true; // 设置自动播放标志
         _preparePlayer(_localFilePath!);
       } else {
-        print("准备开始播放...");
         try {
           controller.startPlayer();
-          print("startPlayer调用成功");
         } catch (e) {
-          print("startPlayer调用失败: $e");
           setState(() {
             _isCurrentlyPlaying = false;
           });

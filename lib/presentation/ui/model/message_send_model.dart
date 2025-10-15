@@ -7,7 +7,7 @@ class ServiceMessageBean {
   final String channelType;
   final int time; // 毫秒时间戳
   final String messId; // 消息唯一ID
-  final String flow;
+  //final String flow;
   final String scene;
   final String msgSendId;
   final int msgSendType; // 0:系统;1:坐席;2:客户
@@ -25,7 +25,7 @@ class ServiceMessageBean {
     required this.channelType,
     required this.time,
     required this.messId,
-    required this.flow,
+    //required this.flow,
     required this.scene,
     required this.msgSendId,
     required this.msgSendType,
@@ -59,7 +59,7 @@ class ServiceMessageBean {
       'time': time,
       'duration': duration,
       'messId': messId,
-      'flow': flow,
+      //'flow': flow,
       'scene': scene,
       'msgSendId': msgSendId,
       'msgSendType': msgSendType,
@@ -89,7 +89,7 @@ class ServiceMessageBean {
       time: _parseInt(json['time']),
       duration: _parseInt(json['duration']),
       messId: _parseString(json['messId']),
-      flow: _parseString(json['flow']),
+      //flow: _parseString(json['flow']),
       scene: _parseString(json['scene']),
       msgSendId: _parseString(json['msgSendId']),
       msgSendType: _parseInt(json['msgSendType']),

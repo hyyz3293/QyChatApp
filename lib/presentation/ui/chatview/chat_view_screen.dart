@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:qychatapp/presentation/constants/assets.dart';
-import 'package:qychatapp/presentation/ui/chart/message_event.dart';
 import 'package:qychatapp/presentation/ui/chatview/theme.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';

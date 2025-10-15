@@ -1319,17 +1319,18 @@ class CSocketIOManager {
     bean.event = "IM-CLICK";
     bean.type = 'notice';
     bean.enumType = 'imClick';
-    bean.msgSendId = cid;
+    bean.msgSendId = userId;
     bean.msgSendType = 2;
     bean.source = 1;
     bean.target = 1;
-    bean.id = "${scene.menuId}";
+    bean.id = scene.menuId;
     bean.value = scene.menuTitle;
+
 
     String msg = json.encode(bean);
 
     SocketIMMessage socketIMMessage = SocketIMMessage(
-        toAccid: [accid], event: 'socket-im-communication', msgContent: '${msg}');
+        toAccid: ["${cid}"], event: 'socket-im-communication', msgContent: '${msg}');
 
     printN("上线；；=accid=  ${accid}");
 
@@ -1382,7 +1383,7 @@ class CSocketIOManager {
     bean.event = "IM-EVALUATE";
     bean.type = 'notice';
     bean.enumType = 'evaluate';
-    bean.msgSendId = cid;
+    bean.msgSendId = userId;
     bean.msgSendType = 2;
     bean.key = item.pressKey;
     bean.value = item.pressValue;
@@ -1441,25 +1442,26 @@ class CSocketIOManager {
     var accid = sharedPreferences.getString("accid") ?? "";
     var channelCode = sharedPreferences.getString("channel_code");
     var cid = sharedPreferences.getInt("cid") ?? 0;
+    var userId = sharedPreferences.getInt("userId") ?? 0;
     var bean = ImUserOnlineEvent();
     bean.event = "IM-CLICK";
     bean.type = 'notice';
     bean.enumType = 'imClick';
-    bean.msgSendId = cid;
+    bean.msgSendId = userId;
     bean.msgSendType = 2;
     if (bean.type == "1") {
       bean.source = 2;
       bean.target = 1;
-      bean.id = "${scene.value}";
+      bean.id = scene.value;
     } else {
       bean.source = 2;
       bean.target = 1;
-      bean.id = "${scene.value}";
+      bean.id = scene.value;
     }
     bean.value = scene.name;
     String msg = json.encode(bean);
-    SocketIMMessage socketIMMessage = SocketIMMessage(toAccid: [accid], event: 'socket-im-communication', msgContent: '${msg}');
-    printN("场景配置项  CHat；；=accid=  ${accid}");
+    SocketIMMessage socketIMMessage = SocketIMMessage(toAccid: ["${cid}"], event: 'socket-im-communication', msgContent: '${msg}');
+    printN("场景配置项  CHat；；=accid=  ${cid}");
     printN("场景配置项 Chat ；；==  ${msg}");
     printN("======================emit======================5");
     _socket!.emit('socket-im-communication', socketIMMessage.toJson());
@@ -1631,7 +1633,7 @@ class CSocketIOManager {
         channelType: '${1}',
         time: millisecondsSinceEpoch,
         messId: msgId,
-        flow: 'out',
+        //flow: 'out',
         scene: 'p2p',
         msgSendId: '${userId}',
         msgSendType: 2, enumType: 'text', content: '${text}'
@@ -1675,7 +1677,7 @@ class CSocketIOManager {
         channelType: '${1}',
         time: millisecondsSinceEpoch,
         messId: msgId,
-        flow: 'out',
+        //flow: 'out',
         scene: 'p2p',
         msgSendId: '${userId}',
         msgSendType: 2,
@@ -1760,7 +1762,7 @@ class CSocketIOManager {
         channelType: '${1}',
         time: millisecondsSinceEpoch,
         messId: msgId,
-        flow: 'out',
+        //flow: 'out',
         scene: 'p2p',
         msgSendId: '${userId}',
         msgSendType: 2, enumType: 'video', content: '${imgPath}',
@@ -1872,7 +1874,7 @@ class CSocketIOManager {
       channelType: '${1}',
       time: millisecondsSinceEpoch,
       messId: msgId,
-      flow: 'out',
+      //flow: 'out',
       scene: 'p2p',
       msgSendId: '${userId}',
       duration: duration,

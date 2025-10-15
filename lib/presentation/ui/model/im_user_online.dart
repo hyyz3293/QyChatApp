@@ -28,7 +28,7 @@ class ImUserOnlineEvent {
   int? msgSendType;
   int? source;
   int? target;
-  String? id;
+  int? id;
   String? value;
   String? content;
   String? messId;
